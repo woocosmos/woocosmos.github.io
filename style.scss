@@ -227,6 +227,17 @@ blockquote {
   }
 }
 
+// 2024-08-09 BACK-TO-TOP
+#back-to-top {
+  color: $white;
+  background: $lightGray;
+  bottom: $back-to-top-bottom;
+  right: $back-to-top-right;
+  height: $back-to-top-height;
+  width: $back-to-top-width;
+  z-index: $back-to-top-z-index;
+}
+
 // Footnote
 a.footnote {
   &,

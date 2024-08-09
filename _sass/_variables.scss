@@ -28,6 +28,7 @@ $base-font-size: 18px;
 $small-font-size: 14px;
 
 // Colors
+
 $base-color: $oc-gray-8;
 $base-lighten-color: $oc-gray-6;
 
@@ -77,6 +78,14 @@ $li-child-size-ratio: 0.95;
 $dt-width: 180px;
 $dt-dd-space: 20px;
 $dd-position: $dt-width+$dt-dd-space;
+
+// 24-08-09 TOP button
+$back-to-top-z-index: 10;
+$back-to-top-bottom: 30px;
+$back-to-top-right: 30px;
+$back-to-top-diameter: 40px;
+$back-to-top-height: $back-to-top-diameter;
+$back-to-top-width: $back-to-top-diameter;
 
 // Mobile breakpoints
 @mixin mobile {
