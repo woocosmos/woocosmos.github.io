@@ -477,6 +477,10 @@ nav {
   }
 }
 
+.center-title {
+  text-align: center;
+}
+
 .pagination {
   font-weight: 300;
   padding: 2em 0;
@@ -526,15 +530,22 @@ nav {
 
 // Tags
 .tags > .label {
+  display: flex;                /* Use Flexbox */
+  justify-content: center;      /* Center the li elements horizontally */
+  flex-wrap: wrap;              /* Allow wrapping if there are too many li elements */
+}
+
+.tags > .label {
   > li:before {
     content: "";
   }
 
   > li {
-    margin: 0;
-    font-size: $small-font-size;
+    margin: 5px 10px;
+    // font-size: $small-font-size;
+    font-size: $base-font-size;
     font-weight: 300;
-    display: inline;
+    display: inline-flex;
 
     > a {
       display: inline-block;
@@ -545,7 +556,7 @@ nav {
 
       span {
         float: left;
-        padding: .5px 5px;
+        padding: .8px 8px;
 
         &.count {
           background-color: $tag-index-count-background-color;
