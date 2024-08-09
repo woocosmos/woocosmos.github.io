@@ -93,3 +93,10 @@ $back-to-top-width: $back-to-top-diameter;
     @content;
   }
 }
+
+// 2024-08-10 Mouse hover gradation
+@mixin transition($args...) {
+  -webkit-transition: $args;
+     -moz-transition: $args;
+          transition: $args;
+}
