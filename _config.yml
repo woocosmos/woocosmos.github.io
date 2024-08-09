@@ -3,15 +3,13 @@
 #
 
 # Name of your site (displayed in the header)
-name: Kiko Now
+name: Yunsoo's Blog
 
 # Short bio or description (displayed in the header)
-description: AI Engineer @Nexon
-
+description: AI Engineer @somewhere v1
 
 # URL of your avatar or profile pic (you could use your GitHub profile pic)
-avatar: https://github.com/woocosmos/woocosmos.github.io/blob/master/images/avatar.png
-
+# avatar: https://github.com/woocosmos/woocosmos.github.io/blob/master/images/avatar.png
 
 # Tabs in header. There are 'Blog', 'About', 'Archive', 'Tags'
 # and URL Link(e.g. 'Theme' tab below) tabs. If you don't need one, just delete
@@ -38,10 +36,10 @@ footer-links:
   email: woocosmos@gmail.com
   facebook:
   flickr:
-  github: github.com/woocosmos
+  github: woocosmos
   googleplus: # anything in your profile username that comes after plus.google.com/
   instagram:
-  linkedin:
+  linkedin: yunsoo-woo-245946213
   pinterest:
   rss: # just type anything here for a working RSS icon
   stackoverflow: # your stackoverflow profile, e.g. "users/50476/bart-kiers"
@@ -50,11 +48,11 @@ footer-links:
   youtube: # channel/<your_long_string> or user/<user-name>
 
 # Text under the icons in footer
-footer-text: © 2017 Kiko Now
+footer-text: © 2024 Yunsoo Woo
 
 # Enter your Disqus shortname (not your username) to enable commenting on posts
 # You can find your shortname on the Settings page of your Disqus account
-disqus: woocosmos.disqus.com
+disqus: woocosmos
 
 # Enter your Google Analytics web tracking code (e.g. UA-2110908-2) to activate tracking
 google_analytics:
