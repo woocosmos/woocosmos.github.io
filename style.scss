@@ -579,6 +579,16 @@ nav {
   }
 }
 
+.tag-container {
+  display: flex;
+  align-items: center; /* Align items vertically centered */
+}
+
+.tags-item-icon {
+  margin-right: 8px; /* Adjust the spacing between the icon and the heading */
+  display: inline-block; /* Ensure the icon aligns properly with the text */
+}
+
 // Footer
 .wrapper-footer {
   margin-top: 50px;
