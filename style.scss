@@ -433,6 +433,7 @@ nav {
   border-bottom: none;
 }
 
+// display: inline-block; <= 미리보기와 '더보기' 를 나열
 .post {
   h1 {
     margin-bottom: .1em;
@@ -440,9 +441,10 @@ nav {
 
   .date {
     font-weight: 300;
-    font-size: $small-font-size;
+    font-size: $middle-font-size;
     color: $base-lighten-color;
     margin-right: 3px;
+    float: right;
   }
 
   .tag {
@@ -457,6 +459,7 @@ nav {
     li {
       display: inline;
       margin: 0;
+      
 
       > a {
         margin: 3px 3px 3px 0;
@@ -576,6 +579,7 @@ nav {
     font-size: $small-font-size;
     font-weight: 300;
     margin-left: 3px;
+    float: right;
   }
 }
 
