@@ -546,10 +546,17 @@ nav {
 
 // search
 #search-container {
-  display: flex;
-  justify-content: center; 
   padding-top: 20px;
   padding-bottom: 20px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+}
+
+#results-container {
+  margin-top: 40px;
+  width: 90%;
 }
 
 .search {
@@ -561,9 +568,13 @@ nav {
     border: 2.5px solid;
     font-size: larger;
     font-family: $base-font;
-    text-indent: 10px;
+    text-indent: 5px;
   }
   
+  input::-webkit-input-placeholder {
+    opacity: 0.5;
+  }
+
   input:focus::-webkit-input-placeholder {
     opacity: 0;
   }
@@ -579,6 +590,10 @@ nav {
   > li:before {
     content: "";
   }
+  
+  > p {
+    margin-right: 10px;
+  }
 
   > li {
     margin: 5px 10px;
@@ -587,6 +602,7 @@ nav {
     display: inline-flex;
     align-content: center;
     align-items: center;
+    margin: 1px;
 
     > a {
       display: flex;

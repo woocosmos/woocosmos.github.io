@@ -1,24 +1,30 @@
 ---
 layout: page
-title: search
-permalink: /search/
+permalink: /search
 ---
 
-<ul class="search">
-    <div id="search-container">
-        <input type="search" id="search-input" placeholder="  🤔 검색어를 입력하세요.">
-        <ul id="results-container"></ul>
-    </div>
+<head>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
+</head>
 
+<ul class="search">
     <ul class="label">
         <p>이런 키워드는 어때요?</p>
         {% for tag in site.tags %}
         <li>
-          <a href="#{{ tag[0] }}">
+            <a href="{{ site.url }}{{ site.baseurl }}/tags#{{ tag[0] }}">
             <span>{{ tag[0] }}</span>
           </a>
         </li>
         {% endfor %}
     </ul>
-      
+
+    <div id="search-container">
+        <input type="search" id="search-input" placeholder="  🤔 검색어를 입력하세요.">
+        <ul id="results-container"></ul>
+    </div>
+
 </ul>
+
+<script src="{{ site.baseurl }}/assets/jekyll-search.js" type="text/javascript"></script>
+<script src="{{ site.baseurl }}/assets/search-and-return.js" type="text/javascript"></script>
