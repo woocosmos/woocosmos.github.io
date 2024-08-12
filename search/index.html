@@ -1,0 +1,24 @@
+---
+layout: page
+title: search
+permalink: /search/
+---
+
+<ul class="search">
+    <div id="search-container">
+        <input type="search" id="search-input" placeholder="  🤔 검색어를 입력하세요.">
+        <ul id="results-container"></ul>
+    </div>
+
+    <ul class="label">
+        <p>이런 키워드는 어때요?</p>
+        {% for tag in site.tags %}
+        <li>
+          <a href="#{{ tag[0] }}">
+            <span>{{ tag[0] }}</span>
+          </a>
+        </li>
+        {% endfor %}
+    </ul>
+      
+</ul>

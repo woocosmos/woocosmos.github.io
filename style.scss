@@ -544,6 +544,71 @@ nav {
   }
 }
 
+// search
+#search-container {
+  display: flex;
+  justify-content: center; 
+  padding-top: 20px;
+  padding-bottom: 20px;
+}
+
+.search {
+  input {
+    width: 80%;
+    padding: 15px;
+    box-sizing: border-box;
+    border-radius: 30px;
+    border: 2.5px solid;
+    font-size: larger;
+    font-family: $base-font;
+    text-indent: 10px;
+  }
+  
+  input:focus::-webkit-input-placeholder {
+    opacity: 0;
+  }
+}
+
+.search > .label {
+  display: flex; 
+  justify-content: center; 
+  flex-wrap: wrap;
+}
+
+.search > .label {
+  > li:before {
+    content: "";
+  }
+
+  > li {
+    margin: 5px 10px;
+    font-size: $base-font-size;
+    font-weight: 300;
+    display: inline-flex;
+    align-content: center;
+    align-items: center;
+
+    > a {
+      display: flex;
+      align-items: center;
+      justify-content: center;  
+      margin: 1px;
+      color: $tag-index-label-color;
+      background-color: antiquewhite;
+      border-radius: 20px;
+      width: 120px;
+      height: 40px;
+
+      span {
+        float: left;
+        padding: .8px 8px;
+
+      }
+    }
+  }
+}
+
+
 // Tags
 .tags > .label {
   display: flex;                /* Use Flexbox */
