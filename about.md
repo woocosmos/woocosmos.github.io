@@ -11,9 +11,10 @@ permalink: /about/
 
 ### 이름의 유래
 
-2015년 겨울, 대학교 이메일의 아이디를 고민하던 중 책상 위 칼 세이건의 <코스모스>를 보았습니다.  
+2015년 이메일 아이디를 고민하던 중 책상 위 칼 세이건의 <코스모스>를 보았습니다.  
 새로운 시작은 늘 두렵지만 우주만큼 무한한 가능성로 이어지는 길이라고 생각하며  
-제 성씨 'WOO'를 붙여 WOOCOSMOS 라는 아이디를 만들었습니다.
+제 성씨 *WOO*를 붙여 `WOOCOSMOS` 라는 아이디를 만들었습니다.  
+이름처럼 저만의 우주를 무한히 넓히는 삶을 살고 싶습니다.
 
 
 ### 이력
@@ -23,5 +24,7 @@ permalink: /about/
 - 2022.12 ~ 2024.08 니트로스튜디오 AI엔지니어 재직
 
 ### 연락처
+[woocosmos@gmail.com](mailto:woocosmos@gmail.com)  
 
-[woocosmos@gmail.com](mailto:woocosmos@gmail.com)
+#### Jekyll 테마
+[kiko-now](https://github.com/aweekj/kiko-now)를 활용, 수정하여 만들었습니다.
