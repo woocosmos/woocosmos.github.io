@@ -354,6 +354,13 @@ img {
   height: 70px;
   margin-right: 15px;
 
+  // @include transition(jiggle .2s ease-in-out infinite);
+  cursor: pointer;
+  &:hover {
+    cursor: pointer;
+    animation: jiggle .2s ease-in-out infinite;
+  }
+
   @include mobile {
     float: none;
     display: block;
@@ -361,8 +368,16 @@ img {
   }
 
   img {
-    border-radius: 5px;
+    border-radius: 50%;
+    -webkit-transition: transform 0.3s ease-in-out;
+    transition: transform 0.3s ease-in-out;
   }
+
+  img:hover {
+    -webkit-transform: rotate(5deg);
+    transform: rotate(5deg);
+  }
+
 }
 
 .site-info {
