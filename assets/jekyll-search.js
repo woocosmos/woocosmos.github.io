@@ -16,6 +16,17 @@ var options = {}
 options.pattern = /\{(.*?)\}/g
 options.template = ''
 options.middleware = function () {}
+options.debounce = null
+
+let debounceTimerHandle
+const debounce = function (func, delayMillis) {
+  if (delayMillis) {
+    clearTimeout(debounceTimerHandle)
+    debounceTimerHandle = setTimeout(func, delayMillis)
+  } else {
+    func.call()
+  }
+}
 
 function setOptions (_options) {
   options.pattern = _options.pattern || options.pattern
@@ -382,13 +393,24 @@ var _$src_8 = {};
   }
 
   function registerInput () {
-    options.searchInput.addEventListener('keypress', function (e) {
-      if (e.key === 'Enter') {
+    options.searchInput.addEventListener('input', function (e) {
+      if (isWhitelistedKey(e.which)) {
         emptyResultsContainer()
-        search(e.target.value)
+        const trimmedValue = e.target.value.trim();
+        debounce(function () { search(trimmedValue) }, options.debounceTime)
       }
     })
   }
+
+  // ENTER 키 입력 기준 검색
+  // function registerInput () {
+  //   options.searchInput.addEventListener('keypress', function (e) {
+  //     if (e.key === 'Enter') {
+  //       emptyResultsContainer()
+  //       search(e.target.value)
+  //     }
+  //   })
+  // }
 
   function search (query) {
     if (isValidQuery(query)) {

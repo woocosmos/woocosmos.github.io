@@ -19,8 +19,8 @@ navigation:
     url: /about
   - name: Blog
     url: /
-  - name: Archive
-    url: /archive
+  - name: Timeline
+    url: /timeline
   - name: Tags
     url: /tags
 

@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "Syntax Highlighting"
+title: "Code Highlighting Cheatsheet"
 tags: [샘플]
 comments: False
 ---

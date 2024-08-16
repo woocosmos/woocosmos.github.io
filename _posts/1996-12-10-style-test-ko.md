@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "Style Cheatsheet"
+title: "Markdown Cheatsheet"
 tags: [샘플]
 comments: False
 ---
