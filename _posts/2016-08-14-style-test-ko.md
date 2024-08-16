@@ -1,7 +1,7 @@
 ---
 layout: post
 title: "Style Cheatsheet"
-tags: [샘플 포스트]
+tags: [샘플]
 comments: False
 ---
 
