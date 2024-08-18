@@ -3,6 +3,7 @@ layout: post
 title: "아이폰 iOS앱 개발 체험하기: 환경 세팅과 시뮬레이션"
 tags: [Swift]
 comments: True
+toc: true
 ---
 
 **이번 포스팅에서 다루는 것**
