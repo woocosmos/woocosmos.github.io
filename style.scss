@@ -27,9 +27,18 @@ body {
 
 .container {
   margin: 0 auto;
-  max-width: 740px;
-  padding: 0 10px;
+  max-width: 900px;
+  // padding: 0 10px;
+  padding-left: 100px;
   width: 100%;
+
+  .post {
+    width: 100%;
+
+    .inner-wrap {
+      width: 100%;
+    }
+  }
 }
 
 h1, h2, h3, h4, h5, h6 {
@@ -444,6 +453,22 @@ nav {
   }
 }
 
+.nav-toc {
+  font-size: smaller;
+  border-left: 1px solid $lightGray;
+
+  h3 {
+    padding-left: 20px;
+  }
+
+  ul > li {
+    list-style-type: none; 
+    &:before {
+      content: '';
+    }
+  }
+}
+
 // Posts
 .posts > .post {
   padding-bottom: 2em;
@@ -499,6 +524,14 @@ nav {
 
   .read-more {
     font-size: 15px;
+  }
+
+  aside {
+    float: right;
+    position: sticky;
+    width: 300px;
+    top: 10px;
+    margin-right: -350px;
   }
 }
 
