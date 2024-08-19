@@ -5,7 +5,7 @@ tags: [샘플]
 comments: False
 ---
 
-이 글은 스타일을 모아둔 것입니다. 소스 코드를 확인하여 스타일을 적용하는 방법을 알아보세요.
+글 작성시 참고할 수 있는 스타일 치트시트
 
 --- 
 
@@ -109,6 +109,20 @@ comments: False
       <p>This is great isn't it?</p>
     </div>
 
---- 
+## 8. 기타
 
-이 문서는 [한글 Lorem Ipsum](http://guny.kr/stuff/klorem/)으로 생성되었습니다.
+포스트에 목차를 추가하고 싶다면 toc 옵션을 참으로 줍니다.  
+**\- toc: true**
+
+TOC에 추가하고 싶지 않은 항목은 `no_toc` 클래스를 활용합니다.
+<h4 class="no_toc"> 제목만큼 커지지만 목차에는 포함되지 않아요 </h4>
+
+```html
+<h4 class="no_toc"> 제목만큼 커지지만 목차에는 포함되지 않아요 </h4>
+```
+
+HTML 태그로 <p style="text-align: center;"><b>이렇게 <i>억지로</i> 스타일을</b></p>
+적용할 수도 있습니다.
+```html
+<p style="text-align: center;"><b>이렇게 <i>억지로</i> 스타일을</b></p>
+```

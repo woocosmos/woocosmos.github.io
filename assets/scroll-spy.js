@@ -12,6 +12,8 @@ document.addEventListener('DOMContentLoaded', () => {
   }).filter(anchor => anchor !== null);
 
   window.addEventListener('scroll', () => {
+    // const currentHash = window.location.hash;
+
     if (anchors.length > 0 && links.length > 0) {
       let scrollTop = window.scrollY;
       let activeIndex = -1;
@@ -28,7 +30,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
       if (activeIndex >= 0) {
         links[activeIndex].classList.add('active');
-        }
+      }
     }
   });
 });
