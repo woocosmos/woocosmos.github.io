@@ -467,6 +467,10 @@ nav {
     &:before {
       content: '';
     }
+
+    ul {
+      display: inline;
+    }
   }
 
   ul > li > a.active {
