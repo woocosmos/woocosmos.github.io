@@ -6,11 +6,12 @@ comments: True
 toc: true
 ---
 
-**이번 포스팅에서 다루는 것**
+**요약**
+```
 - Xcode 개발 환경을 세팅하고 Figma에서 직접 디자인한다
 - 버튼을 누르면 콘솔에 텍스트가 출력되는 간단한 기능을 구현한다
 - 개인 디바이스를 통해 App을 시뮬레이션한다  
-  
+```
 
 ## 개요
 
@@ -198,7 +199,7 @@ struct ContentView_Previews: PreviewProvider {
 
 이는 _아이폰 설정 > VPN 및 기기 관리 > 해당 앱 > '신뢰'_ 를 체크하는 것으로 해결 된다.
 
-#### 성공
+<h4 class="no_toc"> 성공 </h4>
 
 ![image](https://github.com/user-attachments/assets/4c78169a-6345-405f-adff-16ac098a6cd6){: width="60%" }
 
