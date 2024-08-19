@@ -539,9 +539,9 @@ nav {
   aside {
     float: right;
     position: sticky;
-    width: 300px;
+    width: fit-content;
     top: 10px;
-    margin-right: -350px;
+    margin-right: -300px;
   }
 }
 

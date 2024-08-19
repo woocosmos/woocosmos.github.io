@@ -5,5 +5,7 @@ _site
 .jekyll-cache
 .bundle
 .sass-cache
+.ruby-version
+.zshrc
 node_modules
 package.json
