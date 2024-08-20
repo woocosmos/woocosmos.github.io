@@ -135,3 +135,40 @@ JavaScript를 잘 모르다보니 Workaround 형식으로 구현한 내용도 �
 ## 목차(TOC) 추가
 ### 목차 레이아웃
 ### sticky & highlight
+### gh-pages 생성
+
+Toc 기능을 추가한 후 Github Pages에서 배포 실패가 떴다. 분명 로컬 서버에서는 잘 돌아갔는데 말이다.
+
+![image](https://github.com/user-attachments/assets/1060cd1e-0e19-45df-a006-af55b13daf18){: width="60%" }
+
+에러 메시지에 'Unknown tag toc'이라고 적힌 것으로 보아 Jekyll-toc 플러그인 쪽 문제로 보였다.  
+실제로 Jekyll-toc 레포지토리의 이슈 채널에서 동일한 문제를 호소하는 글들을 확인할 수 있었다.
+
+- [Is Github Pages not supported? #151](https://github.com/toshimaru/jekyll-toc/issues/151)
+- [TOC on GitHub Pages #29](https://github.com/toshimaru/jekyll-toc/issues/29)
+- [Is Github Pages not supported? #151](https://github.com/toshimaru/jekyll-toc/issues/151)
+
+>GitHub Pages cannot build sites using unsupported plugins. If you want to use unsupported plugins, generate your site locally and then push your site's static files to GitHub.
+
+이는 Github Pages 서비스에서 내가 사용한 toc 플러그인을 지원하지 않아 발생한 문제였다.
+따라서 **로컬로 사이트를 직접 빌드**한 후 해당 내용을 배포하도록 하는 방법으로 문제를 해결할 수 있다. 이때 `gh-pages`라는 브랜치로 밀어넣고 root 경로로 설정해야 한다. 참고한 [칼럼](https://dqdongg.com/blog/github/2018/12/29/Blog-Jekyll-toc-plugin.html#fn:2)은 여기.
+
+```bash
+# 로컬에서 빌드한다
+jekyll build
+# _site 폴더를 어딘가로 대피시킨다
+mv -r _site /path/to/tmp
+git checkout --orphan gh-pages 
+# 폴더를 비우고 _site 데이터를 다시 가져온다
+rm -rf * 
+cp -r /path/to/tmp/_site/* ./
+git add -A
+git commit -m "build locally and create gh-pages"
+git push origin gh-pages
+```
+브랜치를 생성할 때 `--orphan` 옵션을 추가한 이유는 부모(master)로부터 커밋 히스토리를 이어 받지 않은 독립적인 브랜치를 새로 만들기 위함이다. 마치 레포지토리 안에 새로운 레포지토리를 시작한다고 생각할 수 있겠다.
+
+마지막으로는 레포지토리에서 Settings > Pages > Source 그리고 Branch를 gh-pages로 수정하면 된다
+![image](https://github.com/user-attachments/assets/e19c52f7-e095-4442-b0f0-12f2c59cbf1e)
+
+문제는 이제 앞으로 변경사항을 반영할 때마다 _site 의 내용을 매번 옮겨놨다가 다른 데이터를 삭제하는 식으로 업데이트 해야 한다는 것이다. 위 과정은 향후 **Github Actions를 활용해 자동화된 workflow로 구축**할 예정이다.
