@@ -121,8 +121,23 @@ TOC에 추가하고 싶지 않은 항목은 `no_toc` 클래스를 활용합니�
 <h4 class="no_toc"> 제목만큼 커지지만 목차에는 포함되지 않아요 </h4>
 ```
 
-HTML 태그로 <p style="text-align: center;"><b>이렇게 <i>억지로</i> 스타일을</b></p>
-적용할 수도 있습니다.
+클래스 아래 모든 요소가 TOC에 추가되지 않도록 `no_toc_section` 클래스를 활용합니다.
+<div class="no_toc_section">
+  <h5>목차에 안 들어감</h5>
+  <h5>목차에 안 들어감</h5>
+</div>
+
 ```html
-<p style="text-align: center;"><b>이렇게 <i>억지로</i> 스타일을</b></p>
+<div class="no_toc_section">
+  <h5>목차에 안 들어감</h5>
+  <h5>목차에 안 들어감</h5>
+</div>
 ```
+
+HTML 태그로 <b>이렇게 <i>억지로</i> 스타일을</b> 적용할 수도 있습니다.
+```html
+<b>이렇게 <i>억지로</i> 스타일을</b>
+```
+
+Jekyll 문법에 대해서 기술하는 과정에서 {% raw %}`{{ content }}`{% endraw %}와 같은 문자열을 추가했다가 실제 content가 불러와지는 경우가 있습니다.
+이는 `\{\% raw \%\} ... \{\% endraw \%\}` 태그로 감싸서 escape할 수 있습니다.

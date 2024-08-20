@@ -133,11 +133,172 @@ JavaScript를 잘 모르다보니 Workaround 형식으로 구현한 내용도 �
 ## 아바타 기울기 애니메이션
 
 ## 목차(TOC) 추가
+블로그글 옆에 목차를 추가하여 고정시키고 싶었다. 간단하게 설치해서 사용할 수 있는 [jekyll-toc](https://github.com/toshimaru/jekyll-toc)을 적용해보기로 했다. [동일한 이름의 플러그인](https://github.com/allejo/jekyll-toc)이 있는데, 후술할 Github Pages 이슈로부터 자유로운 것으로 보인다. 처음으로 돌아간다면 이것을 적용해볼지도...
+
+**설치 방법**  
+
+`Gemfile`에 아래 라인을 추가한다
+```
+gem 'jekyll-toc'
+```
+`bundle`로 설치를 진행한다
+```
+bundle install
+```
+`_config.yml` 파일 중 플러그인 부분에 요소를 추가한다
+```
+plugins:
+  - jekyll-sitemap
+    ...
+  - jekyll-toc # 추가
+```
+
+**사용 방법**  
+
+post 헤드에 `toc` 플래그를 추가한다
+```
+---
+layout: post
+title: "Jekyll을 사용한 github.io 블로그 개발기"
+tags: [JavaScript]
+comments: True
+toc: true
+---
+```
+`post.html`에 toc을 추가한다.  
+단순히 {% raw %}`{{ content | toc }}`{% endraw %}로 수정해서 *본문 위에 목차가 생성*되도록 하는 방법도 있지만 목차의 레이아웃이나 기능을 다양하게 커스터마이징 하기 위해 별도 태그인 {% raw %}`{% toc %}`{% endraw %}로 추가했다. 
+{% raw %}```html
+<section class="entry">
+    {% if page.toc %}
+    <aside>
+        <nav class="nav-toc">
+            <h3> 목차 </h3>
+            {% toc %}
+        </nav>
+    </aside>
+    <script src="{{ site.baseurl }}/assets/scroll-spy.js" type="text/javascript"></script>
+    {% endif %}
+    {{ content }}
+</section>
+```{% endraw %}
+- {% raw %}`{% if page.toc %}`{% endraw %} : 헤드에 toc 플래그를 명시한 경우에만 목차가 추가되게 했다.
+- `<aside>` : 본문 옆 사이드바 형식으로 표시하기 위해 사용했다
+- `<nav>` : 목차의 제목을 클릭했을 때 해당 영역으로 이동하도록 링크를 연결하기 위해 사용했다
+- `<h3> 목차 </h3>` : 플러그인으로 자동 생성되는 HTML에는 제목이 없길래 따로 추가해주었다 (사실 page.toc 조건을 굳이 넣은 것도 이 제목 때문이다. toc: false으로 세팅해도 h3 태그는 남아 있었기 때문이다.)
+
 ### 목차 레이아웃
-### sticky & highlight
+
+목차의 위치와 모양을 세팅하는 과정이다.
+
+**목차를 본문 좌측에 맞추고 스크롤과 상관없이 상단에 고정시키기**
+```css
+aside {
+    float: right;
+    position: sticky;
+    width: fit-content;
+    top: 10px;
+    margin-right: -300px;
+  }
+```
+- `position`을 sticky로 설정하고 `top`값을 조금이라도 부여하면 스크롤과 상관없이 화면 한 쪽에 고정되는 효과를 구현할 수 있다
+- `margin-right`를 조정해서 본문과 너무 멀지도, 가깝지도 않게 위치시켰다
+
+**레이아웃을 심플하게 디자인하기**
+```css
+.nav-toc {
+  font-size: smaller;
+  border-left: 1px solid $lightGray;
+
+  h3 {
+    padding-left: 20px;
+  }
+
+  ul > li {
+    list-style-type: none; 
+    &:before {
+      content: '';
+    }
+
+    ul {
+      display: inline;
+    }
+  }
+
+  ul > li > a.active {
+    font-size: larger;
+    font-weight: bold;
+  }
+}
+```
+- 기본적으로 폰트 사이즈는 작게, 리스트 앞에 붙는 마커는 생략했다
+    - `list-style-type: none`를 주었는데도 마커가 생성되어 `&:before {content: '';}`를 별도로 추가했다
+- 목차와 본문 사이 가는 구분선을 추가했다 (`border-left`)
+- 일부 하위 목차들이 가로로 나열되는(?) 이상한 현상이 있어서 `display: inline`을 추가했다
+- 목차가 하이라이트 대상일 때 폰트 사이즈와 굵기를 조금 키운다
+
+**목차 하이라이트 기능**  
+스크롤의 위치에 따라 현재 보고 있는 콘텐츠의 목차를 하이라이트하는 기능이다. 위에서 toc 태그를 추가한 HTML 코드를 보면 `scroll-spy.js`라는 스크립트를 실행시키는 것을 볼 수 있는데, 이것이 **스크롤 위치에 따라 하이라이트할 목차를 지정**하는 역할을 한다.  
+전체 코드를 살펴보겠다.
+
+```
+// 브라우저가 HTML을 전부 읽고 DOM 트리를 완성했을 때 발생하는 이벤트
+document.addEventListener('DOMContentLoaded', () => {
+
+    // links : H1, H2, H3 깊이 까지만 목차를 읽어온다 (a 태그 셀렉트)
+    const Hs = document.querySelectorAll('.nav-toc ul.section-nav li.toc-entry.toc-h1, .nav-toc ul.section-nav li.toc-entry.toc-h2, .nav-toc ul.section-nav li.toc-entry.toc-h3');
+    const links = Array.from(Hs).map(h => { return h.querySelector('a') })
+    
+    // anchors : links 의 각 요소로부터 href 를 읽어온다
+    const anchors = Array.from(links).map(link => {
+        const href = link.getAttribute('href');
+        if (href) {
+            return document.querySelector(href);
+        }
+        return null;
+    }).filter(anchor => anchor !== null);
+
+    // 스크롤 발생시
+    window.addEventListener('scroll', () => {
+        if (anchors.length > 0 && links.length > 0) {
+            let scrollTop = window.scrollY;
+            let activeIndex = -1;
+
+            // 스크롤 위치와 제목의 위치가 가까울 경우 (격차가 300 이하)
+            // 활성화할 제목의 인덱스를 저장한다
+            anchors.forEach((anchor, i) => {
+                if (scrollTop >= anchor.offsetTop - 300) {
+                activeIndex = i; 
+                }
+            });
+
+            // 나머지 제목은 비활성화 한다
+            links.forEach((link) => {
+                link.classList.remove('active');
+            });
+            
+            // 인덱스가 유효하면 제목을 활성화한다
+            if (activeIndex >= 0) {
+                links[activeIndex].classList.add('active');
+            }
+        }
+  });
+});
+```
+코드의 동작 원리는 주석을 참고하면 된다.  
+
+개인적으로 까다로웠던 점은 특정 깊이(h3)까지만 목차를 읽어오는 것이었다. 모든 제목이 하이라이트되는 것을 원하지 않았고 h4 이상부터는 상위 제목을 하이라이트하는 게 목차로서 의미가 있다고 판단했다.  
+
+`querySelectorAll`를 사용해서 *모든* 제목의 a 태그를 바로 긁어올 수 있지만 *특정 깊이까지만* 읽어오기 위해서 H1부터 H3까지 직접 지정해서 읽어온 다음 그 안에서 a 태그를 가져오게 했다. 그 뿐만 아니라 숫자로 시작하는 제목([ 예를 들면 ... ](https://woocosmos.github.io/swift-start/#1-%ED%94%8C%EB%9E%AB%ED%8F%BC-%EC%84%A0%ED%83%9D))은 href를 읽어올 때 에러가 발생했기 때문에 애초에 지정한 만큼만 읽고 그 안에서 파싱하는 방식이 가장 깔끔하다고 생각했다.
+
+또 지속적으로 마주했던 에러는 links와 anchors 변수가 빈 배열을 반환하는 문제였는데, 이는 DOMContentLoaded 이벤트를 조건으로 추가함으로써 해결했다.
+
+하여, 나만의 sticky highlighted TOC 이 완성되었다  
+![image](https://github.com/user-attachments/assets/257eecc6-c39b-4063-b99b-3448b8167d64) 
+
+
 ### gh-pages 생성
 
-Toc 기능을 추가한 후 Github Pages에서 배포 실패가 떴다. 분명 로컬 서버에서는 잘 돌아갔는데 말이다.
+그러나 TOC 기능을 추가한 후 Github Pages에서 빌드/배포 실패가 떴다. 분명 로컬 서버에서는 잘 돌아갔는데 말이다.
 
 ![image](https://github.com/user-attachments/assets/1060cd1e-0e19-45df-a006-af55b13daf18){: width="60%" }
 
