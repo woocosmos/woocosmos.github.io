@@ -74,7 +74,7 @@ $$
 \sum_{\mathbf{x,y} \in S_{i}}\left\|\mathbf{x} - \mathbf{y}\right\|^{2}=2|S_{i}|\sum_{\mathbf{x} \in S_{i}}\left\|\mathbf{x} - {c}_{i}\right\|^{2}
 $$
 
-유도식은 아래와 같다. 편차의 총합이 0이기 때문에 
+유도식은 아래와 같다. 편차의 총합이 0이기 때문에 중간에 내적된 부분은 사라진다.
 
 $$
 \begin{aligned}
@@ -85,7 +85,24 @@ $$
 \end{aligned}
 $$
 
+다시 기존 항등식대로 $\sum$을 적용한다면
 
+$$
+\sum_{\mathbf{x,y} \in S_{i}}\left\|\mathbf{x} - \mathbf{y}\right\|^{2} 
+ = \sum_{\mathbf{x,y} \in S_{i}} (\left\|\mathbf{x} - {c}_{i}\right\|^{2} + \left\|\mathbf{y} - {c}_{i}\right\|^{2})
+$$
+
+모든 점 $x$, $y$에 대해서 합산하기 때문에 두 겹의 $\sum$으로 표현할 수 있으며, $c$는 상수이기 때문에 $\sum$는 $|S|$로 표현할 수 있다.
+
+$$
+\begin{aligned}
+\sum_{\mathbf{x,y} \in S_{i}}\left\|\mathbf{x} - {c}_{i}\right\|^{2}
+& = \sum_{\mathbf{x} \in S_{i}}\ \sum_{\mathbf{y} \in S_{i}}\left\|\mathbf{x} - {c}_{i}\right\|^{2} \\
+& = |S_{i}| \sum_{\mathbf{x} \in S_{i}}\left\|\mathbf{x} - {c}_{i}\right\|^{2} 
+\end{aligned}
+$$
+
+$\sum_{\mathbf{x,y} \in S_{i}}\left\|\mathbf{y} - {c}_{i}\right\|^{2}$ 에 대해서도 동일하게 적용되므로 
 
 ## 표준
 ## 변형
