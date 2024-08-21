@@ -24,7 +24,7 @@ toc: true
 
 # 정의
 
-K-means 알고리즘은 데이터를 k개의 클러스터로 묶는 클러스터링 알고리즘으로, 비지도 학습 방식에 속한다. 클러스터 간 거리 차이의 분산을 최소화하는 방식으로 수행된다.
+K-means 알고리즘은 데이터를 k개의 클러스터로 묶는 클러스터링 알고리즘으로, 비지도 학습 방식에 속한다. 클러스터 내 분산을 최소화하는 방식으로 수행된다.
 
 따라서 클러스터는 비슷한, 즉 가까운 데이터들이 모인 그룹을 뜻한다.
 
@@ -32,13 +32,9 @@ K-means 알고리즘은 데이터를 k개의 클러스터로 묶는 클러스터
 
 >한 클러스터 안의 평균은 그 클러스터를 가장 잘 '대표'하는 점이 된다. 그 클러스터 안의 데이터들이 '평균적으로' 그 점과 가장 가깝기 때문이다.
 
-# 알고리즘
+# 목적함수
 
-n개 샘플은 d차원의 실벡터(real vector)
-
-클러스터 내의 제곱합(Sum of Squares)을 최소화함으로써 n개 데이터 샘플을 k개 set로 나누는 것을 목표한다
-
-"제곱합(Sum of Squares)"  
+$n$개 샘플을 $k$개 집합으로 나눔으로써 클러스터 내 제곱합(within-cluster sum of squares, WCSS)을 최소화한다. 목적 함수를 수식으로 표현하면 아래와 같다. 
 
 $$
 \mathop{\operatorname{arg\,min}}_{\mathbf{S}} \sum_{i=1}^{k} \sum_{\mathbf{x} \in S_{i}} \left\|\mathbf{x} - \boldsymbol{\mu}_{i}\right\|^{2} = \mathop{\operatorname{arg\,min}}_{\mathbf{S}} \sum_{i=1}^{k} |S_{i}| \operatorname{Var}(S_{i})
@@ -46,25 +42,50 @@ $$
 
 
 ${\operatorname{arg\,min}}_{\mathbf{S}}$
- : 주어진 식을 최소화하는 $S$를 찾는다
+ : 주어진 식을 최소화하는 $S$
 
 ${\mu}_{i}$
- : $S_i$에 속한 값들의 평균<sub>mean</sub> (또는 중앙값<sub>median</sub>)<br>
-
-$\|S_i\|$
-: $S_i$의 크기
+ : $S_i$에 속한 값의 평균<sub>mean</sub> (또는 중앙값<sub>median</sub>)<br>
 
 $\||...\||$
-: L2 Norm 
+: 차이를 L2 Norm (유클리드 거리) 으로 표현한다 $\sqrt{\sum_{i=1} \|x_{i}\|^{2}}$
 
-$\|S_i\|\operatorname{Var}(S_{i})$
-: $\|S_i\|$와 $\operatorname{Var}(S_{i})$의 곱(Product). $S_i$의 크기가 가중치로 적용된 분산. 즉, 크기가 큰 $S_i$일수록 합산(sum)에 기여한다 
+$\|S_i\|$
+: $S_i$의 크기, 즉 해당 클러스터에 속한 포인트의 개수
 
-<br>
-여기서 평균이라 함은 $x$의 총합을 $S_i$의 크기로 나눈 값인데, $\frac{1}{\|S_{i}\|}\sum_{\mathbf{x} \in S_{i}}\mathbf{x}$ <br>
-이는 그 클러스터 안에서 데이터 쌍별(pairwise) 편차제곱(squared deviations)의 평균을 최소화하는 $S$를 찾는 것과 동일하다.  
+$\operatorname{Var}(S_{i})$
+: $S_i$의 분산, 즉 해당 클러스터에 속한 포인트들의 분산
 
-$${\operatorname{arg\,min}}_{\mathbf{S}} \sum_{i=1}^{k} \frac{1}{\|S_{i}\|}\sum_{\mathbf{x,y} \in S_{i}}\left\|\mathbf{x} - \mathbf{y}\right\|^{2}$$
+좌항은 $k$개 클러스터별 '각 데이터 포인트과 평균의 차이를 제곱[^1]하여 합산한 값(편차제곱합)'들의 합을 의미한다. *편차제곱의 평균이 분산*이라는 점을 상기한다면, 이 값은 단지 **클러스터의 분산에 클러스터의 사이즈를 곱한 것**과 같다.
+
+[^1]: 유클리드 거리가 제곱근 값이기 때문이 사실상 $X^{2}$ → $\sqrt{X^{2}}$ → $\|X^{2}\|$ 의 과정인 것이다
+
+따라서 우항은 $k$개 클러스터별 '크기와 분산을 곱한 값(Product)'들의 합을 표현하고 있다. 직관적으로 생각한다면 이는 클러스터의 크기가 가중치로 작용하여 클러스터가 클수록 값에 기여한다고 생각할 수 있다.  
+
+한편 이는 $k$개 클러스터별 '데이터 조합별 편차제곱(pairwise squared deviations)의 평균'들의 합을 최소화하는 것과 동일하다. 이 값은 클러스터 내 데이터 포인터끼리 평균적으로 얼마나 퍼져 있는지 나타내기 때문에 분산과 개념적으로 유사하다고 볼 수 있다.
+
+$$
+{\operatorname{arg\,min}}_{\mathbf{S}} \sum_{i=1}^{k} \frac{1}{ |S_{i}| }\sum_{\mathbf{x,y} \in S_{i}}\left\|\mathbf{x} - \mathbf{y}\right\|^{2}
+$$
+
+아래 항등식(identity)에 따르면 '클러스터 내 조합의 편차제곱합'은 '클러스터 내 데이터 포인트와 평균<sub>$c$</sub>의 차이를 제곱하여 합산한 값(편차제곱합)에 클러스터 사이즈의 $2$배를 곱한 것'과 동일하다.
+
+$$
+\sum_{\mathbf{x,y} \in S_{i}}\left\|\mathbf{x} - \mathbf{y}\right\|^{2}=2|S_{i}|\sum_{\mathbf{x} \in S_{i}}\left\|\mathbf{x} - {c}_{i}\right\|^{2}
+$$
+
+유도식은 아래와 같다. 편차의 총합이 0이기 때문에 
+
+$$
+\begin{aligned}
+\left\|\mathbf{x} - \mathbf{y}\right\|^{2} 
+& = \left\|\mathbf{x} - {c}_{i} + {c}_{i} - \mathbf{y}\right\|^2 \\
+& = \left\|\mathbf{x} - {c}_{i}\right\|^{2} -2 (\mathbf{x} - {c}_{i}) \cdot (\mathbf{y} - {c}_{i}) + \left\|\mathbf{y} - {c}_{i}\right\|^{2} \\
+& = \left\|\mathbf{x} - {c}_{i}\right\|^{2} + \left\|\mathbf{y} - {c}_{i}\right\|^{2}
+\end{aligned}
+$$
+
+
 
 ## 표준
 ## 변형
