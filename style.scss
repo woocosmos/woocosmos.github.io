@@ -196,7 +196,7 @@ li {
 dt {
   float: left;
   width: $dt-width;
-  overflow: auto;
+  overflow: hidden; // 스크롤바 생기는 현상 방지
   clear: left;
   text-align: right;
   white-space: nowrap;

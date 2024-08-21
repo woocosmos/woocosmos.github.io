@@ -132,8 +132,55 @@ JavaScript를 잘 모르다보니 Workaround 형식으로 구현한 내용도 �
 
 ## 아바타 기울기 애니메이션
 
+
+---
+## LaTex(수학 수식) 적용하기
+
+LaTex를 렌더링해주는 KaTex 를 `_includes/head.html`의 head 부분에 추가한다.
+
+```html
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.13.11/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.13.11/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.13.11/dist/contrib/auto-render.min.js"
+          onload="renderMathInElement(document.body, {
+            delimiters: [
+              {left: '\\[', right: '\\]', display: true},
+              {left: '$$', right: '$$', display: true},
+              {left: '$', right: '$', display: false},
+            ]
+          });">
+  </script>
+```
+
+- delimiter를 명시한 이유는 inline LaTex를 제대로 인식하지 못했던 문제 때문이다
+- 명시한 이후에도 display LaTex가 적용되지 않는 문제가 있었다 : \$\$로 감싸도 \\[\\] 로 출력되었다 (사실 이것이 표준 display LaTex notation이라고 한다) 그래서 delimiter 항목으로 더 추가했다
+
+이제 LaTex 문법대로 수식을 \$ 기호 1개 혹은 2개 사이에 작성하면 알맞게 렌더링 된다  
+  
+**display LaTex**
+
+$$
+\sum_{i=1}^{k} \sum_{\mathbf{x} \in S_{i}} \left\|\mathbf{x} - \boldsymbol{\mu}_{i}\right\|^{2}
+$$  
+
+```markdown
+$$
+\sum_{i=1}^{k} \sum_{\mathbf{x} \in S_{i}} \left\|\mathbf{x} - \boldsymbol{\mu}_{i}\right\|^{2}
+$$  
+```
+
+**inline LaTex**  
+문장 중간에 이렇게 $\sum_{\mathbf {x} \in S_{i}}\mathbf {x}$ 넣을 수 있다
+
+```markdown
+문장 중간에 이런 수식을 $\sum_{\mathbf {x} \in S_{i}}\mathbf {x}$ 넣을 수 있다
+```
+---
+
 ## 목차(TOC) 추가
-블로그글 옆에 목차를 추가하여 고정시키고 싶었다. 간단하게 설치해서 사용할 수 있는 [jekyll-toc](https://github.com/toshimaru/jekyll-toc)을 적용해보기로 했다. [동일한 이름의 플러그인](https://github.com/allejo/jekyll-toc)이 있는데, 후술할 Github Pages 이슈로부터 자유로운 것으로 보인다. 처음으로 돌아간다면 이것을 적용해볼지도...
+블로그글 옆 사이드바 형식의 목차를 추가한다. 아래는 플러그인을 설치해서 사용할 수 있는 [jekyll-toc](https://github.com/toshimaru/jekyll-toc)을 적용한 내용이다.
+
+[동일한 이름의 플러그인](https://github.com/allejo/jekyll-toc)이 있는데, 후술할 Github Pages 이슈로부터 자유로운 것으로 보인다. 처음으로 돌아간다면 이것을 적용해볼지도...
 
 **설치 방법**  
 
