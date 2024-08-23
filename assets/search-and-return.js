@@ -4,15 +4,16 @@ var sjs = SimpleJekyllSearch({
     json: '/search.json',
     searchResultTemplate: 
         '<article>'+
-        '<div><i class="fas fa-book fa-fw" style="padding-right:10px"></i><a href="{url}">{title}</a></div>'+
-        '<div><i class="fas fa-clock fa-fw" style="padding-right:10px"></i><span>{date}</span></div>'+
-        '<div><i class="fas fa-tag fa-fw" style="padding-right:10px"></i><span>{tags}</span></div>'+
-        '<div><i class="fas fa-pencil-alt fa-fw" style="padding-right:10px"></i><span>{content}</span></div>'+
+        '<div><i class="fas fa-book fa-fw"></i><a href="{url}">{title}</a></div>'+
+        '<div><i class="fas fa-clock fa-fw"></i><span>{date}</span></div>'+
+        '<div><i class="fas fa-tag fa-fw"></i>{tags}</div>'+
+        '<div style="display:inline-flex">' + 
+            '<i class="fas fa-pencil-alt fa-fw" style="padding-top:5px"></i><a href="{url}"><span style="color:#343a40">{content}</span></a>' + 
+        '</div>'+
         '</article>',
     noResultsText: '😴 검색 결과가 없습니다',
-    exclude: ['test'],
     templateMiddleware : function (prop, value, template) {
-        if (prop === "url" || prop === "date") {
+        if (prop === "url" || prop === 'date') {
           return value;
         }
 
@@ -20,12 +21,31 @@ var sjs = SimpleJekyllSearch({
         const regex = new RegExp(searchTerm, "gi");
         let highlightedValue;
 
-        if (prop === 'title' || prop === 'tags') {
+
+        if (prop === 'tags') {
+
+            const dest = window.location.origin;
+            const theTags = value.split(', ').map(tag => tag.trim());
+
+            spanValue = theTags.map(tag => `<span>${tag}</span>`).join(', ');
+            highlightedValue = spanValue.replace(regex, '<b style="background:gold">$&</b>');
+
+            highlightedLinkedValue = highlightedValue.split(',').map(tag => tag.trim())
+                            .map((h, idx) => {
+                                const c = h.replace(/<\/?span[^>]*>/g, '');
+                                return `<a href="${dest}/tags/#${theTags[idx]}">${c}</a>`;
+                            }).join(', ');
+
+            return highlightedLinkedValue;
+        }
+
+        if (prop === 'title') {
             highlightedValue = value.replace(regex, '<span style="background:gold"><b>$&</b></span>')
             return highlightedValue;
         }
 
         // content
+        value = value.replace(/\[.*?\]/g, '');
         const matches = value.match(regex);
         let matchCnt;
         if (matches) {

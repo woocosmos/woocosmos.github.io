@@ -1,7 +1,7 @@
 ---
 layout: post
 title: "Markdown Cheatsheet"
-tags: [샘플]
+tags: [샘플, 테스트]
 comments: False
 ---
 

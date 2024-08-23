@@ -224,23 +224,11 @@ function load (location, callback) {
   xhr.send()
 }
 
-// function createStateChangeListener (xhr, callback) {
-//   return function () {
-//     if (xhr.readyState === 4 && xhr.status === 200) {
-//       try {
-//         callback(null, JSON.parse(xhr.responseText))
-//       } catch (err) {
-//         callback(err, null)
-//       }
-//     }
-//   }
-// }
-
 function createStateChangeListener(xhr, callback) {
   return function () {
       if (xhr.readyState === 4 && xhr.status === 200) {
         try {
-          const sanitizedResponse = xhr.responseText.match(/[a-zA-Z0-9\s\uAC00-\uD7A3{}[\]":,]/g).join('');
+          const sanitizedResponse = xhr.responseText.match(/[a-zA-Z0-9\s\uAC00-\uD7A3\-\/{}[\]":,\.]/g).join('');
           const jsonResponse = JSON.parse(sanitizedResponse);
           try {
             callback(null, jsonResponse);
