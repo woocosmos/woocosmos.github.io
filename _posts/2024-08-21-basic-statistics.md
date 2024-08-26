@@ -1,7 +1,7 @@
 ---
 layout: post
 title: "수학, 통계 개념 모음집"
-tags: []
+tags: [수학, 통계]
 comments: True
 toc: true
 ---

@@ -651,6 +651,15 @@ nav {
   }
 }
 
+.search {
+  > span {
+    margin: 0 auto;
+    display: table;
+    font-size: x-large;
+    padding-bottom: 10px;
+  }
+}
+
 .search > .label {
   display: flex; 
   justify-content: center; 
@@ -660,10 +669,6 @@ nav {
 .search > .label {
   > li:before {
     content: "";
-  }
-  
-  > p {
-    margin-right: 10px;
   }
 
   > li {
@@ -675,7 +680,7 @@ nav {
     align-items: center;
     margin: 1px;
 
-    > a {
+    > span {
       display: flex;
       align-items: center;
       justify-content: center;  
@@ -685,12 +690,13 @@ nav {
       border-radius: 20px;
       width: 120px;
       height: 40px;
+      cursor: pointer;
 
-      span {
-        float: left;
-        padding: .8px 8px;
+      // span {
+      //   float: left;
+      //   padding: .8px 8px;
 
-      }
+      // }
     }
   }
 }

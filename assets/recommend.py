@@ -1,3 +1,5 @@
+import os
+
 import requests
 import json
 import re
@@ -41,21 +43,26 @@ def create_corpus(contents):
     corpus = [' '.join(e+k) for e, k in zip(keywords_eng, keywords_kor)]
     return corpus
 
-def extract_keywords(corpus, topN=5):
+def extract_keywords(corpus, topN=5, asset_dir=None):
     vectorizer = TfidfVectorizer()
     tfidf_matrix = vectorizer.fit_transform(corpus)
     feature_names = vectorizer.get_feature_names_out()
     sum_tfidf_scores = np.array(tfidf_matrix.sum(axis=0)).flatten()
 
     top_indices = sum_tfidf_scores.argsort()[-topN:][::-1]
-    top_keywords = [(feature_names[idx], sum_tfidf_scores[idx]) for idx in top_indices]
+    top_keywords = [[feature_names[idx], sum_tfidf_scores[idx]] for idx in top_indices]
 
     # print
     print(f"Top {topN} keywords for the entire corpus:")
     for keyword, score in top_keywords:
         print(f"    {keyword}: {score:.4f}")
-
-    return top_keywords
+    
+    if asset_dir:
+        root_dir = os.path.dirname(asset_dir)
+        # target_dir = os.path.join(root_dir, 'tags')
+        save_path = os.path.join(root_dir, "keywords.json") 
+        with open(save_path, 'w') as f:
+            json.dump(top_keywords, f)
 
 def get_stopwords(p, add_words=[]):
     with open(p, "r") as f:
@@ -64,8 +71,10 @@ def get_stopwords(p, add_words=[]):
     return sw
 
 if __name__ == '__main__':
-    stop_path = "stopwords.txt"
-    stop_words = get_stopwords(stop_path, add_words=['woocosmos', '데이터'])
+    
+    asset_dir = os.path.dirname(os.path.abspath(__file__))
+    stop_path = os.path.join(asset_dir, "stopwords.txt") 
+    stop_words = get_stopwords(stop_path, add_words=['woocosmos', '데이터', '추가'])
 
     url = 'https://woocosmos.github.io/search.json'
     pattern = r'[^\sa-zA-Z0-9\uac00-\ud7af,\-:"\[\]{}./]+'
@@ -73,4 +82,4 @@ if __name__ == '__main__':
 
     contents = collect_contents(url, pattern, exc_tag) 
     corpus = create_corpus(contents)
-    top_keywords = extract_keywords(corpus)
+    extract_keywords(corpus, asset_dir=asset_dir)
