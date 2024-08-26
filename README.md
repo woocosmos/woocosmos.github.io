@@ -1,16 +1,16 @@
 # Welcome
 
 Don't hesitate to visit my home.
+블로그를 만들고 있습니다. 공사중이지만 놀러오세요.
 
 [woocosmos.github.io](https://woocosmos.github.io/)
 
 
 ## To-do
 
-- [ ] 최초 작성일과 최근 수정일 별도 구분시키기
-- [ ] 검색 대상에서 URL 제외하기
-- [ ] 검색 추천 키워드 선정 기준
-- [ ] 검색 알고리즘 고도화 (여러 키워드일 경우에 대해)
+- [ ] 최초 작성일과 최근 수정일 별도 구분
+- [ ] Tf-idf 계산 자동화
+- [ ] 페이지수로 포스트 리스트 넘기기
 
 ## done
 - 필요 없는 탭 삭제하기
@@ -24,3 +24,4 @@ Don't hesitate to visit my home.
 - TOC(목차) 추가하기
 - favicon 배경 투명화
 - 검색 기능 추가하기
+- Tf-idf 기반 검색 키워드 추천
