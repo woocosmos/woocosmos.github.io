@@ -29,7 +29,6 @@ function getContent (data) {
     return jsonArray
 }
 
-// dicCSVURL로 제대로 읽어오는 부분부터 구현해야 함!!!!!!!!
 var dictionary = []
 const dicCSVURL = '/dic.csv';
 load(dicCSVURL, function (err, text) {
