@@ -630,10 +630,24 @@ nav {
   }
 }
 
+.tooltip {
+  position: absolute;
+  background-color: black;
+  color: white;
+  padding: 5px 10px;
+  border-radius: 5px;
+  font-size: 16px;
+  display: none; /* Hidden by default */
+  white-space: nowrap;
+  z-index: 10;
+  pointer-events: none; /* Ignore pointer events */
+}
+
 .search {
   input {
     width: 80%;
     padding: 15px;
+    padding-left: 30px;
     box-sizing: border-box;
     border-radius: 30px;
     border: 2.5px solid;
@@ -690,13 +704,11 @@ nav {
       border-radius: 20px;
       width: 120px;
       height: 40px;
+      border: #e6d4af solid 1px;
       cursor: pointer;
-
-      // span {
-      //   float: left;
-      //   padding: .8px 8px;
-
-      // }
+    }
+    > span:hover {
+      background: bisque;   
     }
   }
 }

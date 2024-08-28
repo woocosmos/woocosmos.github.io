@@ -48,18 +48,19 @@ def extract_keywords(corpus, topN=5, asset_dir=None):
     tfidf_matrix = vectorizer.fit_transform(corpus)
     feature_names = vectorizer.get_feature_names_out()
     sum_tfidf_scores = np.array(tfidf_matrix.sum(axis=0)).flatten()
+    average_tfidf_score = sum_tfidf_scores.mean().round(2)
 
     top_indices = sum_tfidf_scores.argsort()[-topN:][::-1]
-    top_keywords = [[feature_names[idx], sum_tfidf_scores[idx]] for idx in top_indices]
+    top_keywords = [['말뭉치 평균', average_tfidf_score]]
+    top_keywords += [[feature_names[idx], round(sum_tfidf_scores[idx], 2)] for idx in top_indices]
 
     # print
     print(f"Top {topN} keywords for the entire corpus:")
     for keyword, score in top_keywords:
-        print(f"    {keyword}: {score:.4f}")
+        print(f"    {keyword}: {score}")
     
     if asset_dir:
         root_dir = os.path.dirname(asset_dir)
-        # target_dir = os.path.join(root_dir, 'tags')
         save_path = os.path.join(root_dir, "keywords.json") 
         with open(save_path, 'w') as f:
             json.dump(top_keywords, f)

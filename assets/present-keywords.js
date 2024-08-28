@@ -7,17 +7,69 @@ async function loadTags() {
 
         tagList.innerHTML = '';
         const paragraph = document.createElement('span');
-        const icon = document.createElement('i');
-        icon.className = 'fa fa-circle-info'; // Set the classes for the icon
-
         paragraph.textContent = '이런 키워드는 어때요? ';
-        paragraph.appendChild(icon);
+        paragraph.style.fontWeight = 'bold';
+
+        const svgIcon = document.createElement('span')
+        svgIcon.innerHTML = `
+            <svg width="25" height="25" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" color="#B5B5B5"><g id="Icon/System/Outlined/icon_circle_question"><path id="Icon" d="M6.54167 6.33482C6.65913 6.00091 6.89098 5.71934 7.19616 5.53998C7.50133 5.36063 7.86013 5.29507 8.20901 5.35491C8.55789 5.41475 8.87434 5.59614 9.1023 5.86694C9.33026 6.13774 9.45502 6.48048 9.45449 6.83445C9.45449 7.83371 7.95561 8.33333 7.95561 8.33333M7.97396 10.3333H7.98063M14 8C14 11.3137 11.3137 14 8 14C4.68629 14 2 11.3137 2 8C2 4.68629 4.68629 2 8 2C11.3137 2 14 4.68629 14 8Z" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"></path></g></svg>`;
+        paragraph.appendChild(svgIcon);
+
+        const totalAvg = data[0]
+
+        // Create tooltip element
+        const tooltip = document.createElement('div');
+        tooltip.className = 'tooltip';
+        tooltip.textContent = `TF-IDF 점수를 기반으로 상위 5개 키워드를 추천합니다\n현재 블로그의 전체 평균 TF-IDF는 ${totalAvg[1]}점입니다\n추천 키워드에 마우스를 올려 점수를 비교해보세요`; // Tooltip text
+        tooltip.style.whiteSpace = 'pre';
+        document.body.appendChild(tooltip);
+
+        // Show tooltip on mouse enter
+        svgIcon.addEventListener('mouseenter', (event) => {
+            tooltip.style.display = 'block';
+            tooltip.style.left = `${event.pageX + 10}px`;
+            tooltip.style.top = `${event.pageY + 10}px`;
+        });
+
+        // Move tooltip with mouse
+        svgIcon.addEventListener('mousemove', (event) => {
+            tooltip.style.left = `${event.pageX + 10}px`;
+            tooltip.style.top = `${event.pageY + 10}px`;
+        });
+
+        // Hide tooltip on mouse leave
+        svgIcon.addEventListener('mouseleave', () => {
+            tooltip.style.display = 'none';
+        });
+
         tagList.parentNode.insertBefore(paragraph, tagList);
 
-        data.forEach(obj => {
+        data.slice(1).forEach((obj, rnk) => {
             const li = document.createElement('li');
             const span = document.createElement('span');
             span.textContent = obj[0];
+
+            const tip = document.createElement('div');
+            tip.className = 'tooltip';
+            tip.textContent = `${rnk+1}위(${obj[1]}점)`;
+            document.body.appendChild(tip);
+
+            span.addEventListener('mouseenter', (event) => {
+                tip.style.display = 'block';
+                tip.style.left = `${event.pageX + 10}px`;
+                tip.style.top = `${event.pageY + 10}px`;
+            });
+
+            // Move tooltip with mouse
+            span.addEventListener('mousemove', (event) => {
+                tip.style.left = `${event.pageX + 10}px`;
+                tip.style.top = `${event.pageY + 10}px`;
+            });
+
+            // Hide tooltip on mouse leave
+            span.addEventListener('mouseleave', () => {
+                tip.style.display = 'none';
+            });
             
             span.addEventListener('click', function(event) {
                 const searchInput = document.getElementById('search-input');
