@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "토스 SLASH24 컨퍼런스"
+title: "작성중// 토스 SLASH24 컨퍼런스"
 tags: [이벤트]
 comments: True
 toc: false

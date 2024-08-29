@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "블로그 키워드 추천 및 검색 기능 구현기"
+title: "작성중// 블로그 키워드 추천 및 검색 기능 구현기"
 tags: [JavaScript, NLP]
 comments: True
 toc: true
