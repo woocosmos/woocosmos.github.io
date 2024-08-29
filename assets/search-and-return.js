@@ -23,19 +23,14 @@ var sjs = SimpleJekyllSearch({
 
 
         if (prop === 'tags') {
-
             const dest = window.location.origin;
             const theTags = value.split(', ').map(tag => tag.trim());
-
-            spanValue = theTags.map(tag => `<span>${tag}</span>`).join(', ');
-            highlightedValue = spanValue.replace(regex, '<b style="background:gold">$&</b>');
-
-            highlightedLinkedValue = highlightedValue.split(',').map(tag => tag.trim())
-                            .map((h, idx) => {
-                                const c = h.replace(/<\/?span[^>]*>/g, '');
-                                return `<a href="${dest}/tags/#${theTags[idx]}">${c}</a>`;
-                            }).join(', ');
-
+            
+            highlightedLinkedValue = theTags.map(tag => {
+                const highlightedTag = tag.replace(regex, '<b style="background:gold">$&</b>');
+                return `<a href="${dest}/tags/#${tag}"><span>${highlightedTag}</span></a>`;
+            }).join(', ');
+            
             return highlightedLinkedValue;
         }
 

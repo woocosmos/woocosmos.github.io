@@ -11,8 +11,8 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 def collect_contents(url, pttrn, noTag):
     # get JSON from URL after cleansing
     response = requests.get(url, verify=False)
-    cleaned_response = re.sub(pttrn, ' ', response.text)
-    normalized_response = re.sub(r'\s+', ' ', cleaned_response)
+    cleansed_response = re.sub(pttrn, ' ', response.text)
+    normalized_response = re.sub(r'\s+', ' ', cleansed_response)
     
     # parse needed contents from the JSON
     json_data = json.loads(normalized_response)
