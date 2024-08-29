@@ -19,13 +19,6 @@ toc: true
 
 블로그 개발 과정은 [특정 포스트](https://woocosmos.github.io/blog-history/)에 아카이빙하고 있지만, 해당 기능은 분량이 많아 별도로 기록한다.  
 
-지금까지 구현하고 배포에 반영한 내용을 리스트로 요약하자면 다음과 같다.
-- search 탭 생성과 검색 페이지 구성
-- Jekyll 검색 플러그인 변형과 적용
-- 검색 결과창의 레이아웃 구성
-- TF-iDF를 활용한 검색 추천 키워드 추출  
-<br>
-
 # 기본 기능
 입력 키워드로 블로그 내 모든 컨텐츠에 대해 검색하는 기본 기능부터 적용한다.
 
@@ -33,13 +26,13 @@ toc: true
 
 <h3 class="no_toc"> 첫째, search.json 생성 </h3>
 
-블로그의 root 위치에 아래 json 파일을 만든다.
+블로그의 root 위치에 아래 `search.json` 파일을 만든다.
 
 ```json
----
+{% raw %}---
 layout: none
 ---
-[{% raw %}
+[
   {% for post in site.posts %}
     {
       "title"    : "{{ post.title | escape }}",
@@ -49,12 +42,9 @@ layout: none
       "content": "{{ post.content | strip_html | strip_newlines | escape }}"
     } {% unless forloop.last %},{% endunless %}
   {% endfor %}
-  {% endraw %}
-]
+]{% endraw %}
 ```
-기존 코드에 `post.content` 를 추가하여 본문 텍스트도 가져오게 했다. 이때 `strip_html` 등 몇 가지 Jekyll 문법을 더했다. 
-
-이를 통해 `{baseurl}/search.json` 주소로 json 파일에 접근할 수 있다. 브라우저로부터 이 파일을 읽어와 검색 데이터로 활용할 것이다.
+기존 코드에 `post.content` 를 추가하여 본문 텍스트도 가져오게 했다. 이때 `strip_html` 등 몇 가지 Jekyll 문법을 더했다. 이를 통해 `{baseurl}/search.json` 주소로 json 파일에 접근할 수 있다. 브라우저로부터 이 파일을 읽어와 검색 데이터로 활용할 것이다.
 
 ![image](https://github.com/user-attachments/assets/e2a40f6a-eaea-465f-ab02-42408c060258){: style='border:black solid 0.5px; padding:10px; width:50%;'}{: .center-image}
 <br>
@@ -80,11 +70,10 @@ var sjs = SimpleJekyllSearch({
 
 <h3 class="no_toc"> 셋째, 검색 페이지 구성 </h3>
 
-root 위치에 `search` 폴더를 생성하고 그 아래 `index.html`를 정의한다. js 스크립트가 실행됨으로써 `search-input`의 입력 값이 처리되어 `results-container`에 전달된다.
+root 위치에 `search` 폴더를 생성하고 그 아래 `index.html` 파일을 생성한다. 앞서 추가한 JS 스크립트가 실행되면서 검색어 입출력이 진행되는 곳이다.
 
 ```html
-{% raw %}
----
+{% raw %}---
 layout: page
 permalink: /search
 ---
@@ -97,20 +86,17 @@ permalink: /search
 </ul>
 
 <script src="{{ site.baseurl }}/assets/simple-jekyll-search.js" type="text/javascript"></script>
-<script src="{{ site.baseurl }}/assets/search-and-return.js" type="text/javascript"></script>
-{% endraw %}
+<script src="{{ site.baseurl }}/assets/search-and-return.js" type="text/javascript"></script>{% endraw %}
 ```
 
-이렇게 `{baseurl}/search` 주소로 접근할 수 있는 검색창을 완성하였다.
+이렇게 `{baseurl}/search` 주소로 접근할 수 있는 검색 페이지를 완성하였다.
 
 ![image](https://github.com/user-attachments/assets/a3b2710e-95b2-43d8-b4b7-cdb3375e2625){: style='border:black solid 0.5px; padding:10px;'}{: .center-image}  
 
-
-검색창은 상단의 탭 중에서 **돋보기 아이콘**을 눌러 이동할 수 있다. 돋보기 아이콘을 직접 정의한 svg로 표현하고 링크와 연결하여 `_includes/nav.html`에 추가했다.
+한편, 무엇을 클릭했을 때 이 검색 페이지로 연결되도록 할 것인가? 나는 상단의 탭에 **돋보기 아이콘**을 추가했다. 이를 위해 돋보기 아이콘 svg와 검색 페이지를  연결하여 `_includes/nav.html`에 추가했다.
 
 ```html
-{% raw %}
-<ul class="search-icon">
+{% raw %}<ul class="search-icon">
   <a href="{{ site.baseurl }}/search">
     <svg 
       width="24" 
@@ -121,8 +107,7 @@ permalink: /search
       <path d="M10 ...생략" fill="currentColor"></path>
     </svg>
   </a>
-</ul>
-{% endraw %}
+</ul>{% endraw %}
 ```
 
 ![image](https://github.com/user-attachments/assets/96ec0aaf-0692-4da4-b390-313138b53ad0){: style='border:black solid 0.5px; padding:10px;'}{: .center-image}
@@ -261,15 +246,167 @@ searchResultTemplate:
 ```
 
 ## 키워드 추천
-기존 포스트를 데이터로 활용하여 검색하기 좋은 단어를 추출하여 키워드 추천하기로
 
-### TF-iDF 계산
-텍스트 데이터 수집, 전처리(토크나이징)  
-계산식 포함하여 서술
+![image](https://github.com/user-attachments/assets/5e9706e8-610d-44de-b117-90876070a57f){: style='border:black solid 0.5px; padding:10px;'}
 
-### 적용 파이프라인
-포스트 개수가 늘어날 경우 python으로 키워드 계산, 저장  
-JavaScript로 파일을 읽어서 HTML에 뿌리기  
+유저에게 무슨 키워드를 검색할지 가이드를 제공해주는 것은 어떨까?  
+포스트 본문을 데이터로 활용하여 **키워드의 중요도를 집계하고 상위 n개 키워드를 추천**하는 기능을 떠올렸다.
+
+아이디어는 이렇다.
+1. 블로그 전체에서 제목과 본문 텍스트를 수집하여 전처리하고 키워드를 추출한다
+2. 블로그 포스트 개수를 고려하여 키워드별 TF-IDF를 집계하고 상위 5개를 저장한다
+3. 추천 키워드를 불러와 검색 페이지에서 띄워준다
+
+1~2번은 Python으로 실행하고 3번은 JavaScript로 구현하기로 했다.  
+<br>
+
+**데이터 수집과 처리**  
+`{baseurl}/search.json` 주소로 json 파일에 접근할 수 있다는 점을 기억하고 `requests` 모듈로 불러왔다. 그리고 그 중에서 제목과 본문만 저장했다.
+
+```python
+def collect_contents(url, pttrn, noTag):
+    '''
+    url   : search.json
+    pttrn : escape 기호 제외하기 위한 정규표현식
+    noTag : 데이터 수집에서 제외할 태그
+    '''
+    response = requests.get(url, verify=False)
+    cleansed_response = re.sub(pttrn, ' ', response.text)
+    normalized_response = re.sub(r'\s+', ' ', cleansed_response)
+    
+    json_data = json.loads(normalized_response)
+    contents = [post['title'] + ' ' + post['content'] for post in json_data if noTag not in post['tags']]
+    return contents
+```
+
+수집한 데이터를 키워드 말뭉치 형태로 변환한다. 이때 영어와 한국어를 따로 추출하여 한 글자인 단어와 불용어 사전에 포함된 단어를 제외했다. 명사를 대상으로 하고 싶었기 때문에 **한국어는 형태소 분석기를 사용하여 명사를 추출**했다.
+
+```python
+def create_corpus(contents):
+    # eng_prc, kor_prc는 별도로 정의한 전처리 함수다
+    keywords_eng = list(map(eng_prc, contents))
+    # 한국어는 형태소 분석 후 명사만 사용된다
+    keywords_kor = list(map(kor_prc, contents))
+    corpus = [' '.join(e+k) for e, k in zip(keywords_eng, keywords_kor)]
+    return corpus
+```
+
+참고로 한국어 형태소 분석은 `konlpy`를 사용했다.
+```python
+from konlpy.tag import Okt
+
+def kor_prc(c):
+    okt = Okt()
+    kor_res =[]
+    for k in okt.nouns(c):
+        if (len(k) > 1) & (k not in stop_words):
+            kor_res.append(k)
+    return kor_res
+```
+
+불용어 사전은 [NLTK's list of english stopwords](https://gist.github.com/sebleier/554280)와 [Latex 문법 리스트](https://www.public.asu.edu/~rjansen/latexdoc/ltx-2.html)를 크롤링해서 `stopwords.txt` 파일로 구축하였다. 더불어 *span, div*와 같은 HTML 태그도 불용어 사전에 포함했다.  
+<br>
+
+**TF-IDF 계산**  
+TF-IDF(Term Frequency-Inverse Document Frequency)는 **문서 안에서의 출현 빈도수와 전체 문서 집합에서의 희귀성을 적용한 가중치**이다. scikit-learn 의 [TfidfVectorizer](https://scikit-learn.org/stable/modules/generated/sklearn.feature_extraction.text.TfidfVectorizer.html)을 사용해 계산했다. 여러 개 포스트를 올리는 블로그 특성 상 주요 키워드를 추출하는 데 TF-IDF가 적합하다고 생각하여 적용했다. 
+
+```python
+def extract_keywords(corpus, topN=5, asset_dir=None):
+    vectorizer = TfidfVectorizer()
+    tfidf_matrix = vectorizer.fit_transform(corpus)
+
+    feature_names = vectorizer.get_feature_names_out()
+    # 단어가 열, 문서가 행이므로 각 단어에 대해 문서 전반의 값을 sum
+    sum_tfidf_scores = np.array(tfidf_matrix.sum(axis=0)).flatten()
+    average_tfidf_score = sum_tfidf_scores.mean().round(2)
+
+    top_indices = sum_tfidf_scores.argsort()[-topN:][::-1]
+    top_keywords = [['말뭉치 평균', average_tfidf_score]]
+    top_keywords += [[feature_names[idx], round(sum_tfidf_scores[idx], 2)] for idx in top_indices]
+    ...
+    # 저장
+    with open(save_path, 'w') as f:
+      json.dump(top_keywords, f)
+```
+문서별로 단어의 TF-IDF 값이 계산되는데, 전체 블로그 관점에서 중요도를 고려해야 하므로 단어 단위로 총합 값을 계산했다. 또 추출된 키워드의 중요도를 상대적으로 비교할 수 있도록 전체 키워드의 평균 TF-IDF 값도 함께 저장했다.  
+<br>
+
+**추천 키워드 디스플레이**  
+파이썬으로 계산한 결과는 `keywords.json` 이라는 이름으로 따로 저장했다. 첫번째 요소는 전체 말뭉치 평균이고, 그 아래부터 1위, 2위 ... 5위에 해당한다. [키워드, 점수] 쌍의 리스트로 이루어져 있다.
+```json
+[['말뭉치 평균', 0.05], 
+ ['클러스터', 0.67], 
+ ['toc', 0.42], 
+ ['포인트', 0.38], 
+ ['편차', 0.38], 
+ ['평균', 0.33]]
+```
+
+이제 이것을 읽어 검색 페이지에서 보여주는 JavaScript를 작성한다. 해당 스크립트는 search 폴더의 `index.html` 에서 실행된다. 먼저 json을 읽어온 후 반복문으로 HTML 태그를 추가했다. 키워드를 클릭하면 바로 검색되도록 click 이벤트를 추가했다.
+
+```javascript
+// 미리 추출한 키워드 json 데이터를 불러온다
+const response = await fetch('keywords.json');
+const data = await response.json();
+...
+// 첫번째 요소는 전체 평균이므로 두번째 요소부터 반복문을 시행한다
+data.slice(1).forEach((obj, rnk) => {
+    const li = document.createElement('li');
+    const span = document.createElement('span');
+
+    // 키워드를 읽어온다
+    span.textContent = obj[0];
+
+    // 클릭할 경우 해당 키워드를 search-input 입력창으로 전달한다
+    span.addEventListener('click', function(event) {
+                    const searchInput = document.getElementById('search-input');
+                    searchInput.value = obj[0];
+
+                    // trigger
+                    const e = new Event('input', { bubbles: true });
+                    searchInput.dispatchEvent(e);
+                });
+    ...
+```
+![image](https://github.com/user-attachments/assets/5f04c3c4-89b7-4074-a014-4f4103eeddda){: style='border:black solid 0.5px; padding:10px;'}{: .center-image}
+클릭하면 검색창에 그 키워드가 입력되면서 검색 기능이 발동된다.
+{: .center}  
+
+마지막으로 *이 키워드들이 왜 추천되는지* 도움말 팝업을 추가해보았다. 아이콘 위에 마우스를 호버하면 텍스트 설명이 뜨는 방식이다. 각 추천 키워드의 점수도 `obj[1]`으로 읽어올 수 있으므로 팝업 코드를 forEach문에 추가했다.
+
+```javascript
+// 도움말 아이콘 팝업
+const svgIcon = document.createElement('span')
+svgIcon.innerHTML = `<svg width="25" height="25" viewBox="0 0 16 16" 생략..> </svg>`;
+paragraph.appendChild(svgIcon);
+
+const totalAvg = data[0]
+const tooltip = document.createElement('div');
+tooltip.className = 'tooltip';
+tooltip.textContent = `TF-IDF 점수를 기반으로 상위 5개 키워드를 추천합니다\n
+                      현재 블로그의 전체 평균 TF-IDF는 ${totalAvg[1]}점입니다\n
+                      추천 키워드에 마우스를 올려 점수를 비교해보세요`;
+tooltip.style.whiteSpace = 'pre'; // '\n'이 적용되려면
+document.body.appendChild(tooltip);
+
+svgIcon.addEventListener('mouseenter', (event) => {
+    tooltip.style.display = 'block';
+    tooltip.style.left = `${event.pageX + 10}px`;
+    tooltip.style.top = `${event.pageY + 10}px`;
+});
+
+svgIcon.addEventListener('mousemove', (event) => {
+    tooltip.style.left = `${event.pageX + 10}px`;
+    tooltip.style.top = `${event.pageY + 10}px`;
+});
+
+svgIcon.addEventListener('mouseleave', () => {
+    tooltip.style.display = 'none';
+});
+```
+<br>
+
+**자동화**  
 Github Pages 활용하여 자동화 (포스트가 추가될 때마다 바뀌는 중요도 반영되도록)
 
 # Takeaways

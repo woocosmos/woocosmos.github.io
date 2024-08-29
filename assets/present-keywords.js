@@ -2,7 +2,6 @@ async function loadTags() {
     try {
         const response = await fetch('keywords.json'); // Fetch the JSON file
         const data = await response.json(); // Parse the JSON data
-
         const tagList = document.getElementById('tag-list'); // Get the <ul> element
 
         tagList.innerHTML = '';
