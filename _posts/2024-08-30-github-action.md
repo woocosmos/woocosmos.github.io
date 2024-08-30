@@ -77,10 +77,13 @@ my_frist_job 작업이 성공적으로 실행되었고 그것을 눌러 step-exa
 
 ## 키워드 업데이트
 
-추천 키워드를 업데이트할 조건을 먼저 정해야 한다. 블로그 포스트가 추가되었을 때, 즉 master 브랜치에 post로 시작하는 브랜치를 머지했을 때를 이벤트로 정의하려고 한다. 보통 post 브랜치에서 포스트를 작성하다가 완성했을 때 master로 머지시키기 때문이다.  
+추천 키워드를 업데이트할 조건을 먼저 정해야 한다. master 브랜치를 대상으로 두 가지 조건을 정의했다.
+
+- post로 시작하는 브랜치의 PR를 완료했을 때 (보통 post 브랜치에서 포스트를 작성하다가 완성했을 때 master로 머지시키기 때문)
+- push 의 커밋 메세지에 'post'가 포함되어 있을 때 (master 브랜치에서 바로 수정하여 push할 때도 있으므로)
 
 ```
-name: Test-Event
+name: Update the Keywords
 
 on:
   pull_request:
@@ -88,15 +91,24 @@ on:
       - master
     types:
       - closed
+  push:
+    branches:
+      - master
 
 jobs:
   my-job:
-    if: github.event.pull_request.merged == true && startsWith(github.event.pull_request.head.ref, 'post/')
+    if: (github.event_name == 'pull_request' &&
+            github.event.pull_request.merged == true && 
+            startsWith(github.event.pull_request.head.ref, 'post/')) ||
+        (github.event_name == 'push' &&
+            contains(github.event.head_commit.message, 'post'))
     runs-on: ubuntu-latest
     steps:
     - name: my-step
       run: echo Hello World?!
 ```
 
+![image](https://github.com/user-attachments/assets/60010781-a7c4-4d0a-b08d-f930d1fa5226)
+![image](https://github.com/user-attachments/assets/2ce2518b-df6f-410f-b247-3805174eff9f)
 
 나중에 CI/CD 작업이 필요할 때 Jenkins(젠킨스)도 사용해보고 싶다.

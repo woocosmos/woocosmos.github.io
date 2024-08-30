@@ -9,7 +9,8 @@ on:
 
 jobs:
   my-job:
-    if: github.event.pull_request.merged == true && startsWith(github.event.pull_request.head.ref, 'post/')
+    if: (github.event.pull_request.merged == true && startsWith(github.event.pull_request.head.ref, 'post/')) ||
+        contains(github.event.pull_request.title, 'post')
     runs-on: ubuntu-latest
     steps:
     - name: my-step
