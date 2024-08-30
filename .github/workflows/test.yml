@@ -19,25 +19,27 @@ jobs:
             contains(github.event.head_commit.message, 'post'))
     runs-on: ubuntu-latest
     steps:
-    - name: Set up Python
-      uses: actions/setup-python@v5
-      with:
-        python-version: '3.8'
-        architecture: 'x64'
-    - name: Install Dependencies
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y g++ openjdk-8-jdk
-        python -m pip install requests numpy konlpy scikit-learn
-        echo '-----------all installed'
-           |
-   - name: Approach the Codes
-      uses: actions/checkout@v3
-   - name: Run the Script
-     run: python recommend.py
-   - name : Commit the Change
-     run: |
-        git add keywords.json
-        git commit -m "[automation] keywords updated"
-        git push
-          |
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.8'
+          architecture: 'x64'
+          
+      - name: Install Dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y g++ openjdk-8-jdk
+          python -m pip install requests numpy konlpy scikit-learn
+          echo '-----------all installed'
+
+      - name: Approach the Codes
+        uses: actions/checkout@v3
+        
+      - name: Run the Script
+        run: python recommend.py
+        
+      - name: Commit the Change
+        run: |
+          git add keywords.json
+          git commit -m "[automation] keywords updated"
+          git push
