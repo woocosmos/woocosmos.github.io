@@ -64,6 +64,7 @@ def extract_keywords(corpus, topN=5, asset_dir=None):
         save_path = os.path.join(root_dir, "keywords.json") 
         with open(save_path, 'w') as f:
             json.dump(top_keywords, f)
+        print('keywords updated')
 
 def get_stopwords(p, add_words=[]):
     with open(p, "r") as f:

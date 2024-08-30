@@ -108,7 +108,40 @@ jobs:
       run: echo Hello World?!
 ```
 
-![image](https://github.com/user-attachments/assets/60010781-a7c4-4d0a-b08d-f930d1fa5226)
-![image](https://github.com/user-attachments/assets/2ce2518b-df6f-410f-b247-3805174eff9f)
+테스트를 위해 post 로 시작하는 브랜치로 PR를 등록, merge를 완료했고
 
-나중에 CI/CD 작업이 필요할 때 Jenkins(젠킨스)도 사용해보고 싶다.
+![image](https://github.com/user-attachments/assets/60010781-a7c4-4d0a-b08d-f930d1fa5226)
+
+정상적으로 job이 작동한 것을 확인했다
+
+![image](https://github.com/user-attachments/assets/a5429a7c-5ff3-4d42-baaf-0251b2f848d2)
+
+다음으로 `recommend.py`를 실행하기 위한 dependency 설치 작업을 정의한다.
+
+참고로 konlpy 의 환경 구축이 까다로울 것 같아서 테스트를 docker의 ubuntu:lateset 이미지로 컨테이너를 띄워서 시뮬레이션 했다. (파이썬은 따로 설치해줘야 한다)
+
+docker run --rm -d --name fake-github-actions ubuntu:latest tail -f /dev/null
+docker cp /mnt/c/blog/woocosmos.github.io/assets/recommend.py fake-github-actions:/root/recommend.py
+ docker exec it fake-github-actions /bin/bash
+
+
+```
+jobs:
+  my-job:
+    if: (github.event_name == 'pull_request' &&
+            github.event.pull_request.merged == true && 
+            startsWith(github.event.pull_request.head.ref, 'post/')) ||
+        (github.event_name == 'push' &&
+            contains(github.event.head_commit.message, 'post'))
+    runs-on: ubuntu-latest
+    steps:
+    - name: set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.8'
+        architecture: 'x64'
+    - name: Display Python version
+      run: python -c "import sys; print(sys.version)"
+```
+
+나중에 CI/CD 작업이 필요할 때 Jenkins(젠킨스)도 사용해보고 싶다. dsa
