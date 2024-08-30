@@ -1,0 +1,28 @@
+name: Update the Keywords
+
+on:
+  pull_request:
+    branches:
+      - master
+    types:
+      - closed
+  push:
+    branches:
+      - master
+
+jobs:
+  my-job:
+    if: (github.event_name == 'pull_request' &&
+            github.event.pull_request.merged == true && 
+            startsWith(github.event.pull_request.head.ref, 'post/')) ||
+        (github.event_name == 'push' &&
+            contains(github.event.head_commit.message, 'post'))
+    runs-on: ubuntu-latest
+    steps:
+    - name: set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.8'
+        architecture: 'x64'
+    - name: Display Python version
+      run: python -c "import sys; print(sys.version)"
