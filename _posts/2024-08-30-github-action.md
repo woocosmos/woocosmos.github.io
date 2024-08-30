@@ -110,6 +110,8 @@ jobs:
 
 테스트를 위해 post 로 시작하는 브랜치로 PR를 등록, merge를 완료했고
 
+테스트를 위해 post 로 시작하는 브랜치로 PR를 등록, merge를 완료했고
+
 ![image](https://github.com/user-attachments/assets/60010781-a7c4-4d0a-b08d-f930d1fa5226)
 
 정상적으로 job이 작동한 것을 확인했다
@@ -144,4 +146,5 @@ jobs:
       run: python -c "import sys; print(sys.version)"
 ```
 
+나중에 CI/CD 작업이 필요할 때 Jenkins(젠킨스)도 사용해보고 싶다. dsa
 나중에 CI/CD 작업이 필요할 때 Jenkins(젠킨스)도 사용해보고 싶다. dsa
