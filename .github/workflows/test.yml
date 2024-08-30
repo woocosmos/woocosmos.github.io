@@ -36,7 +36,9 @@ jobs:
         uses: actions/checkout@v3
         
       - name: Run the Script
-        run: python recommend.py
+        run:
+          ls -al 
+          python  ${{ github.workspace }}/assets/recommend.py
         
       - name: Commit the Change
         run: |
