@@ -111,4 +111,4 @@ jobs:
 ![image](https://github.com/user-attachments/assets/60010781-a7c4-4d0a-b08d-f930d1fa5226)
 ![image](https://github.com/user-attachments/assets/2ce2518b-df6f-410f-b247-3805174eff9f)
 
-나중에 CI/CD 작업이 필요할 때 Jenkins(젠킨스)도 사용해보고 싶다.
+나중에 CI/CD 작업이 필요할 때 Jenkins(젠킨스)도 사용해보고 싶다. dsa
