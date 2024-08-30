@@ -30,15 +30,14 @@ jobs:
         sudo apt-get install -y g++ openjdk-8-jdk
         python -m pip install requests numpy konlpy scikit-learn
         echo '-----------all installed'
-
+           |
    - name: Approach the Codes
       uses: actions/checkout@v3
-
    - name: Run the Script
      run: python recommend.py
-
    - name : Commit the Change
      run: |
         git add keywords.json
         git commit -m "[automation] keywords updated"
         git push
+          |
