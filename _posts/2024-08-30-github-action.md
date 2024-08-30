@@ -44,8 +44,59 @@ GitHub Actions는 PR, Push 등 **이벤트**가 발생할 때 **워크플로**�
 
 # 시작하기
 
-root 경로에서 `.github/workflows` 폴더를 생성, 해당 위치에 test.yml 파일을 만든다.
+root 경로에서 `.github/workflows` 폴더를 생성, 해당 위치에 test.yml 파일을 작성한다.
 
+```yaml
+name: Test
+
+on:
+  push:
+    branches:
+      - 'post/**'
+
+jobs:
+  my_first_job:
+    runs-on: ubuntu-latest
+    steps:
+    - name: step-example
+      run: echo Hello World!
+```
+
+post로 시작하는 브랜치에 push 이벤트가 발생할 때 트리거 되는 워크플로를 정의했다. my_frist_job 이라는 작업이 실행될 텐데, ubuntu 실행기에서 Hello World 를 출력하는 step을 포함하고 있다.
+
+yml 파일을 저장한 후, post/github-actions 브랜치에 push 해보았다. 그 결과는 프로젝트 레포지토리의 Actions 탭에서 확인할 수 있다
+
+![image](https://github.com/user-attachments/assets/c657fa7a-03ce-41ef-85cb-3843bed9b570)
+
+왼쪽 탭에 Test 라는 워크플로가 생성되어 있고 워크플로의 실행 내역이 표시되어 있다. post/github-actions에 push 함으로써 트리거된 것이다.
+
+![image](https://github.com/user-attachments/assets/fa4487ef-855d-4617-a003-15904ba4ed74){: width="80%"}
+![image](https://github.com/user-attachments/assets/c6b5fc64-481c-4be5-aba8-ae5d34be5d79){: width="50%"}
+
+my_frist_job 작업이 성공적으로 실행되었고 그것을 눌러 step-example 단계도 실행되었음을 확인할 수 있다. 이제 본격 나의 태스크에 적용해보겠다.
+
+## 키워드 업데이트
+
+추천 키워드를 업데이트할 조건을 먼저 정해야 한다. 블로그 포스트가 추가되었을 때, 즉 master 브랜치에 post로 시작하는 브랜치를 머지했을 때를 이벤트로 정의하려고 한다. 보통 post 브랜치에서 포스트를 작성하다가 완성했을 때 master로 머지시키기 때문이다.  
+
+```
+name: Test-Event
+
+on:
+  pull_request:
+    branches:
+      - master
+    types:
+      - closed
+
+jobs:
+  my-job:
+    if: github.event.pull_request.merged == true && startsWith(github.event.pull_request.head.ref, 'post/')
+    runs-on: ubuntu-latest
+    steps:
+    - name: my-step
+      run: echo Hello World?!
+```
 
 
 나중에 CI/CD 작업이 필요할 때 Jenkins(젠킨스)도 사용해보고 싶다.

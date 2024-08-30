@@ -1,13 +1,16 @@
-name: Test
+name: Test-Event
 
 on:
-  push:
+  pull_request:
     branches:
-      - 'post/**'
+      - master
+    types:
+      - closed
 
 jobs:
-  my_first_job:
+  my-job:
+    if: github.event.pull_request.merged == true && startsWith(github.event.pull_request.head.ref, 'post/')
     runs-on: ubuntu-latest
     steps:
-    - name: step-example
-      run: echo Hello World!
+    - name: my-step
+      run: echo Hello World?!
