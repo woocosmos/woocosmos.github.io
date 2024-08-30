@@ -37,7 +37,6 @@ jobs:
         
       - name: Run the Script
         run:
-          ls -al 
           python  ${{ github.workspace }}/assets/recommend.py
         
       - name: Commit the Change
