@@ -6,7 +6,7 @@ comments: True
 toc: false
 ---
 
-![image](../images/slash24.png)
+![image](https://github.com/user-attachments/assets/53ea52c7-68f6-4a32-a071-a87047c39634)
 
 [**2024 토스 개발자 컨퍼런스 SLASH24**](https://toss.im/slash-24)의 참가자를 모집하고 있어 이벤트에 응모해본다.  
 
