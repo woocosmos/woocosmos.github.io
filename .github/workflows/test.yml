@@ -44,6 +44,7 @@ jobs:
           git config --global user.email "${GITHUB_ACTOR}@users.noreply.github.com"
       
       - name: Check for Differences
+        id: check_diff
         run: |
           git add ${{ github.workspace }}/keywords.json
           if git diff --cached --quiet; then
@@ -54,7 +55,7 @@ jobs:
           fi
 
       - name: Commit the Change
-        if: steps.check_changes.outputs.has_changes == 'true'
+        if: steps.check_diff.outputs.has_changes == 'true'
         run: |
           echo "pushing the file ..."
           git commit -m "[automation] keywords updated"
