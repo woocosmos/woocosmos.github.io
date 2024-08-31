@@ -9,8 +9,9 @@ Don't hesitate to visit my home.
 ## To-do
 
 - [ ] 최초 작성일과 최근 수정일 별도 구분
-- [ ] Tf-idf 계산 자동화
 - [ ] 페이지수로 포스트 리스트 넘기기
+- [ ] [이전 블로그](https://woo-niverse.tistory.com/) 포스트 이관
+- [ ] 모바일 UI 최적화
 
 ## done
 - 필요 없는 탭 삭제하기
@@ -25,3 +26,5 @@ Don't hesitate to visit my home.
 - favicon 배경 투명화
 - 검색 기능 추가하기
 - Tf-idf 기반 검색 키워드 추천
+- Tf-idf 계산 자동화
+- 로컬 빌드와 배포의 자동화
