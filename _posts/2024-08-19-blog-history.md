@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "Jekyll을 사용한 github.io 블로그 개발기"
+title: "작성중// Jekyll을 사용한 github.io 블로그 개발기"
 tags: [JavaScript]
 comments: True
 toc: true
