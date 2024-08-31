@@ -1,4 +1,4 @@
-name: This is for test
+name: Workflow for updating keywords
 
 on:
   pull_request:
