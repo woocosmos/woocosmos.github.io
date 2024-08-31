@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "작성중// 블로그 키워드 추천 및 검색 기능 구현기"
+title: "블로그 키워드 추천 및 검색 기능 구현기"
 tags: [JavaScript, NLP]
 comments: True
 toc: true
@@ -8,9 +8,9 @@ toc: true
 
 **요약**
 ```
-- 지금 이 블로그(woocosmos.github.io)의 검색창 blah blah
-- 내용
-- 내용
+- simple-jekyll-search 라이브러리를 활용하여 검색 기능을 추가했다
+- 탭에서 접근할 수 있는 검색 페이지를 구성하고 검색 결과를 적절하게 시각화했다
+- TF-IDF 값을 활용하여 검색할 키워드를 추천했다
 ```
 
 # 개요
@@ -407,8 +407,7 @@ svgIcon.addEventListener('mouseleave', () => {
 <br>
 
 **자동화**  
-Github Pages 활용하여 자동화 (포스트가 추가될 때마다 바뀌는 중요도 반영되도록)
+끝으로 TF-IDF를 계산하는 파이썬 스크립트의 실행만 자동화하면 된다. 이 부분은 GitHub Actions로 처리했으며 [GitHub Actions 활용한 태스크 및 배포 자동화](https://woocosmos.github.io/github-action/)에서 그 과정을 확인할 수 있다.
 
-# Takeaways
-- JS에서 실행할 수 있는 토크나이저
-- 
+# 기타  
+JS에서 실행할 수 있는 [한국어 토크나이저](https://github.com/NOT2ho/notPOS_kr)도 있다. 사이트를 불러올 때마다 점수를 연산하기는 어려울 것 같아서 결국 python으로 구현했지만, 충분히 활용 가치가 있을 것 같아서 기록해둔다
