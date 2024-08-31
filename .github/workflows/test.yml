@@ -38,6 +38,11 @@ jobs:
       - name: Run the Script
         run:
           python  ${{ github.workspace }}/assets/recommend.py
+
+      - name: Configure Git for pushing changes
+        run: |
+          git config --global user.name "${GITHUB_ACTOR}"
+          git config --global user.email "${GITHUB_ACTOR}@users.noreply.github.com"
         
       - name: Commit the Change
         run: |
