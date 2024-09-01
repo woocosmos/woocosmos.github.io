@@ -30,7 +30,8 @@ body {
   margin: 0 auto;
   max-width: 900px;
   // padding: 0 10px;
-  padding-left: 100px;
+  padding-left: 50px;
+  padding-right: 50px;
   width: 100%;
 
   .post {
@@ -348,6 +349,10 @@ img {
 
 .wrapper-masthead {
   margin-bottom: 50px;
+
+  @include mobile {
+    margin-bottom: 20px;
+  }
 }
 
 .masthead {
@@ -423,8 +428,9 @@ nav {
   @include mobile {
     float: none;
     margin-top: 9px;
-    display: block;
+    display: flex;
     font-size: 16px;
+    justify-content: center;
   }
 
   ul {
@@ -494,6 +500,16 @@ nav {
 .post {
   h1 {
     margin-bottom: .1em;
+
+    @include mobile {
+      font-size: larger;
+    }
+  }
+
+  .entry {
+    @include mobile {
+      font-size: medium;
+    }
   }
 
   .date {
@@ -502,6 +518,11 @@ nav {
     color: $base-lighten-color;
     margin-right: 3px;
     float: right;
+
+    @include mobile {
+      font-size: $small-font-size;
+      margin-top: 5px;
+    }
   }
 
   .tag {
@@ -547,6 +568,10 @@ nav {
 
 .center-title {
   text-align: center;
+
+  @include mobile {
+    font-size: 20px;
+  }
 }
 
 .pagination {
@@ -733,6 +758,10 @@ nav {
     font-weight: 300;
     display: inline-flex;
 
+    @include mobile {
+      margin: 2px;
+    }
+
     > a {
       display: inline-block;
       margin: 1px;
@@ -748,6 +777,10 @@ nav {
           background-color: $tag-index-count-background-color;
           border-radius: 0 3px 3px 0;
         }
+
+        @include mobile {
+          font-size: 15px;
+        }
       }
     }
   }
@@ -756,19 +789,41 @@ nav {
 .tags > .tag {
   a {
     color: $base-color;
+
+    @include mobile {
+      font-size: 15px;
+    }
   }
+
   time {
     color: $base-lighten-color;
     font-size: $small-font-size;
     font-weight: 300;
     margin-left: 3px;
     float: right;
+
+    @include mobile {
+      font-size: 10px;
+      float: inherit;
+    }
+  }
+
+  li {
+    @include mobile {
+      display: grid;
+    }
   }
 }
 
 .tag-container {
   display: flex;
   align-items: center; /* Align items vertically centered */
+
+  > h2 {
+    @include mobile {
+      font-size: 18px;
+    }
+  }
 }
 
 .tags-item-icon {

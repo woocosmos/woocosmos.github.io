@@ -89,7 +89,7 @@ $back-to-top-width: $back-to-top-diameter;
 
 // Mobile breakpoints
 @mixin mobile {
-  @media screen and (max-width: 640px) {
+  @media screen and (max-width: 768px) {
     @content;
   }
 }
