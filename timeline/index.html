@@ -11,16 +11,28 @@ permalink: /timeline/
 <ul class="archive">
   {% for post in site.posts %}
     {% unless post.next %}
-      <h2>{{ post.date | date: '%Y' }}</h2>
+      <h2>{{ post.date | date: '%Y' }}년</h2>
     {% else %}
       {% capture year %}{{ post.date | date: '%Y' }}{% endcapture %}
       {% capture nyear %}{{ post.next.date | date: '%Y' }}{% endcapture %}
       {% if year != nyear %}
-        <h2>{{ post.date | date: '%Y' }}</h2>
+        <h2>{{ post.date | date: '%Y' }}년</h2>
       {% endif %}
     {% endunless %}
 
-    <li>
+    <div class="archive-item">
+      <p class="archive-date">{{ post.date | date: "%m월 %d일" }} - {{ post.tags | join: ', ' }}</p>
+      {% if post.link %}
+      <a href="{{ post.link }}" class="archive-title">
+        {% else %}
+        <a href="{{ site.baseurl }}{{ post.url }}" class="archive-title">
+        {% endif %}
+        {{ post.title }}
+        </a>
+    </div>
+
+
+    <!-- <li>
       {% if post.link %}
       <a href="{{ post.link }}">
       {% else %}
@@ -29,6 +41,7 @@ permalink: /timeline/
         {{ post.title }}
       </a>
       <time>{{ post.date | date: "%Y-%m-%d" }}</time>
-    </li>
+    </li> -->
+
   {% endfor %}
 </ul>

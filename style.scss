@@ -30,7 +30,8 @@ body {
   margin: 0 auto;
   max-width: 900px;
   // padding: 0 10px;
-  padding-left: 100px;
+  padding-left: 50px;
+  padding-right: 50px;
   width: 100%;
 
   .post {
@@ -346,8 +347,27 @@ img {
 // .masthead
 //
 
+.page {
+
+  h1 {
+    @include mobile {
+      font-size: larger;
+    }
+  }
+
+  h2 {
+    @include mobile {
+      font-size: large;
+    }
+  }
+}
+
 .wrapper-masthead {
   margin-bottom: 50px;
+
+  @include mobile {
+    margin-bottom: 20px;
+  }
 }
 
 .masthead {
@@ -423,8 +443,9 @@ nav {
   @include mobile {
     float: none;
     margin-top: 9px;
-    display: block;
+    display: flex;
     font-size: 16px;
+    justify-content: center;
   }
 
   ul {
@@ -494,6 +515,16 @@ nav {
 .post {
   h1 {
     margin-bottom: .1em;
+
+    @include mobile {
+      font-size: larger;
+    }
+  }
+
+  .entry {
+    @include mobile {
+      font-size: medium;
+    }
   }
 
   .date {
@@ -502,6 +533,11 @@ nav {
     color: $base-lighten-color;
     margin-right: 3px;
     float: right;
+
+    @include mobile {
+      font-size: $small-font-size;
+      margin-top: 5px;
+    }
   }
 
   .tag {
@@ -547,6 +583,10 @@ nav {
 
 .center-title {
   text-align: center;
+
+  @include mobile {
+    font-size: 20px;
+  }
 }
 
 .pagination {
@@ -587,13 +627,41 @@ nav {
 .archive {
   a {
     color: $base-color;
+    @include mobile {
+      font-size: 15px;
+    }
   }
   time {
     color: $base-lighten-color;
     font-size: $small-font-size;
     font-weight: 300;
     margin-left: 3px;
+
+    @include mobile {
+      font-size: 10px;
+      float: inherit;
+    }
   }
+}
+
+.archive-item {
+  margin-bottom: 10px;            
+  padding-bottom: 10px;           
+  border-bottom: .7px solid #e0e0e0; 
+}
+
+.archive-date {
+  font-size: 13px;                /* Smaller font size for date */
+  font-weight: 300;               /* Normal weight for date */
+  color: #555;                    /* Slightly darker color for date */
+  margin-bottom: 2px;             /* Small margin below date */
+}
+
+.archive-title {
+  font-size: 16px;                /* Larger font size for title */
+  font-weight: 500;              /* Bold weight for title */
+  margin: 0;                      /* No margin around title */
+  color: #000;                    /* Black color for title */
 }
 
 // search
@@ -604,6 +672,7 @@ nav {
   justify-content: center;
   align-items: center;
   flex-direction: column;
+
 }
 
 #results-container {
@@ -650,18 +719,26 @@ nav {
     padding-left: 30px;
     box-sizing: border-box;
     border-radius: 30px;
-    border: 2.5px solid;
+    border: 0px solid;
+    box-shadow: 1px 1px 8px 1px rgba(0, 0, 0, 0.3);
     font-size: larger;
     font-family: $base-font;
     text-indent: 5px;
+
+    @include mobile {
+      width: 100%;
+      padding-left: 10px;
+      font-size: smaller;
+      border: 0px solid;
+    }
+
+    &:focus {
+      outline: none;
+    }
   }
   
   input::-webkit-input-placeholder {
     opacity: 0.5;
-  }
-
-  input:focus::-webkit-input-placeholder {
-    opacity: 0;
   }
 }
 
@@ -733,6 +810,10 @@ nav {
     font-weight: 300;
     display: inline-flex;
 
+    @include mobile {
+      margin: 2px;
+    }
+
     > a {
       display: inline-block;
       margin: 1px;
@@ -748,6 +829,10 @@ nav {
           background-color: $tag-index-count-background-color;
           border-radius: 0 3px 3px 0;
         }
+
+        @include mobile {
+          font-size: 15px;
+        }
       }
     }
   }
@@ -756,19 +841,41 @@ nav {
 .tags > .tag {
   a {
     color: $base-color;
+
+    @include mobile {
+      font-size: 15px;
+    }
   }
+
   time {
     color: $base-lighten-color;
     font-size: $small-font-size;
     font-weight: 300;
     margin-left: 3px;
     float: right;
+
+    @include mobile {
+      font-size: 10px;
+      float: inherit;
+    }
+  }
+
+  li {
+    @include mobile {
+      display: grid;
+    }
   }
 }
 
 .tag-container {
   display: flex;
   align-items: center; /* Align items vertically centered */
+
+  > h2 {
+    @include mobile {
+      font-size: 18px;
+    }
+  }
 }
 
 .tags-item-icon {
@@ -788,129 +895,236 @@ nav {
   position: relative;
   margin-top: 150px;
   margin-bottom: 120px;
+
+  .timeline-item {
+    position: relative;
+    flex: 1;
+    text-align: center;
+
+    /* 중앙선 */
+    &:before {
+      content: "";
+      position: absolute;
+      width: 100%;
+      height: 4px;
+      background: #000;
+      top: 50%;
+      left: 0;
+      z-index: -1;
+    }
+
+    /* 아이콘 */
+    .timeline-icon {
+      width: 40px;
+      height: 40px;
+      background: #fff;
+      border: 4px solid #000;
+      border-radius: 50%;
+      margin: 0 auto;
+      position: relative;
+      z-index: 1;
+    }
+
+    .blue { background-color: #007bff; }
+    .yellow { background-color: #ffc107; }
+    .red { background-color: #dc3545; }
+    .green { background-color: #28a745; }
+    .purple { background-color: #6f42c1; }
+    .pink { background-color: #e83e8c; }
+    .black { background-color: #000; }
+
+
+    .timeline-content {
+      position: absolute;
+      background: #fff;
+      left: 50%; /* Start from the center horizontally */
+      transform: translateX(-50%); /* Center horizontally by offsetting half of the width */
+
+      /* 타이틀 */
+      &.top {
+        bottom: 100%; /* Position above the line */
+
+        &.long {
+          margin-bottom: 80px;
+
+          &:after {
+            content: "";
+            position: absolute;
+            width: 2px;
+            height: 70px;
+            background: #000;
+            bottom: -80px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: -1;
+          }
+        }
+
+        &.short {
+          margin-bottom: 20px;
+
+          &:after {
+              content: "";
+              position: absolute;
+              width: 2px;
+              height: 20px; /* Length of the line connecting the icon to the content */
+              background: #000; /* Color of the line */
+              bottom: -20px; /* Positioning it just below the content */
+              left: 50%; /* Center the line horizontally */
+              transform: translateX(-50%); /* Adjust for centering */
+              z-index: -1; /* Place it behind the content */
+            }
+          }
+      }
+
+      /* 내용 */
+      &.bottom {
+        top: 100%;
+
+        &.long {
+          margin-top: 80px;
+
+          &:after {
+              content: "";
+              position: absolute;
+              width: 0;
+              height: 70px;
+              border-left: 2px dashed #000;
+              top: -80px;
+              left: 50%;
+              transform: translateX(-50%);
+              z-index: -1;
+          }
+        }
+
+        &.short {
+          margin-top: 40px;
+          
+          &:after {
+              content: "";
+              position: absolute;
+              width: 0; /* No width since we are using border for the line */
+              height: 40px; /* Length of the line connecting the icon to the content */
+              border-left: 2px dashed #000; /* Dashed border for the vertical line */
+              top: -50px; /* Positioning it just above the content */
+              left: 50%; /* Center the line horizontally */
+              transform: translateX(-50%); /* Adjust for centering */
+              z-index: -1; /* Place it behind the content */
+              } 
+          }
+      }
+
+      h3 {
+        margin: 0 0 5px;
+      }
+
+      p {
+        margin-top: -10px;
+        width: max-content;
+      }
+    }
+  }
 }
 
-.timeline-item {
-  position: relative;
-  flex: 1;
-  text-align: center;
+@include mobile {
+  .timeline {
+    display: flex;
+    flex-direction: column; /* 세로 정렬 */
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    max-width: 1000px; 
+    margin: 0 auto;
+    position: relative;
+    margin-bottom: 40px;
+    padding-top: 5px;
+
+    .timeline-item {
+      position: relative;
+      flex: 1;
+      text-align: center;
+
+      &:before {
+        content: "";
+        position: absolute;
+        width: 4px;
+        height: 120px;
+        background: #000;
+        top: 0;
+        left: 50%;
+        transform: translateX(-50%);
+        z-index: -1;
+      }
+
+      .timeline-icon {
+        width: 30px;
+        height: 30px;
+        background: #fff;
+        border: 4px solid #000;
+        border-radius: 50%;
+        position: relative;
+        z-index: 1;
+        margin-top: -40px;
+      }
+
+      .blue { background-color: #007bff; }
+      .yellow { background-color: #ffc107; }
+      .red { background-color: #dc3545; }
+      .green { background-color: #28a745; }
+      .purple { background-color: #6f42c1; }
+      .pink { background-color: #e83e8c; }
+      .black { background-color: #000; }
+
+      .timeline-content {
+      position: relative;
+      background: #fff;
+      left: 50%;
+      transform: translateX(-50%);
+
+      &.top {
+        &.long, &.short {
+          margin-inline: -80px;
+          margin-bottom: 0px;
+          display: table;
+          margin-top: 30px;
+
+          &:after {
+            content: "";
+            position: absolute;
+            width: 0px;
+            height: 0px;
+          }
+        }
+      }
+
+      &.bottom{
+        &.long, &.short {
+          margin-inline: 80px;
+          margin-bottom: 0px;
+          display: table;
+          margin-top: -40px;
+
+          &:after {
+            content: "";
+            position: absolute;
+            width: 0px;
+            height: 0px;
+          }
+        }
+      }
+      h3 {
+        font-size: medium;
+      }
+
+      p {
+        font-size: small;
+      }
+    }
+    }
+  }
 }
 
-.timeline-item:before {
-  content: "";
-  position: absolute;
-  width: 100%;
-  height: 4px; /* Thickness of the horizontal line */
-  background: #000;
-  top: 50%; /* Center line vertically */
-  left: 0;
-  z-index: -1;
-}
 
-.timeline-content.bottom.short:after {
-  content: "";
-  position: absolute;
-  width: 0;
-  height: 70px;
-  border-left: 2px dashed #000;
-  top: -80px;
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: -1;
-}
-
-.timeline-content.top.long:after {
-  content: "";
-  position: absolute;
-  width: 2px;
-  height: 70px;
-  background: #000;
-  bottom: -80px;
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: -1;
-}
-
-.timeline-content.bottom.long:after {
-  content: "";
-  position: absolute;
-  width: 0;
-  height: 70px;
-  border-left: 2px dashed #000;
-  top: -80px;
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: -1;
-}
-
-.timeline-content.top:after {
-  content: "";
-  position: absolute;
-  width: 2px;
-  height: 20px; /* Length of the line connecting the icon to the content */
-  background: #000; /* Color of the line */
-  bottom: -20px; /* Positioning it just below the content */
-  left: 50%; /* Center the line horizontally */
-  transform: translateX(-50%); /* Adjust for centering */
-  z-index: -1; /* Place it behind the content */
-}
-
-.timeline-content.bottom:after {
-  content: "";
-  position: absolute;
-  width: 0; /* No width since we are using border for the line */
-  height: 50px; /* Length of the line connecting the icon to the content */
-  border-left: 2px dashed #000; /* Dashed border for the vertical line */
-  top: -50px; /* Positioning it just above the content */
-  left: 50%; /* Center the line horizontally */
-  transform: translateX(-50%); /* Adjust for centering */
-  z-index: -1; /* Place it behind the content */
-}
-
-.timeline-icon {
-  width: 40px;
-  height: 40px;
-  background: #fff;
-  border: 4px solid #000;
-  border-radius: 50%;
-  margin: 0 auto;
-  position: relative;
-  z-index: 1; /* Place the icon above the line */
-}
-
-.blue { background-color: #007bff; }
-.yellow { background-color: #ffc107; }
-.red { background-color: #dc3545; }
-.green { background-color: #28a745; }
-.purple { background-color: #6f42c1; }
-.pink { background-color: #e83e8c; }
-.black { background-color: #000; }
-
-.timeline-content {
-  position: absolute;
-  background: #fff;
-  left: 50%; /* Start from the center horizontally */
-  transform: translateX(-50%); /* Center horizontally by offsetting half of the width */
-}
-
-.timeline-content.top {
-  bottom: 100%; /* Position above the line */
-  margin-bottom: 20px; /* Spacing between content and line */
-}
-
-.timeline-content.bottom {
-  top: 100%; /* Position below the line */
-  margin-top: 40px; /* Spacing between content and line */
-}
-
-.timeline-content h3 {
-  margin: 0 0 5px;
-}
-
-.timeline-content p {
-  margin-top: -10px;
-  width: max-content;
-}
 // Footer
 .wrapper-footer {
   margin-top: 50px;
