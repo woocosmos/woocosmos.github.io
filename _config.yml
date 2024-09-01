@@ -19,10 +19,11 @@ navigation:
     url: /about
   - name: Blog
     url: /
-  - name: Timeline
-    url: /timeline
   - name: Tags
     url: /tags
+  - name: Timeline
+    url: /timeline
+
 
 # Pagination
 paginate: 5

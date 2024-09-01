@@ -347,6 +347,21 @@ img {
 // .masthead
 //
 
+.page {
+
+  h1 {
+    @include mobile {
+      font-size: larger;
+    }
+  }
+
+  h2 {
+    @include mobile {
+      font-size: large;
+    }
+  }
+}
+
 .wrapper-masthead {
   margin-bottom: 50px;
 
@@ -612,13 +627,41 @@ nav {
 .archive {
   a {
     color: $base-color;
+    @include mobile {
+      font-size: 15px;
+    }
   }
   time {
     color: $base-lighten-color;
     font-size: $small-font-size;
     font-weight: 300;
     margin-left: 3px;
+
+    @include mobile {
+      font-size: 10px;
+      float: inherit;
+    }
   }
+}
+
+.archive-item {
+  margin-bottom: 10px;            
+  padding-bottom: 10px;           
+  border-bottom: .7px solid #e0e0e0; 
+}
+
+.archive-date {
+  font-size: 13px;                /* Smaller font size for date */
+  font-weight: 300;               /* Normal weight for date */
+  color: #555;                    /* Slightly darker color for date */
+  margin-bottom: 2px;             /* Small margin below date */
+}
+
+.archive-title {
+  font-size: 16px;                /* Larger font size for title */
+  font-weight: 500;              /* Bold weight for title */
+  margin: 0;                      /* No margin around title */
+  color: #000;                    /* Black color for title */
 }
 
 // search
