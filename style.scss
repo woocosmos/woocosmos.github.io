@@ -672,6 +672,7 @@ nav {
   justify-content: center;
   align-items: center;
   flex-direction: column;
+
 }
 
 #results-container {
@@ -718,10 +719,18 @@ nav {
     padding-left: 30px;
     box-sizing: border-box;
     border-radius: 30px;
-    border: 2.5px solid;
+    border: 0px solid;
+    box-shadow: 1px 1px 8px 1px rgba(0, 0, 0, 0.3);
     font-size: larger;
     font-family: $base-font;
     text-indent: 5px;
+
+    @include mobile {
+      width: 100%;
+      padding-left: 10px;
+      font-size: smaller;
+      border: 0px solid;
+    }
   }
   
   input::-webkit-input-placeholder {
