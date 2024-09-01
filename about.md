@@ -12,7 +12,8 @@ permalink: /about/
 ML엔지니어로서 배운 내용을 기록하기 위해 블로그 <mark>YunsooLog</mark> 를 개설하였습니다.  
 부족하거나 잘못된 정보가 있다면, 언제든 덧글이나 연락처로 알려주세요.
 
-> disclaimer: [티스토리 블로그](https://woo-niverse.tistory.com/)로부터 이관 진행 중이므로 수시로 컨텐츠가 업데이트될 수 있습니다
+<blockquote> disclaimer1. <a href="https://woo-niverse.tistory.com/">티스토리 블로그</a>로부터 이관 진행 중이므로 수시로 컨텐츠가 <u>업데이트</u>될 수 있습니다 <br>
+disclaimer2. 모바일에서는 컨텐츠가 의도와 다르게 보일 수 있으므로 <u>데스크톱 환경</u>에서 열람하시는 것을 권합니다</blockquote>
 
 
 <br>
@@ -23,11 +24,11 @@ ML엔지니어로서 배운 내용을 기록하기 위해 블로그 <mark>Yunsoo
 
 <div class="timeline">
   <div class="timeline-item">
-    <div class="timeline-content top long" style="margin-bottom: 80px;">
+    <div class="timeline-content top long">
         <h3>성균관대학교</h3>
         <p style="font-weight: 100;">2016.02 ~ 2021.02</p>
     </div>
-    <div class="timeline-content bottom long" style="margin-top: 80px;">
+    <div class="timeline-content bottom long">
       <p>독문학, 국문학</p>
     </div>
     <div class="timeline-icon blue"></div>

@@ -7,7 +7,7 @@ async function loadTags() {
         tagList.innerHTML = '';
         const paragraph = document.createElement('span');
         paragraph.textContent = '이런 키워드는 어때요? ';
-        paragraph.style.fontWeight = 'bold';
+        // paragraph.style.fontWeight = 'bold';
 
         const svgIcon = document.createElement('span')
         svgIcon.innerHTML = `
