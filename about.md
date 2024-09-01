@@ -46,11 +46,11 @@ disclaimer2. 모바일에서는 컨텐츠가 의도와 다르게 보일 수 있�
   </div>
 
   <div class="timeline-item">
-    <div class="timeline-content top long" style="margin-bottom: 80px;">
+    <div class="timeline-content top long">
         <h3>넥슨컴퍼니</h3>
         <p style="font-weight: 100;">2022.12 ~ 현재 </p>
     </div>
-    <div class="timeline-content bottom long" style="margin-top: 80px;">
+    <div class="timeline-content bottom long">
       <p>분석가(AI엔지니어)</p>
     </div>
     <div class="timeline-icon green"></div>

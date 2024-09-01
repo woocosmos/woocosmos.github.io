@@ -23,23 +23,42 @@ async function loadTags() {
         tooltip.style.whiteSpace = 'pre';
         document.body.appendChild(tooltip);
 
-        // Show tooltip on mouse enter
-        svgIcon.addEventListener('mouseenter', (event) => {
+        // Function to display the tooltip
+        function showTooltip(event) {
             tooltip.style.display = 'block';
-            tooltip.style.left = `${event.pageX + 10}px`;
-            tooltip.style.top = `${event.pageY + 10}px`;
-        });
+            
+            // For mobile (touch) events
+            if (event.touches) {
+                tooltip.style.left = `${event.touches[0].pageX - tooltip.offsetWidth - 10}px`;
+                tooltip.style.top = `${event.touches[0].pageY}px`;
+            } else { // For desktop (mouse) events
+                tooltip.style.left = `${event.pageX - tooltip.offsetWidth - 10}px`;
+                tooltip.style.top = `${event.pageY}px`;
+            }
+        }
 
-        // Move tooltip with mouse
-        svgIcon.addEventListener('mousemove', (event) => {
-            tooltip.style.left = `${event.pageX + 10}px`;
-            tooltip.style.top = `${event.pageY + 10}px`;
-        });
-
-        // Hide tooltip on mouse leave
-        svgIcon.addEventListener('mouseleave', () => {
+        // Function to hide the tooltip
+        function hideTooltip() {
             tooltip.style.display = 'none';
-        });
+        }
+
+        // Show tooltip on mouse enter or touch start
+        svgIcon.addEventListener('mouseenter', showTooltip);
+        svgIcon.addEventListener('touchstart', (event) => {
+            event.preventDefault();  // Prevent default touch behavior
+            showTooltip(event);
+        }, { passive: true });
+
+        // Move tooltip with mouse or touch move
+        svgIcon.addEventListener('mousemove', showTooltip);
+        svgIcon.addEventListener('touchmove', (event) => {
+            event.preventDefault();  // Prevent default touch behavior
+            showTooltip(event);
+        }, { passive: true });
+
+        // Hide tooltip on mouse leave or touch end
+        svgIcon.addEventListener('mouseleave', hideTooltip);
+        svgIcon.addEventListener('touchend', hideTooltip);
 
         tagList.parentNode.insertBefore(paragraph, tagList);
 
