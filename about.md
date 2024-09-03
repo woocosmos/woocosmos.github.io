@@ -13,7 +13,7 @@ ML엔지니어로서 배운 내용을 기록하기 위해 블로그 <mark>Yunsoo
 부족하거나 잘못된 정보가 있다면, 언제든 덧글이나 연락처로 알려주세요.
 
 <blockquote> disclaimer1. <a href="https://woo-niverse.tistory.com/">티스토리 블로그</a>로부터 이관 진행 중이므로 수시로 컨텐츠가 <u>업데이트</u>될 수 있습니다 <br>
-disclaimer2. 모바일에서는 컨텐츠가 의도와 다르게 보일 수 있으므로 <u>데스크톱 환경</u>에서 열람하시는 것을 권합니다</blockquote>
+disclaimer2. 모바일에서는 컨텐츠가 의도와 다르게 보일 수 있으므로 <u>데스크톱 환경</u>에서 열람하시는 것을 권장합니다</blockquote>
 
 
 <br>
@@ -85,8 +85,8 @@ disclaimer2. 모바일에서는 컨텐츠가 의도와 다르게 보일 수 있�
 
 - About : **현 위치**
 - [blog](https://woocosmos.github.io/) : **전체** 포스트를 볼 수 있습니다
-- [Timeline](https://woocosmos.github.io/timeline/) : **연도별** 포스트를 볼 수 있습니다
 - [Tags](https://woocosmos.github.io/tags/) : **태그별** 포스트를 볼 수 있습니다
+- [Timeline](https://woocosmos.github.io/timeline/) : **연도별** 포스트를 볼 수 있습니다
 - [돋보기](https://woocosmos.github.io/search) : 포스트를 **검색**할 수 있습니다 (*[추천 키워드](https://woocosmos.github.io/search-page-dev/#%ED%82%A4%EC%9B%8C%EB%93%9C-%EC%B6%94%EC%B2%9C)를 활용해보세요*)
 
 #### Jekyll 테마
