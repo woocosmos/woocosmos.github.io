@@ -4,6 +4,7 @@ import requests
 import json
 import re
 import numpy as np
+import pickle
 
 from konlpy.tag import Okt
 from sklearn.feature_extraction.text import TfidfVectorizer
@@ -25,7 +26,7 @@ def eng_prc(c):
     eng_res = []
     for k in eng_compiler.findall(c):
         if (len(k) > 1) & (k not in stop_words):
-            eng_res.append(k)
+            eng_res.append(k.lower())
     return eng_res
 
 # korean tokenizer
@@ -34,7 +35,8 @@ def kor_prc(c):
     kor_res =[]
     for k in okt.nouns(c):
         if (len(k) > 1) & (k not in stop_words):
-            kor_res.append(k)
+            f_k = synoyms.get(k, k)
+            kor_res.append(f_k)
     return kor_res
 
 def create_corpus(contents):
@@ -72,11 +74,18 @@ def get_stopwords(p, add_words=[]):
     sw += add_words
     return sw
 
+def get_synonym(p):
+    with open(p, 'rb') as file:
+        synoyms = pickle.load(file)
+    return synoyms
+
 if __name__ == '__main__':
     
     asset_dir = os.path.dirname(os.path.abspath(__file__))
-    stop_path = os.path.join(asset_dir, "stopwords.txt") 
-    stop_words = get_stopwords(stop_path, add_words=['woocosmos', '데이터', '추가'])
+    stop_path = os.path.join(asset_dir, "stopwords.txt")
+    syn_path = os.path.join(asset_dir, "synoyms.pkl") 
+    stop_words = get_stopwords(stop_path, add_words=['woocosmos', '데이터', '추가', '실행', '포인트'])
+    synoyms = get_synonym(syn_path)
 
     url = 'https://woocosmos.github.io/search.json'
     pattern = r'[^\sa-zA-Z0-9\uac00-\ud7af,\-:"\[\]{}./]+'
