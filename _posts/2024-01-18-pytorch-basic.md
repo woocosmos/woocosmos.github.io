@@ -422,3 +422,201 @@ G.backward()
 print(a_cuda.grad)      # tensor([40.], device='cuda:0')
 print(b_cuda.grad)      # tensor([20.], device='cuda:0')
 ```
+
+# 학습
+
+파이토치에서의 학습 과정을 예제를 통해 살펴본다. 전체 과정은 아래 단계로 이루어진다.
+
+1. DataLoader 클래스 정의 및 객체 생성
+2. model 클래스 정의 및 객체 생성
+3. loss function, optimizer 정의
+4. epoch와 training loop  
+
+<br>
+**1. DataLoader 클래스 정의 및 객체 생성**  
+
+커스텀 DataLoader 클래스에는 `__init__`, `__len__`, `__getitem__` 함수를 정의해야 한다. 이 중 `__getitem__` 함수는 인자 `index`를 통해 데이터 샘플을 반환하는 역할을 한다.  
+학습과 평가를 위한 DataLoader 객체를 각각 생성한다: train_dataloader, test_dataloader
+
+```python
+import pandas as pd
+
+from torch.utils.data import Dataset
+from torch.utils.data import DataLoader
+
+class CustomDataset(Dataset):
+    def __init__(self):
+        self.sample = pd.read_csv('/path/to/data.csv')
+        self.x = np.array(self.sample[['feature1', 'feature2', 'feature3']])
+        self.y = np.array(self.sample[['label']])
+ 
+    def __len__(self):
+        return len(self.sample)
+     
+    def __getitem__(self, index):
+        x = torch.tensor(self.x[index].reshape(1, -1), dtype=torch.float32)
+        y = self.y[index]
+        return x, y
+ 
+training_data = CustomDataset()
+train_dataloader = DataLoader(training_data, batch_size=64, shuffle=True)
+```
+
+DataLoader 객체에서 데이터 샘플을 뽑아보고 싶다면 iter, next 내장함수를 사용한다.
+
+```python
+data_iterator = iter(train_dataloader)
+features, label = next(data_iterator)
+```
+
+<br>
+**2. model 클래스 정의 및 객체 생성**
+
+파이토치의 `nn.Module`를 상속 받아 모델 클래스를 정의한다. `__init__` 함수에서 레이어를 초기화하고 `forward` 함수에서 순전파 구조를 정의한다.  
+입력 데이터와 아웃풋의 사이즈를 잘 고려해야 한다. 연속된 레이어를 쌓아주는 `nn.Sequential`도 쓸 수 있다.
+
+```python
+import torch.nn as nn
+import torch.nn.functional as F
+ 
+class CustomClassifier(nn.Module):
+    def __init__(self):
+        super(CustomClassifier, self).__init__()
+ 
+        self.input_size = 3
+        self.output_size = 10
+        self.hidden_dim1 = 64
+        self.hidden_dim2 = 128
+ 
+        self.fc1 = nn.Linear(self.input_size, self.hidden_dim1)
+        self.fc2 = nn.Linear(self.hidden_dim1, self.hidden_dim2)
+        self.fc3 = nn.Linear(self.hidden_dim2, self.output_size)
+
+        # 이렇게도 할 수 있다
+        # self.net = nn.Sequential(
+        #     nn.Linear(self.feature_num, self.hidden_dim1),
+        #     nn.ReLU(),
+        #     nn.Linear(self.hidden_dim1, self.hidden_dim2),
+        #     nn.ReLU(),
+        #    nn.Linear(self.hidden_dim2, self.output_size),
+        # )
+ 
+    def forward(self, x):
+        x = F.relu(self.fc1(x))
+        x = F.relu(self.fc2(x))
+        output = self.fc3(x)
+        
+        # 이것과 같다
+        # output = net(x)
+
+        return output
+```
+
+모델 클래스를 생성하고 전반적인 정보를 확인한다. `torchsummary`를 활용하면 그냥 print하는 것보다 훨씬 보기 좋게 확인할 수 있다.
+
+```python
+from torchsummary import summary
+
+model = CustomClassifier()
+model = model.to('cuda')
+
+batch_size, feature_num = 64, 3
+summary(model, input_size=(batch_size,  feature_num))
+```
+
+![image](https://github.com/user-attachments/assets/bc05f826-bcb2-4f33-8da5-74ebd41b3012){: .center-image}
+
+
+특정 레이어의 파라미터 값을 확인하고 싶다면 `named_parameters()` 혹은 `parameters()`를 사용한다.
+
+```python
+# for param in model.parameters():
+for name, param in model.named_parameters():
+    if param.requires_grad:
+        print(name, param.data)
+```
+
+<br>
+**3. loss function, optimizer 정의**  
+
+라벨 수가 10인 다중분류를 상정하여 `CrossEntropyLoss`를 손실함수로 정의하고 임의의 입력값을 통해 loss를 연산한다.
+
+```python
+loss_fn = nn.CrossEntropyLoss()
+ 
+output_size = 10
+dummy_outputs = torch.rand(batch_size, output_size)
+dummy_labels = torch.randint(output_size, (batch_size,))
+ 
+loss = loss_fn(dummy_outputs, dummy_labels)
+```
+
+옵티마이저(otpimizer)는 아주 다양한 종류가 있지만 이곳에서는 SGD를 예시로 든다.
+
+```python
+optimizer = torch.optim.SGD(model.parameters(), lr=0.001)
+```
+
+<br>
+**4. epoch와 training loop**
+
+<u>한 번</u>의 학습 epoch를 정의했다.  
+1. dataloader 객체에서 한 배치의 데이터를 꺼내며 gradient를 초기화한다(`zero_grad`)
+2. 한 배치의 데이터를 모델에 통과시키고(`model`) 그 값으로 loss를 계산한다(`loss_fn`)
+3. loss에 대해 gradient를 계산한 후(`loss.backward`), 그 값을 기반으로 모델을 업데이트한다(`optimizer.step`)
+
+```python
+running_loss = 0.0
+model.train()
+
+for data in training_loader:
+    inputs, labels = data
+    
+    optimizer.zero_grad()
+ 
+    outputs = model(inputs)
+    loss = loss_fn(outputs, labels)
+
+    loss.backward()
+    optimizer.step()
+ 
+    running_loss += loss.item()
+```
+
+<h4 class='no_toc'> ✅ 동 떨어져 있는 optimizer.zero_grad(), loss.backward(), optimizer.step()이 각각 호출되는데 어떻게 모델이 업데이트되는가? </h4>
+
+optimizer 를 정의할 때 모델의 파라미터를 넘겨주기 때문에 - `torch.optim.SGD(model.parameters(), lr=0.001)`  
+내부적으로 grad를 저장하고 값을 업데이트한다. 달리 말해 optimizer가 활용하는 값은 loss도 아닌 `model.parameters()`의 **`param.grad`** 이다.
+
+이때 모델을 GPU로 옮기고 난 <u>후</u>에 optimizer를 정의하는 것이 좋다.  
+만약 모델을 GPU로 옮기기 전에 optimizer를 정의하면, optimizer는 CPU 위 파라미터를 추적하게 된다. 그 결과 optimizer가 추적하는 파라미터와 실제 모델의 파라미터가 달라지는 문제가 발생할 수 있다.
+
+---
+
+비슷한 방식으로 validation 을 정의할 수 있다. 단 모델 평가 단계이므로 모델을 `eval` 모드로 바꾸고 `torch.no_grad` 안에서 추론이 이루어진다.  
+또한 "loss에 대해 gradient를 계산한 후 그 값을 기반으로 모델을 업데이트"하는 과정은 생략된다.
+
+```python
+test_loss = 0.0
+model.eval()
+
+with torch.no_grad():
+    for data in test_dataloader:
+        inputs, labels = data
+
+        outputs = model(inputs)
+        loss = loss_fn(outputs, labels)
+
+        test_loss += loss.item()
+```
+
+전자를 `train_loop`, 후자를 `test_loop` 이라는 함수로 정의한다면 전체 학습 loop는 이렇게 정의할 수 있다.
+
+```python
+num_epochs = 100
+for epoch in range(num_epochs):
+    train_loop()
+    
+    if epoch % 10 == 0:
+        test_loop()
+```
