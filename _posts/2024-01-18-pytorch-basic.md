@@ -6,8 +6,6 @@ comments: True
 toc: true
 ---
 
-# 개요
-
 PyTorch의 구성 요소와 동작 원리를 살펴본다. 
 
 # 개발 환경
