@@ -67,6 +67,7 @@ async def hello():
 if __name__ == '__main__':
     asyncio.run(hello())
 ```
+<br>
 
 1. `server.py` 를 실행한다
 2. `client.py` 를 실행한다
@@ -75,5 +76,6 @@ if __name__ == '__main__':
 4. 이름[입력 내용]을 전달 받은 서버가 인사말을 붙여 클라이언트에 전달한다
 5. 인사말+이름을 전달받은 클라이언트가 내용을 출력한다
 ![image](https://github.com/user-attachments/assets/a7368cbc-7b01-4f41-accc-e047d998e0ee)
+<br>
 
 클라이언트 종료. 서버는 유지된다.
