@@ -231,6 +231,23 @@ jobs:
 
 이미 `gh-pages` 브랜치를 만들어 배포에 사용하고 있었기 때문에 수정 없이 그대로 적용할 수 있었다. 이 워크플로를 통해 jeykll 환경을 구성, master를 기준으로 build하고 `gh-pages` 에 반영하는 과정을 자동화했다. master 브랜치로 push 이벤트가 발생할 때마다 자동으로 배포가 되는 셈이다.
 
+*+ 2024-09-16 업데이트*  
+
+2주 만에 블로그를 업데이트하고 master로 push 했더니 **error: RPC failed; HTTP 400 curl 92 HTTP/2 stream 7 was not closed cleanly: CANCEL (err 8)** 라는 에러와 함께 배포에 실패했다. 이슈 채널에 동일한 에러를 호소하는 사람이 있었다. 답변에서 안내해주는 대로 SSH 옵션을 추가했다.
+
+> Note: SSH approach has higher priority than HTTP approach when you provide both at the same time.
+
+```yaml
+- uses: jeffreytse/jekyll-deploy-action@v0.6.0
+  with:
+  ...
+  ssh_private_key: ${{ secrets.SSH_PRIVATE_KEY }}
+  ...
+```
+
+마찬가지로 에러가 발생해서 `jekyll-deploy-action`의 버전을 master로 바꾸어보았다.
+
+
 # 나가며
 
 이로써 GitHub Actions를 활용하여 매우 간편하게 CI/CD를 자동화해보았다. 액션의 yaml 파일을 구성하는 과정이 docker-compose.yml 를 작성하는 것과 유사해서 금방 해낼 수 있었던 것 같다.  
