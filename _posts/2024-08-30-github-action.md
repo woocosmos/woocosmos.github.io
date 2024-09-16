@@ -233,7 +233,7 @@ jobs:
 
 *+ 2024-09-16 업데이트*  
 
-2주 만에 블로그를 업데이트하고 master로 push 했더니 **error: RPC failed; HTTP 400 curl 92 HTTP/2 stream 7 was not closed cleanly: CANCEL (err 8)** 라는 에러와 함께 배포에 실패했다. 이슈 채널에 동일한 에러를 호소하는 사람이 있었다. 답변에서 안내해주는 대로 SSH 옵션을 추가했다.
+2주 만에 블로그를 업데이트하고 master로 push 했더니 **error: RPC failed; HTTP 400 curl 92 HTTP/2 stream 7 was not closed cleanly: CANCEL (err 8)** 라는 에러와 함께 배포에 실패했다. [이슈 채널에 동일한 에러를 호소하는 사람](https://github.com/jeffreytse/jekyll-deploy-action/issues/81)이 있었다. 답변에서 안내해주는 대로 SSH 옵션을 추가했다.
 
 > Note: SSH approach has higher priority than HTTP approach when you provide both at the same time.
 
@@ -245,8 +245,13 @@ jobs:
   ...
 ```
 
-마찬가지로 에러가 발생해서 `jekyll-deploy-action`의 버전을 master로 바꾸어보았다.
+하지만 마찬가지로 에러가 발생해서 `jekyll-deploy-action`의 버전을 master로 바꾸어보았다.
 
+```yaml
+- uses: jeffreytse/jekyll-deploy-action@master
+```
+
+배포에 성공했다. master 브랜치에 관련 에러가 이제 막 반영된 모양이다. (심지어 지금 시간 기준 50분 전에 올라온 [동일한 이슈](https://github.com/jeffreytse/jekyll-deploy-action/issues/89)도 있다..)
 
 # 나가며
 

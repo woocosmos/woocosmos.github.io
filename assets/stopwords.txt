@@ -403,3 +403,4 @@ location
 makebox
 lt
 github
+mint
