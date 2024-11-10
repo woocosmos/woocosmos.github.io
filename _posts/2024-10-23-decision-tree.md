@@ -6,13 +6,6 @@ comments: True
 toc: true
 ---
 
-**요약**
-```
-- 내용
-- 내용
-- 내용
-```
-
 # 들어가며
 
 아래와 같은 설문조사가 있다. 응답자들은 0 ~ 10점 선지 중 하나를 선택한다.
@@ -24,10 +17,9 @@ toc: true
 
 그러나 내가 설명할 수 있는 최선은 여기까지였다. "내가 모델의 개념과 원리를 근본적으로 이해하고 있나?" 반성하게 되었고, 이 글을 쓰게 된 계기가 되었다.  
 
-> 제한된 범위의 정수 데이터를 처리하는 데 있어서 결정트리 모델이 적절한가?
+> 제한된 범위의 정수로 이루어진 응답 데이터를 처리하는 데 있어서 결정트리 모델이 적절한가?
 
 즉, 이 질문에 답변하기 위해 해당 모델을 공부한 글이다.  
-그 외에 (1) 지도 학습 기반의 회귀 문제라는 점 (2) 데이터 샘플수가 매우 적다는 점 (3) feature들이 다중공선성을 띤다는 점 - 의 조건에서도 모델이 힘을 써줄 수 있는지 함께 알아보겠다.
 
 
 # 개념
@@ -129,147 +121,133 @@ $$
 
 *좌측 노드에서 다른 클래스가 추출될 확률($1-p$)는 $0$이므로 계산 결과도 $0$이 된다.*
 
-![image](https://github.com/user-attachments/assets/fbdefbc1-ead0-43b6-9e94-5c5de12ab235)
+![image](https://github.com/user-attachments/assets/39f7029e-ff17-48d9-a4cf-2520dc142d50)
 
 분할 전 지니 계수가 $0.612$ 라는 점을 고려하면, 두 분할 방식 모두 지니 계수가 줄어들어 불순도가 낮아진 상태이다. 둘 중에서는 *이렇게!* 의 지니 계수 $0.214$ 가 *이렇게?* 의 $0.548$ 보다 더 낮으므로 더 적합한 분할이라고 판단할 수 있다.
 
 
 ## 엔트로피(Entropy)  
 
-
-
-
-${\operatorname{arg\,min}}_{\mathbf{S}}$
- : 주어진 식을 최소화하는 $S$
-
-${\mu}_{i}$
- : $S_i$에 속한 포인트들의 평균<sub>mean</sub> (또는 중앙값<sub>median</sub>)<br>
-
-$\||...\||$
-: 편차를 L2 Norm (유클리드 거리) 으로 계산
-
-$k$개 클러스터별 '데이터 포인트들과 평균의 차이를 제곱하여 합산한 값(*=편차제곱합*)'의 합을 의미한다. 분산이 편차제곱의 평균이라는 점을 상기한다면, 이 값은 클러스터의 분산에 클러스터의 사이즈를 곱한 것과 같다는 것을 알 수 있다.
-
+엔트로피는 *정보량의 기대값*을 의미한다.  
 
 $$
-\begin{aligned}
-\left\|\mathbf{x} - \mathbf{y}\right\|^{2} 
-& = \left\|\mathbf{x} - {c}_{i} + {c}_{i} - \mathbf{y}\right\|^2 \\
-& = \left\|\mathbf{x} - {c}_{i}\right\|^{2} -2 (\mathbf{x} - {c}_{i}) \cdot (\mathbf{y} - {c}_{i}) + \left\|\mathbf{y} - {c}_{i}\right\|^{2} \\
-& = \left\|\mathbf{x} - {c}_{i}\right\|^{2} + \left\|\mathbf{y} - {c}_{i}\right\|^{2}
-\end{aligned}
+\text{Entropy} = -\sum_{j=1}^{J} p_{j} \log{(p_{j})}
+$$  
+
+$J$
+ : 각 클래스
+
+$p_{j}$
+ : 샘플이 클래스 $j$에 속할 확률
+
+$-\log{(p_{j})}$
+ : 클래스 $j$에 대한 정보량
+
+정보 이론에서는 <u>의외</u>인 사건이 발생할 때 **정보량(Information Content)**이 더 많다고 본다. 여기서 '의외인 사건'은 곧 사건의 확률이 낮다는 것을 의미한다. (11월은 강우 확률이 낮으니까 11월에 눈이 오는 것은 의외인 사건이며 정보량이 많은 것이기도 하다. 1월에 눈이 오는 사건에 비해서 말이다.)
+
+![image](https://github.com/user-attachments/assets/acb1c007-51cd-46f1-b27d-f7bc0d18fd31)  
+
+이처럼 확률이 낮을수록 정보량이 많고 높을수록 정보량이 낮아지는 것은 확률에 로그를 취하고 음수화한 값으로 표현할 수 있다. 그리고 이 정보량에 확률을 곱함으로써 구한 <u>기댓값</u>을 엔트로피라고 부른다.
+
+$$
+-p_{j} \times \log{(p_{j})}
 $$
 
+> 확률이 낮다 => 정보량이 많다 => 엔트로피가 높다 <=> 사건을 예측하기 어렵다
 
-## 최적화
+노드에 다양한 클래스가 혼재되어 있을수록 어떤 클래스가 추출될지 예측하기 어렵다. 따라서 불순도를 측정하는 방식으로 엔트로피를 쓸 수 있다.
 
-내용
+### 정보획득량 (Information Gain)
 
-## 초기화
+결정트리 알고리즘 ID3 에서는 '정보획득량'을 불순도 지표로 사용하는데, 이는 분할 전후의 엔트로피 차이를 계산한 값이다.
 
-내용
+$$
+IG(S, A) = H(S) - \sum_{t \in T} p(t) H(t) = H(S) - H(S|A)
+$$
 
-# 파라미터
+$IG(S, A)$
+ : $A$ 속성을 기준으로 $S$를 분할했을 때의 정보 획득량
 
-내용
+$H(S)$
+ : $S$의 엔트로피
 
+$T$
+ : $S$를 분할함으로써 생성된 노드들
 
-# 코드
+$p(t)$
+ : $S$ 대비 노드 $t$의 비율(크기)
 
-## sklearn 라이브러리 활용
-sklearn.Cluster의 [KMeans 모듈](https://scikit-learn.org/stable/modules/generated/sklearn.cluster.KMeans.html)과 sklearn.metrics [silhouette_score](https://scikit-learn.org/stable/modules/generated/sklearn.metrics.silhouette_score.html)를 적용할 수 있다.  
+$H(t)$
+ : 노드 $t$의 엔트로피
 
-```python
-from sklearn.cluster import KMeans
-```  
+$H(S|A)$
+ : $A$ 속성을 기준으로 $S$를 분할하여 생성된 노드들의 $H(t)$를 가중 평균한 값
+  
+'*이렇게!*' 분할 방식을 정보 획득량에 따라 평가해보자. 나이 30살을 기준으로 샘플을 분할했다고 가정했다.
 
-**입력 파라미터**  
-- `n_clusters` : 클러스터 개수
-- `init` : 초기화 기법 (디폴트는 `k-means++`)
- 
-**속성**  
-- `cluster_centers_` : 각 클러스터 중심점의 좌표
-- `inertia_` : 클러스터 내 제곱합(WCSS)  
-<br>
+![image](https://github.com/user-attachments/assets/020adc3f-9cb1-4a3c-8d6f-e9fc7b754d58)
 
-## Python 구현 (from scratch)
+먼저 분할 전 엔트로피 $H(S)$를 구한다. 엔트로피 식 $-\sum_{j=1}^{J} p_{j} \log{(p_{j})}$ 을 적용하면 된다.
 
-**거리 함수 (L2 Norm)**
-```python
-import numpy as np
+- 노랑 클래스 : 7개 중 3개이므로, $- \frac{3}{7} \log \frac{3}{7}$
+- 초록 클래스 : 7개 중 3개이므로, $- \frac{3}{7} \log \frac{3}{7}$
+- 검정 클래스 : 7개 중 1개이므로, $- \frac{1}{7} \log \frac{1}{7}$  
 
-def euclidean(point, data):
-    return np.sqrt(np.sum((point - data)**2, axis=1))
-```
+$H(S) \approx 0.523 + 0.523 + 0.402 = 1.448$
 
-**중심점 초기화 (Kmeans++)**
-```python
-import random
+다음으로 분할 후 엔트로피 $H(S\|A)$를 구한다. 이는 각 노드의 엔트로피를 가중 평균하여 계산한다.
 
-k = 3
-# 최초 클러스터 중심점 1개 추출
-centroids = [random.choice(X)]
-for _ in range(k-1):
-    # 더 가까운 클러스터의 중심점까지 거리 계산
-    dists = np.min([euclidean(centroid, X) for centroid in centroids], axis=0)
-    dists = dists**2
-    dists /= np.sum(dists)
+**True 노드**
 
-    # 거리 기반의 확률로 추출
-    new_centroid_idx = np.random.choice(range(len(X)), size=1, p=dists)
-    centroids.append(X[new_centroid_idx[0]])
-```
+- 초록 클래스 : 3개 중 3개이므로, $- \frac{3}{3} \log \frac{3}{3} = 0$
 
-**목적함수 최적화 (iteration)**
-```python
-max_iter = 100
-n_iter = 0
-prev_centroids = None
+$H(\text{True}) = 0$
 
-# 중심점이 하나라도 변경되거나 max_iter 미만일 때 반복
-while np.not_equal(centroids, prev_centroids).any() and n_iter < max_iter:
-    sorted_points = [[] for _ in range(k)]
+**False 노드**  
 
-    # Assignment : 포인트마다 가장 가까운 클러스터 할당
-    for point in X:
-        dists = euclidean(point, centroids)
-        centroid_idx = np.argmin(dists)
-        sorted_points[centroid_idx].append(point)
-    prev_centroids = np.copy(centroids)
+- 노랑 클래스 : 4개 중 3개이므로, $- \frac{3}{4} \log \frac{3}{4} = 0$
+- 검정 클래스 : 4개 중 1개이므로, $- \frac{1}{4} \log \frac{1}{4} = 0$
 
-    # Update : 클러스터별로 평균값 업데이트하기
-    centroids = []
-    for cluster in sorted_points:
-        if len(cluster) > 0:
-            centroid = np.mean(cluster, axis=0)
-        else:
-            # 클러스터가 비어 있으면 업데이트 전 기존 평균값 사용
-            centroid = prev_centroid[len(centroids)]
-        centroids.append(centroid)
+$H(\text{True}) \approx 0.311 + 0.5 = 0.811$
 
-    n_iter += 1
-```
+그 다음 분할된 비율을 기준으로 가중평균을 구한다. 좌측 노드는 네 개, 우측 노드는 세 개 샘플을 가져갔다.
 
-**실루엣 지수 (Silhouette Score)**
-```python
-# i번째 데이터 포인트에 대한 점수 계산
+$H(S\|A) = \frac{3}{7} \cdot H(\text{True}) + \frac{4}{7} \cdot H(\text{False}) \approx 0.463$
 
-# Cohesion (a(i))
-own_cluster = labels[i]
-own_cluster_points = X[labels == own_cluster]
-if len(own_cluster_points) > 1:
-    a_i = np.mean(euclidean(point, own_cluster_points))
-else:
-    a_i = 0
+최종적으로 분할 전에 비해 정보량을 비교한다.
 
-# Separation (b(i))
-b_i = float('inf')
-for centroid_idx, centroid in enumerate(centroids):
-    if centroid_idx != own_cluster:
-        other_cluster_points = X[labels == centroid_idx]
-        if len(other_cluster_points) > 0:
-            avg_dist = np.mean(euclidean(point, other_cluster_points))
-            b_i = min(b_i, avg_dist)
+$$
+IG(S, A) = H(S) - H(S|A) \approx 1.448 - 0.463 = 0.985
+$$
 
-score = (b_i - a_i) / max(a_i, b_i) if max(a_i, b_i) > 0 else 0
-```
+![image](https://github.com/user-attachments/assets/46c1934c-769d-4d09-b71f-b52ba8edb1bc)
+
+분할 전후의 엔트로피를 비교한 결과 정보 이득은 약 $0.985$이다. 반면 *이렇게?* 분할 방식의 정보 이득을 계산하면 $0.198$로 비교적 정보 이득이 적은 것을 알 수 있다.
+
+이처럼 불순도를 낮추는 방향으로 데이터를 분할하는 것을 반복함으로써 계층적인 트리 구조를 형성하는 것이 결정트리 방법론이다. 여기서 '불순도'를 어떤 지표로 평가할지, 언제까지 분할을 반복할지, 어떤 노드를 주로 참고할지 등 구체적인 활용 방식에 따라 다른 알고리즘이 될 수 있다.
+
+# 직관 설명하기  
+
+> 제한된 범위의 정수로 이루어진 응답 데이터를 처리하는 데 있어서 결정트리 모델이 적절한가?
+
+지금까지 결정트리 방법론의 등장 맥락, 분할의 기준을 살펴보았다. 이제 처음의 질문으로 돌아가보자.
+
+**"제한된 범위"**  
+
+결정트리 모델은 값이 좁은 범위로 제한된 데이터에 대해 유리할 수 있다. 결정트리가 <u>비모수적 모델(non-parametric models)</u>이기 때문이다.  
+결정트리 모델은 주어진 데이터를 거듭된 조건에 따라 쪼개 나간다. 특정 분포를 가정하지 않고 **주어진 데이터에 따라 비선형적인 구조를 형성**한다는 의미다. 반면 선형회귀와 같은 모수적 모델은 **모든 범위의 데이터에 대해서 유효한 분포(함수)**가 있다고 가정하고 이에 맞춰 파라미터를 학습(fit)한다. 실제 데이터에 비해 함수 가정이 과도할 수 있다. 우리는 0 ~ 10 의 범위에서 벗어나는 입력은 전혀 고려하지 않고 있단 말이다.
+
+**"정수"**  
+
+결정트리 모델은 특정 임계값을 기준으로 데이터를 분할하는데, 정수형 데이터는 이산적(discrete) 성격을 띠므로 <u>분할 자체가 직관적이고 간단해진다</u>. 예를 들어 '5번 질문에 대한 응답이 3점 이상'이라는 분할 조건을 세우는 건 간단하고 직관적이다. 하지만 데이터가 연속형이었으면 'A 속성이 0.3728 이상'과 같이 정밀한 임계값을 정해야 했을 것이다. 당연히 더 많은 경우의 수를 고려해야 하기 때문에 난이도가 높아진다.
+
+**"응답 데이터"**  
+
+설문 참여자들은 비슷한 질문에 대해 비슷하게 응답하는 경향이 있을 것이다. 예를 들어 '인생이 행복합니까?' 라는 질문에 그렇다고 응답할수록, '생활이 만족스럽습니까?' 라는 질문에도 그렇다고 응답할 것이다. 이처럼 변수 간 상관관계가 존재하는 다중공선성의 문제에 결정트리 모델이 유리하다. 애초에 결정트리는 사회과학 연구에서 일종의 교차분석과 유사한 방법론으로 제시되지 않았는가?  
+결정트리는 불순도가 (지니 계수든 엔트로피든) 가장 크게 감소하는 조건을 선택하여 분할을 실시하기 때문에 <u>가장 중요한 변수가 우선적으로 선택되는 효과</u>가 있다. 그 결과 비슷한 패턴의 변수들은 자연스럽게 제외되기 때문에 변수 간 상관관계는 결정트리 모델에 큰 해가 되지 않는다.  
+
+# 나가며  
+
+결정트리의 작동 맥락과 주요 지표를 살펴봄으로써 나의 직관을 설명할 수 있었다. 이 과정에서 '비모수형 모델'의 개념을 명확하게 이해할 수 있게 되었고, 머신러닝 분야에서 '엔트로피'가 가지는 의미를 다시 상기할 수 있었다. 이번 공부를 통해 나의 직관이 어느 정도 의미 있었다는 결론을 내렸으므로, 이제 실제 적용하는 일만 남았다.
+
+분량이 너무 길어져서 가지치기나 정지규칙, 코드 등 더 깊은 내용은 다루지 못했지만 모델의 본질과 연결되는 직관을 이해했다는 점에서 만족스러운 공부였다. 이어서 결정트리 방법론을 기반으로 하는 다양한 머신러닝 모델에 대해서 하나씩 공부하는 시간을 가져보겠다.
