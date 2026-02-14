@@ -102,3 +102,4 @@ exclude:
   - LICENSE
   - README.md
   - CNAME
+  - AGENTS.md
