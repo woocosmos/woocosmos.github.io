@@ -4,76 +4,39 @@ permalink: /portfolio/
 ---
 
 <h1 style="text-align:center; margin-bottom:0;">우연수</h1>
-<p style="text-align:center; color:#868e96; font-size:16px; margin-top:5px;">LLM · ML Engineer Portfolio</p>
+<p style="text-align:center; color:#868e96; font-size:16px; margin-top:5px;">LLM · ML Engineer</p>
 
 <p style="text-align:center; background:#f1f3f5; border-radius:8px; padding:14px 20px; font-size:16px; color:#495057; margin:20px auto; max-width:600px;">
-복잡한 비즈니스 문제를 <strong>AI 모델</strong>과 <strong>데이터 파이프라인</strong>으로 해결하는 엔지니어입니다.
+문제를 <strong>쉬운 언어</strong>로 차근차근 정의하고, <strong>결과물</strong>로 성과를 입증합니다.
 </p>
 
 <p style="text-align:center; margin-bottom:40px;">
-<a href="https://github.com/woocosmos" style="color:#fff; background:#343a40; padding:6px 14px; border-radius:4px; font-size:14px; margin:0 4px;">GitHub</a>
-<a href="mailto:woocosmos@gmail.com" style="color:#fff; background:#1862ab; padding:6px 14px; border-radius:4px; font-size:14px; margin:0 4px;">Email</a>
-<a href="https://www.linkedin.com/in/yunsoo-woo-245946213" style="color:#fff; background:#1971c2; padding:6px 14px; border-radius:4px; font-size:14px; margin:0 4px;">LinkedIn</a>
+<a href="https://github.com/woocosmos"><img src="https://img.shields.io/badge/GitHub-181717?style=for-the-badge&amp;logo=github&amp;logoColor=white" alt="GitHub" style="display:inline; margin:0 4px; border-radius:4px;"></a>
+<a href="mailto:woocosmos@gmail.com"><img src="https://img.shields.io/badge/Email-EA4335?style=for-the-badge&amp;logo=gmail&amp;logoColor=white" alt="Email" style="display:inline; margin:0 4px; border-radius:4px;"></a>
+<a href="https://www.linkedin.com/in/yunsoo-woo-245946213"><img src="https://img.shields.io/badge/LinkedIn-0A66C2?style=for-the-badge&amp;logo=linkedin&amp;logoColor=white" alt="LinkedIn" style="display:inline; margin:0 4px; border-radius:4px;"></a>
 </p>
-
 ---
 
-## 🔎 Summary
+## 📊 성과 요약
 
-- **현재 역할:** ML/LLM 엔지니어 — (회사명, N년 경력)
-- **핵심 역량:** LLM 응용, ML 모델링, 데이터 파이프라인, MLOps
-- **관심 분야:** (해결하고 싶은 문제 영역 한 줄)
-
----
-
-## 🧠 Core Skills
-
-<div style="display:grid; grid-template-columns:1fr 1fr; gap:16px; margin:20px 0;">
-  <div style="border:1px solid #e9ecef; border-radius:8px; padding:16px;">
-    <h4 style="margin:0 0 8px; color:#1862ab;">ML / Modeling</h4>
-    <p style="margin:0; font-size:15px; color:#495057;">
-      사용 가능한 모델 및 알고리즘<br>
-      모델 설계, 평가, 개선 경험
-    </p>
-    <p style="margin:8px 0 0;">
-      <code>PyTorch</code> <code>Scikit-learn</code> <code>XGBoost</code>
-    </p>
+<div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px; margin:20px 0; text-align:center;">
+  <div style="background:#f8f9fa; border-radius:8px; padding:20px 12px;">
+    <p style="font-size:28px; font-weight:bold; margin:0; color:#1862ab;">(수치)</p>
+    <p style="font-size:14px; color:#868e96; margin:4px 0 0;">(설명 — 예: 모델 정확도 개선)</p>
   </div>
-  <div style="border:1px solid #e9ecef; border-radius:8px; padding:16px;">
-    <h4 style="margin:0 0 8px; color:#7048e8;">LLM / NLP</h4>
-    <p style="margin:0; font-size:15px; color:#495057;">
-      Prompt Engineering / RAG / Fine-tuning 경험<br>
-      LLM 기반 서비스 구축 경험
-    </p>
-    <p style="margin:8px 0 0;">
-      <code>LangChain</code> <code>HuggingFace</code> <code>OpenAI</code>
-    </p>
+  <div style="background:#f8f9fa; border-radius:8px; padding:20px 12px;">
+    <p style="font-size:28px; font-weight:bold; margin:0; color:#2b8a3e;">16배</p>
+    <p style="font-size:14px; color:#868e96; margin:4px 0 0;">모델 추론 시 병렬처리를 적용하여<br>소요시간 32분에서 2분대로 단축</p>
   </div>
-  <div style="border:1px solid #e9ecef; border-radius:8px; padding:16px;">
-    <h4 style="margin:0 0 8px; color:#2b8a3e;">Data Engineering</h4>
-    <p style="margin:0; font-size:15px; color:#495057;">
-      데이터 수집, 전처리, 파이프라인 구축 경험<br>
-      사용 스택 나열
-    </p>
-    <p style="margin:8px 0 0;">
-      <code>SQL</code> <code>Airflow</code> <code>Spark</code>
-    </p>
-  </div>
-  <div style="border:1px solid #e9ecef; border-radius:8px; padding:16px;">
-    <h4 style="margin:0 0 8px; color:#e67700;">MLOps / Infra</h4>
-    <p style="margin:0; font-size:15px; color:#495057;">
-      모델 배포 및 운영 경험<br>
-      CI/CD, 모니터링 경험
-    </p>
-    <p style="margin:8px 0 0;">
-      <code>Docker</code> <code>Kubernetes</code> <code>GitHub Actions</code>
-    </p>
+  <div style="background:#f8f9fa; border-radius:8px; padding:20px 12px;">
+    <p style="font-size:28px; font-weight:bold; margin:0; color:#e67700;">(수치)</p>
+    <p style="font-size:14px; color:#868e96; margin:4px 0 0;">(설명 — 예: 지연시간 단축)</p>
   </div>
 </div>
 
 ---
 
-## 🚀 Selected Projects
+## 🚀 주요 프로젝트
 
 <!-- ────────── Project 1 ────────── -->
 <div style="border-left:4px solid #1862ab; padding:16px 20px; margin:24px 0; background:#f8f9fa; border-radius:0 8px 8px 0;">
@@ -133,35 +96,6 @@ permalink: /portfolio/
 
 ---
 
-## 🏢 Domain Experience
-
-| 도메인 | 수행 내용 | 사용 기술 |
-|:---|:---|:---|
-| 게임 분석 | (수행 내용) | (기술) |
-| 추천 시스템 | (수행 내용) | (기술) |
-| LLM 서비스 | (수행 내용) | (기술) |
-
----
-
-## 📊 Impact & Metrics
-
-<div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px; margin:20px 0; text-align:center;">
-  <div style="background:#f8f9fa; border-radius:8px; padding:20px 12px;">
-    <p style="font-size:28px; font-weight:bold; margin:0; color:#1862ab;">(수치)</p>
-    <p style="font-size:14px; color:#868e96; margin:4px 0 0;">(설명 — 예: 모델 정확도 개선)</p>
-  </div>
-  <div style="background:#f8f9fa; border-radius:8px; padding:20px 12px;">
-    <p style="font-size:28px; font-weight:bold; margin:0; color:#2b8a3e;">(수치)</p>
-    <p style="font-size:14px; color:#868e96; margin:4px 0 0;">(설명 — 예: 비용 절감)</p>
-  </div>
-  <div style="background:#f8f9fa; border-radius:8px; padding:20px 12px;">
-    <p style="font-size:28px; font-weight:bold; margin:0; color:#e67700;">(수치)</p>
-    <p style="font-size:14px; color:#868e96; margin:4px 0 0;">(설명 — 예: 지연시간 단축)</p>
-  </div>
-</div>
-
----
-
 ## 🧩 Problem Solving Cases
 
 <details style="margin:16px 0; border:1px solid #e9ecef; border-radius:8px;">
@@ -190,32 +124,7 @@ Case 2 — (제목, 예: 데이터 품질 문제 해결)
 
 ---
 
-## 🛠 Tech Stack
-
-<div style="margin:20px 0; font-size:15px;">
-  <p><strong>Languages</strong><br>
-    <code>Python</code> <code>SQL</code> <code>(기타)</code>
-  </p>
-  <p><strong>ML / LLM</strong><br>
-    <code>PyTorch</code> <code>HuggingFace</code> <code>LangChain</code> <code>(기타)</code>
-  </p>
-  <p><strong>Infra / MLOps</strong><br>
-    <code>Docker</code> <code>Kubernetes</code> <code>GitHub Actions</code> <code>(기타)</code>
-  </p>
-  <p><strong>Data</strong><br>
-    <code>BigQuery</code> <code>Spark</code> <code>(기타)</code>
-  </p>
-</div>
-
----
-
-## ✍️ Writing & Knowledge Sharing
+## ✍️ 활동
 
 - [YunsooLog 블로그](https://woocosmos.github.io) — ML 엔지니어링 기록
 - (발표, 기고, 오픈소스 기여 등 추가)
-
----
-
-<p style="text-align:center; color:#adb5bd; font-size:13px; margin-top:40px;">
-© 2024 우연수 · Built with Jekyll
-</p>

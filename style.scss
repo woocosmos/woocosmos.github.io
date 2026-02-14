@@ -890,7 +890,7 @@ nav {
   align-items: center;
   padding: 40px 0;
   width: 100%;
-  max-width: 1000px; /* Adjust to control the width of the timeline */
+  max-width: 1000px;
   margin: 0 auto;
   position: relative;
   margin-top: 150px;
@@ -901,48 +901,82 @@ nav {
     flex: 1;
     text-align: center;
 
-    /* 중앙선 */
+    /* 중앙선 - 그라데이션으로 부드럽게 */
     &:before {
       content: "";
       position: absolute;
       width: 100%;
-      height: 4px;
-      background: #000;
+      height: 3px;
+      background: linear-gradient(90deg, 
+        rgba(100, 116, 139, 0.2) 0%, 
+        rgba(100, 116, 139, 0.4) 50%, 
+        rgba(100, 116, 139, 0.2) 100%
+      );
       top: 50%;
       left: 0;
       z-index: -1;
     }
 
-    /* 아이콘 */
+    /* 아이콘 - 크기 줄이고 그림자 추가 */
     .timeline-icon {
-      width: 40px;
-      height: 40px;
+      width: 28px;
+      height: 28px;
       background: #fff;
-      border: 4px solid #000;
+      border: 3px solid #fff;
       border-radius: 50%;
       margin: 0 auto;
       position: relative;
       z-index: 1;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+      transition: all 0.3s ease;
+
+      &:hover {
+        transform: scale(1.2);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+      }
     }
 
-    .blue { background-color: #007bff; }
-    .yellow { background-color: #ffc107; }
-    .red { background-color: #dc3545; }
-    .green { background-color: #28a745; }
-    .purple { background-color: #6f42c1; }
-    .pink { background-color: #e83e8c; }
-    .black { background-color: #000; }
-
+    /* 세련된 그라데이션 색상 */
+    .blue { 
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+    .yellow { 
+      background: linear-gradient(135deg, #f6d365 0%, #fda085 100%);
+    }
+    .green { 
+      background: linear-gradient(135deg, #a8edea 0%, #6dd5b8 100%);
+    }
+    .pink { 
+      background: linear-gradient(135deg, #fbc2eb 0%, #a6c1ee 100%);
+    }
+    .purple { 
+      background: linear-gradient(135deg, #c471f5 0%, #fa71cd 100%);
+    }
+    .red { 
+      background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);
+    }
+    .black { 
+      background: linear-gradient(135deg, #434343 0%, #000000 100%);
+    }
 
     .timeline-content {
       position: absolute;
-      background: #fff;
-      left: 50%; /* Start from the center horizontally */
-      transform: translateX(-50%); /* Center horizontally by offsetting half of the width */
+      background: #ffffff;
+      left: 50%;
+      transform: translateX(-50%);
+      padding: 8px 12px;
+      border-radius: 10px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+      transition: all 0.3s ease;
+
+      &:hover {
+        transform: translateX(-50%) translateY(-3px);
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+      }
 
       /* 타이틀 */
       &.top {
-        bottom: 100%; /* Position above the line */
+        bottom: 100%;
 
         &.long {
           margin-bottom: 80px;
@@ -952,7 +986,10 @@ nav {
             position: absolute;
             width: 2px;
             height: 70px;
-            background: #000;
+            background: linear-gradient(180deg, 
+              rgba(100, 116, 139, 0.3) 0%, 
+              rgba(100, 116, 139, 0.6) 100%
+            );
             bottom: -80px;
             left: 50%;
             transform: translateX(-50%);
@@ -964,17 +1001,20 @@ nav {
           margin-bottom: 20px;
 
           &:after {
-              content: "";
-              position: absolute;
-              width: 2px;
-              height: 20px; /* Length of the line connecting the icon to the content */
-              background: #000; /* Color of the line */
-              bottom: -20px; /* Positioning it just below the content */
-              left: 50%; /* Center the line horizontally */
-              transform: translateX(-50%); /* Adjust for centering */
-              z-index: -1; /* Place it behind the content */
-            }
+            content: "";
+            position: absolute;
+            width: 2px;
+            height: 20px;
+            background: linear-gradient(180deg, 
+              rgba(100, 116, 139, 0.3) 0%, 
+              rgba(100, 116, 139, 0.6) 100%
+            );
+            bottom: -20px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: -1;
           }
+        }
       }
 
       /* 내용 */
@@ -985,15 +1025,15 @@ nav {
           margin-top: 80px;
 
           &:after {
-              content: "";
-              position: absolute;
-              width: 0;
-              height: 70px;
-              border-left: 2px dashed #000;
-              top: -80px;
-              left: 50%;
-              transform: translateX(-50%);
-              z-index: -1;
+            content: "";
+            position: absolute;
+            width: 0;
+            height: 70px;
+            border-left: 2px dashed rgba(100, 116, 139, 0.4);
+            top: -80px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: -1;
           }
         }
 
@@ -1001,26 +1041,33 @@ nav {
           margin-top: 40px;
           
           &:after {
-              content: "";
-              position: absolute;
-              width: 0; /* No width since we are using border for the line */
-              height: 40px; /* Length of the line connecting the icon to the content */
-              border-left: 2px dashed #000; /* Dashed border for the vertical line */
-              top: -50px; /* Positioning it just above the content */
-              left: 50%; /* Center the line horizontally */
-              transform: translateX(-50%); /* Adjust for centering */
-              z-index: -1; /* Place it behind the content */
-              } 
-          }
+            content: "";
+            position: absolute;
+            width: 0;
+            height: 40px;
+            border-left: 2px dashed rgba(100, 116, 139, 0.4);
+            top: -50px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: -1;
+          } 
+        }
       }
 
       h3 {
-        margin: 0 0 5px;
+        margin: 0 0 6px;
+        font-size: 0.9rem;
+        font-weight: 400;
+        color: #2c3e50;
       }
 
       p {
-        margin-top: -10px;
+        margin-top: 0;
+        margin-bottom: 0;
         width: max-content;
+        font-size: 0.7rem;
+        color: #64748b;
+        font-weight: 300;
       }
     }
   }
@@ -1029,7 +1076,7 @@ nav {
 @include mobile {
   .timeline {
     display: flex;
-    flex-direction: column; /* 세로 정렬 */
+    flex-direction: column;
     justify-content: center;
     align-items: center;
     width: 100%;
@@ -1047,9 +1094,13 @@ nav {
       &:before {
         content: "";
         position: absolute;
-        width: 4px;
+        width: 3px;
         height: 120px;
-        background: #000;
+        background: linear-gradient(180deg, 
+          rgba(100, 116, 139, 0.2) 0%, 
+          rgba(100, 116, 139, 0.4) 50%, 
+          rgba(100, 116, 139, 0.2) 100%
+        );
         top: 0;
         left: 50%;
         transform: translateX(-50%);
@@ -1057,69 +1108,95 @@ nav {
       }
 
       .timeline-icon {
-        width: 30px;
-        height: 30px;
+        width: 24px;
+        height: 24px;
         background: #fff;
-        border: 4px solid #000;
+        border: 3px solid #fff;
         border-radius: 50%;
         position: relative;
         z-index: 1;
         margin-top: -40px;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
       }
 
-      .blue { background-color: #007bff; }
-      .yellow { background-color: #ffc107; }
-      .red { background-color: #dc3545; }
-      .green { background-color: #28a745; }
-      .purple { background-color: #6f42c1; }
-      .pink { background-color: #e83e8c; }
-      .black { background-color: #000; }
+      /* 모바일에서도 그라데이션 유지 */
+      .blue { 
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      }
+      .yellow { 
+        background: linear-gradient(135deg, #f6d365 0%, #fda085 100%);
+      }
+      .green { 
+        background: linear-gradient(135deg, #a8edea 0%, #6dd5b8 100%);
+      }
+      .pink { 
+        background: linear-gradient(135deg, #fbc2eb 0%, #a6c1ee 100%);
+      }
+      .purple { 
+        background: linear-gradient(135deg, #c471f5 0%, #fa71cd 100%);
+      }
+      .red { 
+        background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);
+      }
+      .black { 
+        background: linear-gradient(135deg, #434343 0%, #000000 100%);
+      }
 
       .timeline-content {
-      position: relative;
-      background: #fff;
-      left: 50%;
-      transform: translateX(-50%);
+        position: relative;
+        background: #fff;
+        left: 50%;
+        transform: translateX(-50%);
+        padding: 8px 12px;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
 
-      &.top {
-        &.long, &.short {
-          margin-inline: -80px;
-          margin-bottom: 0px;
-          display: table;
-          margin-top: 30px;
+        &.top {
+          &.long, &.short {
+            margin-inline: -80px;
+            margin-bottom: 0px;
+            display: table;
+            margin-top: 30px;
 
-          &:after {
-            content: "";
-            position: absolute;
-            width: 0px;
-            height: 0px;
+            &:after {
+              content: "";
+              position: absolute;
+              width: 0px;
+              height: 0px;
+            }
           }
         }
-      }
 
-      &.bottom{
-        &.long, &.short {
-          margin-inline: 80px;
-          margin-bottom: 0px;
-          display: table;
-          margin-top: -40px;
+        &.bottom {
+          &.long, &.short {
+            margin-inline: 80px;
+            margin-bottom: 0px;
+            display: table;
+            margin-top: -40px;
 
-          &:after {
-            content: "";
-            position: absolute;
-            width: 0px;
-            height: 0px;
+            &:after {
+              content: "";
+              position: absolute;
+              width: 0px;
+              height: 0px;
+            }
           }
         }
-      }
-      h3 {
-        font-size: medium;
-      }
 
-      p {
-        font-size: small;
+        h3 {
+          font-size: 0.7rem;
+          font-weight: 500;
+          color: #2c3e50;
+          margin: 0 0 4px;
+        }
+
+        p {
+          font-size: 0.6rem;
+          color: #64748b;
+          font-weight: 300;
+          margin: 0;
+        }
       }
-    }
     }
   }
 }
