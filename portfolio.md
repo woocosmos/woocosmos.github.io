@@ -17,21 +17,87 @@ permalink: /portfolio/
 </p>
 ---
 
-## 📊 성과 요약
+## 📊 핵심 역량
 
 <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px; margin:20px 0; text-align:center;">
   <div style="background:#f8f9fa; border-radius:8px; padding:20px 12px;">
-    <p style="font-size:28px; font-weight:bold; margin:0; color:#1862ab;">(수치)</p>
-    <p style="font-size:14px; color:#868e96; margin:4px 0 0;">(설명 — 예: 모델 정확도 개선)</p>
+    <p style="font-size:24px; font-weight:bold; margin:0; color:#1862ab;">문제 (재)정의</p>
+    <p style="font-size:13px; color:#495057; margin:8px 0 0; line-height:1.5;">주어진 문제를 그대로 풀지 않고<br>구조와 관점을 바꿔 본질에 접근합니다</p>
+    <p style="font-size:12px; color:#868e96; margin:8px 0 0;">절대 매출 대신에 시장 내 상대적 위치 예측<br>게임의 일대일 경합 결과를 Bradley-Terry 환산</p>
   </div>
   <div style="background:#f8f9fa; border-radius:8px; padding:20px 12px;">
-    <p style="font-size:28px; font-weight:bold; margin:0; color:#2b8a3e;">16배</p>
-    <p style="font-size:14px; color:#868e96; margin:4px 0 0;">모델 추론 시 병렬처리를 적용하여<br>소요시간 32분에서 2분대로 단축</p>
+    <p style="font-size:24px; font-weight:bold; margin:0; color:#2b8a3e;">LLM 실무 적용</p>
+    <p style="font-size:13px; color:#495057; margin:8px 0 0; line-height:1.5;">LLM을 통해 작업 생산성을 높일 뿐만 아니라<br>실무 문제 해결에 방법론으로서 적용합니다</p>
+    <p style="font-size:12px; color:#868e96; margin:8px 0 0;">Cursor 환경에서 Plan-Act 프레임워크 활용<br>google ADK 활용한 멀티에이전트 시스템 개발</p>
   </div>
   <div style="background:#f8f9fa; border-radius:8px; padding:20px 12px;">
-    <p style="font-size:28px; font-weight:bold; margin:0; color:#e67700;">(수치)</p>
-    <p style="font-size:14px; color:#868e96; margin:4px 0 0;">(설명 — 예: 지연시간 단축)</p>
+    <p style="font-size:24px; font-weight:bold; margin:0; color:#e67700;">비즈니스 의사결정</p>
+    <p style="font-size:13px; color:#495057; margin:8px 0 0; line-height:1.5;">분석과 모델의 결과가 리서치에 그치지 않고<br>실제 의사결정으로 이어지게 합니다</p>
+    <p style="font-size:12px; color:#868e96; margin:8px 0 0;">매출 예측 모델로 첫 개발사 계약 성사<br>사업 조직의 니즈에 맞춘 모델 평가 지표</p>
   </div>
+</div>
+
+---
+
+## 🧗‍♀️ 커리어
+
+<div style="max-width:700px; margin:20px auto;">
+
+  <!-- 넥슨컴퍼니 — 넥슨코리아 (현재) -->
+  <div style="display:flex; margin-bottom:0;">
+    <div style="display:flex; flex-direction:column; align-items:center; margin-right:20px;">
+      <div style="width:12px; height:12px; border-radius:50%; background:#7048e8; box-shadow:0 0 0 4px #d0bfff; flex-shrink:0;"></div>
+      <div style="width:2px; flex:1; background:#dee2e6;"></div>
+    </div>
+    <div style="flex:1; padding-bottom:24px;">
+      <p style="margin:0; font-weight:bold; font-size:16px;">넥슨컴퍼니 · 넥슨코리아 <span style="background:#7048e8; color:#fff; font-size:11px; padding:2px 8px; border-radius:3px; margin-left:6px; font-weight:normal;">현재</span></p>
+      <p style="margin:0; font-size:14px; color:#495057;">분석가 (AI엔지니어)</p>
+      <p style="margin:2px 0 0; color:#868e96; font-size:13px;">2024.09 — 현재</p>
+      <p style="margin:6px 0 0; font-size:14px; color:#495057;">LLM, 머신러닝 등 다양한 방법론을 통해 게임의 잠재 가치를 정량화여 비즈니스 의사결정에 직접적으로 기여하고 있습니다</p>
+    </div>
+  </div>
+
+  <!-- 넥슨컴퍼니 — 니트로스튜디오 -->
+  <div style="display:flex; margin-bottom:0;">
+    <div style="display:flex; flex-direction:column; align-items:center; margin-right:20px;">
+      <div style="width:12px; height:12px; border-radius:50%; background:#e83e8c; box-shadow:0 0 0 4px #fcc2d7; flex-shrink:0;"></div>
+      <div style="width:2px; flex:1; background:#dee2e6;"></div>
+    </div>
+    <div style="flex:1; padding-bottom:24px;">
+      <p style="margin:0; font-weight:bold; font-size:16px;">넥슨컴퍼니 · 니트로스튜디오</p>
+      <p style="margin:0; font-size:14px; color:#495057;">분석가 (AI엔지니어)</p>
+      <p style="margin:2px 0 0; color:#868e96; font-size:13px;">2022.12 — 2024.08</p>
+      <p style="margin:6px 0 0; font-size:14px; color:#495057;">인게임 로그 데이터를 기반으로 유저 행동을 분석하고, 강화학습 기반 자율주행 시스템을 리서치했습니다</p>
+    </div>
+  </div>
+
+  <!-- 플랫팜 -->
+  <div style="display:flex; margin-bottom:0;">
+    <div style="display:flex; flex-direction:column; align-items:center; margin-right:20px;">
+      <div style="width:12px; height:12px; border-radius:50%; background:#e67700; box-shadow:0 0 0 4px #fff3bf; flex-shrink:0;"></div>
+      <div style="width:2px; flex:1; background:#dee2e6;"></div>
+    </div>
+    <div style="flex:1; padding-bottom:24px;">
+      <p style="margin:0; font-weight:bold; font-size:16px;">플랫팜</p>
+      <p style="margin:0; font-size:14px; color:#495057;">AI 리서치 엔지니어</p>
+      <p style="margin:2px 0 0; color:#868e96; font-size:13px;">2021.07 — 2022.08</p>
+      <p style="margin:6px 0 0; font-size:14px; color:#495057;">2D·3D 딥러닝 모델을 기반으로 자동 콘텐츠 제작 파이프라인을 구축하였습니다</p>
+    </div>
+  </div>
+
+  <!-- 성균관대학교 -->
+  <div style="display:flex; margin-bottom:0;">
+    <div style="display:flex; flex-direction:column; align-items:center; margin-right:20px;">
+      <div style="width:12px; height:12px; border-radius:50%; background:#1862ab; box-shadow:0 0 0 4px #d0ebff; flex-shrink:0;"></div>
+    </div>
+    <div style="flex:1; padding-bottom:8px;">
+      <p style="margin:0; font-weight:bold; font-size:16px;">성균관대학교</p>
+      <p style="margin:0; font-size:14px; color:#495057;">독문학·국문학 전공</p>
+      <p style="margin:2px 0 0; color:#868e96; font-size:13px;">2016.02 — 2021.02</p>
+      <p style="margin:6px 0 0; font-size:14px; color:#495057;">언어와 텍스트에 대한 관심이 자연어처리(NLP)로 이어졌습니다</p>
+    </div>
+  </div>
+
 </div>
 
 ---
@@ -40,55 +106,104 @@ permalink: /portfolio/
 
 <!-- ────────── Project 1 ────────── -->
 <div style="border-left:4px solid #1862ab; padding:16px 20px; margin:24px 0; background:#f8f9fa; border-radius:0 8px 8px 0;">
-  <h3 style="margin:0 0 4px; color:#1862ab;">(프로젝트명)</h3>
+  <h3 style="margin:0 0 4px; color:#1862ab;">페르소나 기반 멀티 에이전트 시스템을 활용한 게임 IP평가</h3>
   <p style="margin:0 0 12px; color:#868e96; font-size:14px;">
-    2023.06 — 2024.01 · (역할) · (소속)
+    2026.02 — 2026.02 · 분석가 · 넥슨코리아
   </p>
   <p style="margin:0 0 8px;">
-    <img src="https://img.shields.io/badge/Python-3776AB?style=flat-square&amp;logo=python&amp;logoColor=white" alt="Python" style="display:inline; margin:0 2px 4px 0; border-radius:3px;">
-    <img src="https://img.shields.io/badge/LangChain-1C3C3C?style=flat-square&amp;logo=chainlink&amp;logoColor=white" alt="LangChain" style="display:inline; margin:0 2px 4px 0; border-radius:3px;">
-    <img src="https://img.shields.io/badge/FastAPI-009688?style=flat-square&amp;logo=fastapi&amp;logoColor=white" alt="FastAPI" style="display:inline; margin:0 2px 4px 0; border-radius:3px;">
+    <img src="https://img.shields.io/badge/OpenAI-412991?style=flat-square&logo=OpenAI&logoColor=white" alt="OpenAI" style="display:inline; margin:0 2px 4px 0; border-radius:3px;">
+    <img src="https://img.shields.io/badge/Microsoft%20Azure-0078D4?style=flat-square&amp;logo=microsoftazure&amp;logoColor=white" alt="Azure" style="display:inline; margin:0 2px 4px 0; border-radius:3px;">
   </p>
   <h4 style="margin:12px 0 4px; font-size:15px;">문제 상황</h4>
-  <p style="margin:0; font-size:15px;">(해결하고자 했던 문제 설명)</p>
+  <p style="margin:0; font-size:15px;">KPI 외 인지도, 팬덤 등의 정성 요인을 반영하여 IP의 사업가치를 점수화하고자 함</p>
   <h4 style="margin:12px 0 4px; font-size:15px;">접근 방법</h4>
   <ul style="margin:0; font-size:15px;">
-    <li>모델 설계 및 데이터 처리 방식</li>
-    <li>기술 선택 이유</li>
+    <li>6개 페르소나(게이머, 사업개발실 실장 등)를 서로 다른 관점의 평가 에이전트로 두고 같은 항목을 독립적으로 평가</li>
+    <li>점수화 과정의 편향을 줄이기 위해 평가 에이전트의 서술식 발언을 점수로 환산하는 별도의 에이전트 활용</li>
   </ul>
   <h4 style="margin:12px 0 4px; font-size:15px;">결과 및 성과</h4>
   <p style="margin:0; font-size:15px;">
     <span style="background:#1862ab; color:#fff; padding:2px 8px; border-radius:3px; font-size:13px;">성과</span>
-    (성능 개선 수치, 실제 서비스 영향)
+    평가 결과를 대표 이사진 대상으로 보고하여 비즈니스 의사결정의 근거로 활용
   </p>
   <h4 style="margin:12px 0 4px; font-size:15px;">배운 점</h4>
-  <p style="margin:0; font-size:15px;">(기술적/프로세스적 인사이트)</p>
+  <p style="margin:0; font-size:15px;">멀티 페르소나 프레임워크를 통해 말투만 바꾼 응답이 아닌, 실제 그 페르소나에 입각한 주장을 유도함으로써 관점의 다양성을 확보하고 실제에 가까운 평가 내용을 추출</p>
+</div>
+
+<div style="border-left:4px solid #7048e8; padding:16px 20px; margin:24px 0; background:#f8f9fa; border-radius:0 8px 8px 0;">
+  <h3 style="margin:0 0 4px; color:#7048e8;">모바일 게임 출시 후 1년 누적 매출 예측 머신러닝 모델 고도화</h3>
+  <p style="margin:0 0 12px; color:#868e96; font-size:14px;">
+    2025.02 — 진행 중 · 분석가 · 넥슨코리아
+  </p>
+  <p style="margin:0 0 8px;">
+    <img src="https://img.shields.io/badge/MLflow-0194E2?style=flat-square&amp;logo=mlflow&amp;logoColor=white" alt="MLflow" style="display:inline; margin:0 2px 4px 0; border-radius:3px;">
+    <img src="https://img.shields.io/badge/scikit--learn-F7931E?style=flat-square&amp;logo=scikitlearn&amp;logoColor=white" alt="scikit-learn" style="display:inline; margin:0 2px 4px 0; border-radius:3px;">
+  </p>
+  <h4 style="margin:12px 0 4px; font-size:15px;">문제 상황</h4>
+  <p style="margin:0; font-size:15px;">학습 데이터 구조와 모델 가정이 충분히 검증되지 않아 데이터 분포 및 평가 인원 변화에 취약한 기존 매출 예측 모델의 개선이 필요</p>
+  <h4 style="margin:12px 0 4px; font-size:15px;">접근 방법</h4>
+  <ul style="margin:0; font-size:15px;">
+    <li>평가자 단위 샘플 구조로 데이터셋을 재구성하여 구조적 안정성을 확보하고 데이터 증강 효과 확인</li>
+    <li>SHAP 분석과 평가자 인터뷰를 통해 예측 오류가 발생하는 구간의 원인을 분석하여 신규 평가 문항 설계</li>
+    <li>단순 오차 기반 평가 대신 실제 의사결정에 필요한 손익분기점 구간의 변별력을 fuzzy하게 반영한 성능 지표 개발</li>
+    <li>절대 매출 예측이 중간값으로 수렴하는 문제를 해결하기 위해 시장 내 상대적 위치(z-score) 예측 방식으로 재구성</li>
+  </ul>
+  <h4 style="margin:12px 0 4px; font-size:15px;">결과 및 성과</h4>
+  <p style="margin:0; font-size:15px;">
+    <span style="background:#1862ab; color:#fff; padding:2px 8px; border-radius:3px; font-size:13px;">성과</span>
+    약 200여 개 게임에 대한 매출 추론 수행하여 첫 개발사 계약 성사, 학습 데이터가 2배 증가하고 평가자풀이 변화하는 분포 변화 환경에서도 RMSE 100만 달러 이상 감소, MAPE 절반 수준으로 감소
+  </p>
+  <h4 style="margin:12px 0 4px; font-size:15px;">배운 점</h4>
+  <p style="margin:0; font-size:15px;">모델 성능 개선은 알고리즘 변경보다 문제 정의, 데이터 구조, 평가 지표, 운영 프로세스를 함께 개선할 때 실질적인 효과가 발생하며, 실제 비즈니스 의사결정 환경에서는 모델 정확도뿐 아니라 조직이 활용 가능한 형태로 문제를 재정의하는 과정이 핵심임을 경험</p>
 </div>
 
 <!-- ────────── Project 2 ────────── -->
 <div style="border-left:4px solid #2b8a3e; padding:16px 20px; margin:24px 0; background:#f8f9fa; border-radius:0 8px 8px 0;">
-  <h3 style="margin:0 0 4px; color:#2b8a3e;">(프로젝트명)</h3>
+  <h3 style="margin:0 0 4px; color:#2b8a3e;">매칭 대기 시간 및 경기 품질 지표가 유저의 이탈과 리텐션에 미치는 영향 분석</h3>
   <p style="margin:0 0 12px; color:#868e96; font-size:14px;">
-    2022.01 — 2022.12 · (역할) · (소속)
-  </p>
-  <p style="margin:0 0 8px;">
-    <img src="https://img.shields.io/badge/PyTorch-EE4C2C?style=flat-square&amp;logo=pytorch&amp;logoColor=white" alt="PyTorch" style="display:inline; margin:0 2px 4px 0; border-radius:3px;">
-    <img src="https://img.shields.io/badge/Docker-2496ED?style=flat-square&amp;logo=docker&amp;logoColor=white" alt="Docker" style="display:inline; margin:0 2px 4px 0; border-radius:3px;">
+    2024.03 — 2024.04 · 분석가 · 니트로스튜디오
   </p>
   <h4 style="margin:12px 0 4px; font-size:15px;">문제 상황</h4>
-  <p style="margin:0; font-size:15px;">(해결하고자 했던 문제 설명)</p>
+  <p style="margin:0; font-size:15px;">매칭 시스템의 '양적 관점(대기 시간 최소화)'과 '질적 관점(실력 격차 최소화)' 사이의 트레이드오프를 규명</p>
   <h4 style="margin:12px 0 4px; font-size:15px;">접근 방법</h4>
   <ul style="margin:0; font-size:15px;">
-    <li>모델 설계 및 데이터 처리 방식</li>
-    <li>기술 선택 이유</li>
+    <li>유저 행동을 즉각적인 세션 이탈과 장기적인 잔존으로 구분함으로써 특정 변수가 유저의 만족에 미치는 영향이 단기적인지 장기적인지를 구분</li>
+    <li>티어와 권역에 따라 유저 세그먼트를 나누어 숙련도(티어)와 지역적 특성에 따라 반응 양상이 다름을 확인</li>
   </ul>
   <h4 style="margin:12px 0 4px; font-size:15px;">결과 및 성과</h4>
   <p style="margin:0; font-size:15px;">
     <span style="background:#2b8a3e; color:#fff; padding:2px 8px; border-radius:3px; font-size:13px;">성과</span>
-    (성능 개선 수치, 실제 서비스 영향)
+    매칭 시스템 개선을 위한 파라미터 제시 (허용할 수 있는 최대 대기 시간 및 적정 수준의 유저 기록 격차)
   </p>
   <h4 style="margin:12px 0 4px; font-size:15px;">배운 점</h4>
-  <p style="margin:0; font-size:15px;">(기술적/프로세스적 인사이트)</p>
+  <p style="margin:0; font-size:15px;">유저의 경험이 행동(결과)으로 이어지는 흐름을 데이터로 확인함으로써 유입부터 정착까지 유저 생애 주기(LTV)를 고려한 인사이트 도출</p>
+</div>
+
+<div style="border-left:4px solid #e67700; padding:16px 20px; margin:24px 0; background:#f8f9fa; border-radius:0 8px 8px 0;">
+  <h3 style="margin:0 0 4px; color:#e67700;">3D Pose Estimation 기반 자동 콘텐츠 제작 파이프라인 구축</h3>
+  <p style="margin:0 0 12px; color:#868e96; font-size:14px;">
+    2021.11 — 2022.08 · AI 리서치 엔지니어 · 플랫팜
+  </p>
+  <p style="margin:0 0 8px;">
+    <img src="https://img.shields.io/badge/Python-3776AB?style=flat-square&amp;logo=python&amp;logoColor=white" alt="Python" style="display:inline; margin:0 2px 4px 0; border-radius:3px;">
+    <img src="https://img.shields.io/badge/TensorFlow-FF6F00?style=flat-square&amp;logo=tensorflow&amp;logoColor=white" alt="TensorFlow" style="display:inline; margin:0 2px 4px 0; border-radius:3px;">
+    <img src="https://img.shields.io/badge/Docker-2496ED?style=flat-square&amp;logo=docker&amp;logoColor=white" alt="Docker" style="display:inline; margin:0 2px 4px 0; border-radius:3px;">
+    <img src="https://img.shields.io/badge/Blender-F5792A?style=flat-square&amp;logo=blender&amp;logoColor=white" alt="Blender" style="display:inline; margin:0 2px 4px 0; border-radius:3px;">
+  </p>
+  <h4 style="margin:12px 0 4px; font-size:15px;">목표</h4>
+  <p style="margin:0; font-size:15px;">트렌드 Meme 이미지를 자사 캐릭터 스타일로 변환하여 콘텐츠를 자동 생성</p>
+  <h4 style="margin:12px 0 4px; font-size:15px;">접근 방법</h4>
+  <ul style="margin:0; font-size:15px;">
+    <li>ROMP 기반 3D pose 추출 → 캐릭터 리타겟팅 → 영상 렌더링까지 전체 콘텐츠 제작 과정을 자동화 파이프라인으로 설계</li>
+    <li>Docker 및 multiprocessing 기반 병렬 처리 구조를 적용해 대량 영상 처리 시간을 단축</li>
+  </ul>
+  <h4 style="margin:12px 0 4px; font-size:15px;">결과 및 성과</h4>
+  <p style="margin:0; font-size:15px;">
+    <span style="background:#1862ab; color:#fff; padding:2px 8px; border-radius:3px; font-size:13px;">성과</span>
+    콘텐츠 조회수 1만 이상 기록 | SIGGRAPH 2022 출품
+  </p>
+  <h4 style="margin:12px 0 4px; font-size:15px;">배운 점</h4>
+  <p style="margin:0; font-size:15px;">모델 연구 결과를 실제 서비스 제작 파이프라인에 적용하는 과정에서 데이터 흐름 설계, 병렬 처리, 자동화 구조 설계 경험</p>
 </div>
 
 <!-- 프로젝트 추가 시: 위 블록을 복사하고 border-left 색상만 변경 -->
@@ -96,35 +211,128 @@ permalink: /portfolio/
 
 ---
 
-## 🧩 Problem Solving Cases
+## 👉 경험 아카이브
+
 
 <details style="margin:16px 0; border:1px solid #e9ecef; border-radius:8px;">
 <summary style="padding:12px 16px; cursor:pointer; font-weight:bold; font-size:16px; background:#f8f9fa; border-radius:8px;">
-Case 1 — (제목, 예: 모델 성능 저하 해결)
-</summary>
+LLM 엔지니어링</summary>
 <div style="padding:12px 16px; font-size:15px;">
-<p><strong>문제:</strong> (문제 상황)</p>
-<p><strong>원인 분석:</strong> (원인)</p>
-<p><strong>해결:</strong> (해결 방식)</p>
-<p><strong>결과:</strong> (개선 수치)</p>
+<p style="margin:0 0 6px; font-weight:bold;">에이전트 및 파이프라인</p>
+<ul style="margin:0 0 14px; padding-left:20px;">
+  <li>Google ADK 기반 UA소재 생성을 위한 파이프라인 구축 (진행중)</li>
+  <li>LLM 기반 게임 상대 평가 결과를 Bradley–Terry 알고리즘으로 가공해 모델 피처로 활용</li>
+  <li>VLM 기반 이미지 태그 추출 및 임베딩 기반 예측 실험 수행</li>
+</ul>
+<p style="margin:0 0 6px; font-weight:bold;">어플리케이션 및 활용</p>
+<ul style="margin:0; padding-left:20px;">
+  <li>LLM API 비용 구조 분석 및 활용 시나리오 정립</li>
+  <li>LLM 프롬프트 및 파라미터 튜닝을 통한 결과 최적화</li>
+</ul>
 </div>
 </details>
 
 <details style="margin:16px 0; border:1px solid #e9ecef; border-radius:8px;">
 <summary style="padding:12px 16px; cursor:pointer; font-weight:bold; font-size:16px; background:#f8f9fa; border-radius:8px;">
-Case 2 — (제목, 예: 데이터 품질 문제 해결)
+딥러닝 모델</summary>
+<div style="padding:12px 16px; font-size:15px;">
+<p style="margin:0 0 6px; font-weight:bold;">생성 모델 및 컴퓨터 비전 연구·개발</p>
+<ul style="margin:0 0 14px; padding-left:20px;">
+  <li>GAN / StyleGAN 기반 이미지 생성 및 스타일 변환 모델 개발</li>
+  <li>Image translation 및 few-shot adaptation 기반 캐릭터 스타일 변환 실험</li>
+  <li>데이터 수집·전처리·학습·latent space 탐색 전 과정 수행</li>
+  <li>텍스처 합성 및 스타일 보정 모델 후처리 적용</li>
+</ul>
+<p style="margin:0 0 6px; font-weight:bold;">모션 모방 및 3D 기반 모델 확장</p>
+<ul style="margin:0 0 14px; padding-left:20px;">
+  <li>Few-shot 기반 motion imitation 모델 연구 및 실험 수행</li>
+  <li>영상 모션을 캐릭터 이미지에 적용하는 파이프라인 구축</li>
+  <li>SMPL 기반 인간 모션 구조 이해 및 적용 경험 확보</li>
+  <li>2D 이미지 중심 연구에서 3D 모션 영역으로 기술 확장</li>
+</ul>
+<p style="margin:0 0 6px; font-weight:bold">강화학습 기반 주행 AI 연구</p>
+<ul style="margin:0; padding-left:20px;">
+  <li>PPO 기반 아이템전 자율주행 에이전트 개선</li>
+  <li>PointNet 기반 공간 정보 처리 구조 적용</li>
+  <li>Delayed reward 문제 해결을 위한 보상 구조 설계</li>
+</ul>
+</div>
+</details>
+
+<details style="margin:16px 0; border:1px solid #e9ecef; border-radius:8px;">
+<summary style="padding:12px 16px; cursor:pointer; font-weight:bold; font-size:16px; background:#f8f9fa; border-radius:8px;">
+데이터 분석
 </summary>
 <div style="padding:12px 16px; font-size:15px;">
-<p><strong>문제:</strong> (문제 상황)</p>
-<p><strong>원인 분석:</strong> (원인)</p>
-<p><strong>해결:</strong> (해결 방식)</p>
-<p><strong>결과:</strong> (개선 수치)</p>
+<p style="margin:0 0 6px; font-weight:bold;">게임 플레이 데이터 분석 및 운영 인사이트 도출</p>
+<ul style="margin:0 0 14px; padding-left:20px;">
+  <li>매칭 품질, 실력 격차, 대기 시간과 리텐션 관계 분석</li>
+  <li>유저 티어 및 권역별 매칭 전략 차별화 필요성 도출</li>
+  <li>세션 이탈과 장기 리텐션 영향 분리 분석</li>
+</ul>
+<p style="margin:0 0 6px; font-weight:bold;">AI봇 및 게임 난이도 튜닝 분석</p>
+<ul style="margin:0 0 14px; padding-left:20px;">
+  <li>트랙별 AI 리타이어율 및 랩타임 분석</li>
+  <li>AI봇 주행 실패 구간 히트맵 분석</li>
+  <li>시즌별 AI 난이도 변화 모니터링 및 튜닝 대상 구간 도출</li>
+</ul>
+<p style="margin:0 0 6px; font-weight:bold;">유저 세그먼트 및 행동 분석</p>
+<ul style="margin:0 0 14px; padding-left:20px;">
+  <li>신규 유저 행동 로그 기반 세그먼트 모델 구축</li>
+  <li>접속 빈도·플레이 방식·소비 패턴 기반 유형 분류</li>
+  <li>권역 및 플랫폼별 세그먼트 분포 및 소비 패턴 분석</li>
+</ul>
+<p style="margin:0 0 6px; font-weight:bold;">게임 시스템 및 콘텐츠 밸런스 분석</p>
+<ul style="margin:0 0 14px; padding-left:20px;">
+  <li>카트 업그레이드 성능 및 랩타임 영향 분석</li>
+  <li>캐릭터 조합 및 승률 영향 분석</li>
+  <li>라이센스 콘텐츠 난이도 및 이탈 구간 분석</li>
+  <li>튜토리얼 및 신규 모드 참여 패턴 분석</li>
+</ul>
+<p style="margin:0 0 6px; font-weight:bold;">게임 경제 및 상품 소비 구조 분석</p>
+<ul style="margin:0 0 14px; padding-left:20px;">
+  <li>프리미엄 패스 구매와 리텐션 관계 분석</li>
+  <li>재화 순환 구조 및 소비 병목 구간 분석</li>
+  <li>보너스권 구매 및 실제 사용 패턴 분석</li>
+</ul>
+<p style="margin:0 0 6px; font-weight:bold;">플랫폼 및 환경 요인 분석</p>
+<ul style="margin:0; padding-left:20px;">
+  <li>플랫폼별 플레이 패턴 및 접속 구조 분석</li>
+  <li>패치 용량 및 기기 환경과 리텐션 영향 분석</li>
+  <li>플랫폼 간 유저 이동 패턴 분석</li>
+</ul>
+</div>
+</details>
+
+<details style="margin:16px 0; border:1px solid #e9ecef; border-radius:8px;">
+<summary style="padding:12px 16px; cursor:pointer; font-weight:bold; font-size:16px; background:#f8f9fa; border-radius:8px;">
+대시보드 및 인프라
+</summary>
+<div style="padding:12px 16px; font-size:15px;">
+<p style="margin:0 0 6px; font-weight:bold;">대시보드 구축</p>
+<ul style="margin:0 0 14px; padding-left:20px;">
+  <li>캐릭터/카트, 리텐션 Tableau 대시보드 구축 및 운영</li>
+  <li>실험 트랙킹을 위한 MLflow 대시보드 활용</li>
+  <li>Sensortower API를 활용한 해외 신규 가망 게임 대시보드 개발</li>
+</ul>
+<p style="margin:0 0 6px; font-weight:bold;">데이터 인프라 및 파이프라인</p>
+<ul style="margin:0 0 14px; padding-left:20px;">
+  <li>로그 이벤트 구조 개선 및 분석 환경 정비</li>
+  <li>Snowflake DB 스키마 설계, Airflow DAG 자동 적재</li>
+  <li>UNIFIED_APP_ID 등 게임 단위 식별자 체계 도입 및 데이터 자산 구조화</li>
+</ul>
+<p style="margin:0 0 6px; font-weight:bold;">성능 최적화 및 자동화</p>
+<ul style="margin:0; padding-left:20px;">
+  <li>모델 학습 및 추론 파이프라인 병렬 처리 적용으로 연산 속도 16배 개선 (30분 → 2분)</li>
+  <li>GPT Batch 처리 및 API 기반 자동화 도입으로 기존 수동 작업 대폭 단축</li>
+</ul>
 </div>
 </details>
 
 ---
 
-## ✍️ 활동
+## 활동
 
-- [YunsooLog 블로그](https://woocosmos.github.io) — ML 엔지니어링 기록
-- (발표, 기고, 오픈소스 기여 등 추가)
+- [2024년 구글 ML부트캠프 Tips for Kaggle 발표](https://youtu.be/os1IUUxy9vI?si=XFbqtcHSqt_aGn_J&t=58) - 구글 머신러닝 부트캠프의 졸업생으로서 후배들을 위한 Kaggle 상위권 달성 팁을 전달하였습니다.
+- [Where can creative AI take over - where not?](https://aixdesign.space/asianPOV/content/421) - 독일 함부르크응용과학대학교 Peter Kabel 교수와 AI 와 디자인의 교차지점에 대해 인터뷰를 진행하였습니다.
+- [[슈퍼루키 직무소개] 플랫팜의 Data Engineering 직무](https://www.superookie.com/contents/6194d1ec8b129f47845e5812)
