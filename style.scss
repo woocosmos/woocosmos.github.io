@@ -590,35 +590,51 @@ nav {
 }
 
 .pagination {
-  font-weight: 300;
   padding: 2em 0;
   width: 100%;
-  display: inline-block;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 4px;
 
   @include mobile {
     font-size: $small-font-size;
   }
 
-  > .prev {
-    float: left;
-    width: 50%;
-    a {
-      color: $pagination-color;
-      &:hover, &:focus {
-        color: $pagination-over-color;
-      }
-    }
-  }
+  .page-link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 36px;
+    height: 36px;
+    padding: 0 8px;
+    border-radius: 6px;
+    color: $pagination-color;
+    font-weight: 400;
+    text-decoration: none;
+    transition: background 0.15s, color 0.15s;
 
-  > .next {
-    float: right;
-    text-align: right;
-    width: 50%;
-    a {
-      color: $pagination-color;
-      &:hover, &:focus {
-        color: $pagination-over-color;
-      }
+    &:hover, &:focus {
+      background: $oc-gray-1;
+      color: $pagination-over-color;
+    }
+
+    &.active {
+      background: $oc-gray-8;
+      color: #fff;
+      font-weight: 600;
+      pointer-events: none;
+    }
+
+    &.disabled {
+      color: $oc-gray-4;
+      pointer-events: none;
+    }
+
+    @include mobile {
+      min-width: 32px;
+      height: 32px;
+      padding: 0 6px;
     }
   }
 }

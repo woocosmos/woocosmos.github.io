@@ -111,10 +111,20 @@ JavaScript를 잘 모르다보니 Workaround 형식으로 구현한 내용도 �
 
 ## 검색 페이지 추가
 ### 검색 기능
-내용
+
+[Simple-Jekyll-Search](https://github.com/christian-fei/Simple-Jekyll-Search) 오픈소스를 활용했다.
+
+- Jekyll 빌드 시 `search.json`에 전체 포스트의 제목, 태그, 날짜, 본문을 JSON으로 생성
+- `search-and-return.js`에서 `SimpleJekyllSearch`를 초기화하고, 검색창 입력 시 JSON을 대상으로 클라이언트 사이드 검색 수행
+- 검색 결과는 제목, 날짜, 태그, 본문 미리보기로 구성
 
 ### 검색 결과 하이라이트
-내용
+
+`search-and-return.js`의 `templateMiddleware`에서 구현했다.
+
+- 검색어를 정규식으로 변환하여 제목, 태그, 본문에서 매칭되는 부분을 `<b style="background:gold">` 로 강조 표시
+- 본문의 경우 매칭 위치 앞뒤 15단어만 잘라서 표시하고, 본문 내 총 언급 횟수를 함께 출력
+- 태그는 각각 태그 페이지로의 링크를 포함
 
 ---
 ## LaTex(수학 수식) 적용하기

@@ -39,19 +39,59 @@ layout: default
   {% endfor %}
 </div>
 
+{% if paginator.total_pages > 1 %}
 <div class="pagination">
+  {% comment %} Previous button {% endcomment %}
   {% if paginator.previous_page %}
-    <span class="prev">
-      <a href="{{ site.baseurl }}{{ paginator.previous_page_path }}" class="prev">
-        &#xE000; Previous
-      </a>
-    </span>
+    <a href="{{ site.baseurl }}{{ paginator.previous_page_path }}" class="page-link">&laquo;</a>
+  {% else %}
+    <span class="page-link disabled">&laquo;</span>
   {% endif %}
+
+  {% comment %} Numbered pages with window=5 {% endcomment %}
+  {% assign window = 5 %}
+  {% assign half = window | divided_by: 2 %}
+  {% assign pg_start = paginator.page | minus: half %}
+  {% assign pg_end = paginator.page | plus: half %}
+
+  {% if pg_start < 1 %}
+    {% assign pg_start = 1 %}
+    {% assign pg_end = window %}
+  {% endif %}
+  {% if pg_end > paginator.total_pages %}
+    {% assign pg_end = paginator.total_pages %}
+    {% assign pg_start = pg_end | minus: window | plus: 1 %}
+    {% if pg_start < 1 %}{% assign pg_start = 1 %}{% endif %}
+  {% endif %}
+
+  {% if pg_start > 1 %}
+    <a href="{{ site.baseurl }}/" class="page-link">1</a>
+    {% if pg_start > 2 %}<span class="page-link disabled">&hellip;</span>{% endif %}
+  {% endif %}
+
+  {% for i in (1..paginator.total_pages) %}
+    {% if i >= pg_start and i <= pg_end %}
+      {% if i == paginator.page %}
+        <span class="page-link active">{{ i }}</span>
+      {% elsif i == 1 %}
+        <a href="{{ site.baseurl }}/" class="page-link">{{ i }}</a>
+      {% else %}
+        <a href="{{ site.baseurl }}/page{{ i }}/" class="page-link">{{ i }}</a>
+      {% endif %}
+    {% endif %}
+  {% endfor %}
+
+  {% if pg_end < paginator.total_pages %}
+    {% assign before_last = paginator.total_pages | minus: 1 %}
+    {% if pg_end < before_last %}<span class="page-link disabled">&hellip;</span>{% endif %}
+    <a href="{{ site.baseurl }}/page{{ paginator.total_pages }}/" class="page-link">{{ paginator.total_pages }}</a>
+  {% endif %}
+
+  {% comment %} Next button {% endcomment %}
   {% if paginator.next_page %}
-    <span class="next">
-      <a href="{{ site.baseurl}}{{ paginator.next_page_path }}" class="next">
-        Next &#xE001;
-      </a>
-    </span>
+    <a href="{{ site.baseurl }}{{ paginator.next_page_path }}" class="page-link">&raquo;</a>
+  {% else %}
+    <span class="page-link disabled">&raquo;</span>
   {% endif %}
 </div>
+{% endif %}
