@@ -1,6 +1,6 @@
 ---
 layout: post
-title: 작성중// 포모도로 윈도우 앱 '토스터' 미니 프로젝트
+title: 포모도로 윈도우 앱 '토스터' 미니 프로젝트
 tags: [네트워크, python]
 comments: True
 toc: true

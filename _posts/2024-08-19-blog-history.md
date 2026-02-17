@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "작성중// Jekyll을 사용한 github.io 블로그 개발기"
+title: "Jekyll을 사용한 github.io 블로그 개발기"
 tags: [JavaScript]
 comments: True
 toc: true
@@ -100,28 +100,14 @@ git merge post/blog-history
 
 JavaScript를 잘 모르다보니 Workaround 형식으로 구현한 내용도 많다. 개선 지점은 언제든 덧글이나 연락처로 알려주시면 감사하겠다.
 
-## disqus 덧글창 추가
-
-내용
-
-## favicon 아이콘 추가
-
-내용
 
 ## back-to-top 버튼 구현
 
-내용
+`_includes/top.html`에 인라인 JS로 구현되어 있다. 외부 라이브러리 없이 순수 JavaScript로 작성했다.
 
-## 커서에 따른 그라데이션 색상 변화
-
-내용
-
-## 페이지 레이아웃 수정
-### Tag 페이지
-내용
-
-### Blog 페이지
-내용
+- 스크롤 위치를 감지하여 일정 이상 내려가면 우측 하단에 원형 버튼이 나타남
+- 클릭 시 `cosine easing` 애니메이션으로 부드럽게 최상단으로 이동
+- 레이아웃(`default.html`, `page.html`, `post.html`)에서 `{% raw %}{% include top.html %}{% endraw %}`로 삽입
 
 ## 검색 페이지 추가
 ### 검색 기능
@@ -129,9 +115,6 @@ JavaScript를 잘 모르다보니 Workaround 형식으로 구현한 내용도 �
 
 ### 검색 결과 하이라이트
 내용
-
-## 아바타 기울기 애니메이션
-
 
 ---
 ## LaTex(수학 수식) 적용하기
