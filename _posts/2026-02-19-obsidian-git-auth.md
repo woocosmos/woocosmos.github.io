@@ -27,4 +27,4 @@ git config --global credential.helper manager
 
 # obsidian 경로에서 로그인 (Github 로그인 창)
 git fetch
-```
+``` 
