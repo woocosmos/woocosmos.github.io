@@ -107,3 +107,6 @@ exclude:
   - README.md
   - CNAME
   - AGENTS.md
+
+# 시간차로 인해서 오늘 추가한 포스트가 보이지 않는 문제 해결
+timezone: Asia/Seoul
