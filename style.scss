@@ -899,6 +899,14 @@ nav {
   display: inline-block; /* Ensure the icon aligns properly with the text */
 }
 
+// About - ASCII hero
+.ascii-hero {
+  @include mobile {
+    font-size: 6.5px;
+    line-height: 1.2;
+  }
+}
+
 // About
 .timeline {
   display: flex;
