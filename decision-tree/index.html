@@ -1,0 +1,1039 @@
+<!DOCTYPE html>
+<html>
+  <head>
+  <title>결정트리 모델(Decision Tree)이 나의 문제를 해결해줄 수 있을까? – YunsooLog – 행간을 읽는 기계학습 이야기</title>
+  <link rel="icon" href="/images/favicon.ico">
+      <meta name="google-site-verification" content="NA4jg1Iffw6aA9VWjj3kqoo2jfOkPRxINJtYphd7VeI" />
+    <meta charset="utf-8" />
+    <meta content='text/html; charset=utf-8' http-equiv='Content-Type'>
+    <meta http-equiv='X-UA-Compatible' content='IE=edge'>
+    <meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1.0'>
+    <meta http-equiv="Permissions-Policy" content="interest-cohort=()">
+    
+    
+    <meta name="description" content="들어가며
+
+아래와 같은 설문조사가 있다. 응답자들은 0 ~ 10점 선지 중 하나를 선택한다.
+
+
+
+
+이러한 응답 데이터를 활용해서 특정 값을 예측하려 한다. 어떤 모델을 쓰면 좋을까? 이 문제 상황에서 가장 먼저 떠올린 것은 결정트리 모델이었다. 최소 0부터 최대 10으로 스케일이 한정된 정수 데이터가 주어졌으며, 결정트리 모델은 조건 (예를 들면, $x &gt; 4$ ?)에 따라 샘플을 나누며 가지를 뻗어나가기 때문이다. 문제를 해결하는 데 결정트리가 적절한 모델이라는 직관적인 느낌을 받았다.
+
+그러나 내가 설명할 수 있는 최선은 여기까지였다. “내가 모델의 개념과 원리를 근본적으로 이해하고 있나?” 반성하게 되었고, 이 글을 쓰게 된 계기가 되었다.
+
+
+  제한된 범위의 정수로 이루어진 응답 데이터를 처리하는 데 있어서 결정트리 모델이 적절한가?
+
+
+즉, 이 질문에 답변하기 위해 해당 모델을 공부한 글이다.
+
+개념
+
+결정트리 Decision Tree, 의사결정 나무라고도 부른다.
+
+데이터를 기준에 따라 반복 분할함으로써 계층적인 구조로 하위 집합을 형성하는 방법론
+
+역사로 이해하기
+
+결정트리 모델의 시초는 1960년대 사회과학에서 찾아볼 수 있다. 이후 1980년대 데이터 과학 분야의 발전과 함께 결정트리 방법론이 소개되고 다양한 모델이 개발, 활용되기 시작했다.
+
+우선 1963년에 발간된 사회과학서 Problems in the Analysis of Survey Data, and a Proposal에 초기 개념이 소개되었다. 고차원의 다중공선성을 띠는 설문조사 데이터를 다루기 위한 방법론으로, 오차제곱합(SSE)를 최소화하도록 하위 그룹으로 분할한다.
+
+사회과학 분야에서 다룰 법한 간단한 예제를 상상해봤다. 응답자의 나이, 성별, 연봉 수준을 수집했으며 이에 따른 직업 만족도를 비교하려 한다. 그런데 나이가 많을수록 연봉 수준이 높아지기도 하고, 분포 상 응답자가 여자일수록 나이대가 낮아진다. 이러한 변수 간 상호작용을 고려하면서 종속변수(직업 만족도)의 차이를 설명하기 위해 응답자를 그룹으로 나눠볼 수 있다. 30대 미만/이상으로 나눠도 좋고, 성별에 따라 나눠도 좋다. 중요한 건 나눠진 그룹끼리 직업 만족도를 비교했을 때 차이가 커지도록 하는 것이다.
+
+
+그룹끼리 차이가 커지도록 그룹을 나누는 이유는, 그룹 안의 동질성이 높다는 것과 같은 의미이기 때문이다. 한 그룹의 평균을 예측값으로 삼는다고 치자. 그룹의 동질성이 높을수록 그룹 내 샘플들은 평균에 가까이 몰려 있을 테니 실제값과 예측값 간의 오차가 전반적으로 줄어든다.
+
+이렇듯 직업 만족도가 가장 크게 차이나는 두 그룹으로 나눠 첫번째 분할을 마쳤다. 그 다음에 오차가 더 큰 그룹을 선택한 다음 그 안에서 또 분할한다. 마찬가지로 그룹 간 차이가 크게 발생하는, 다시 말해 오차를 최소화하는 분할 기준을 결정한다. 분할을 반복한다.
+
+
+Problems in the Analysis of Survey Data, and a Proposal(1963), 17페이지. 오늘날 결정트리 모델을 시각화한 모습과 같다.
+
+사회과학 분야에서 분할의 결과는 이렇게 활용할 수 있다. ‘30세 미만 남성 노동직 그룹과 여성 고졸 그룹의 직업 만족도가 75점 수준으로 비슷하다’ - 한편 머신러닝 분야라면? 입력 데이터에 대해 예측값을 출력하는 모델을 생성하는 데 활용할 수 있겠다! 30세 미만 남성 노동직이 입력으로 들어오면 75점 가량으로 예측하는 것이다.
+
+이어 1984년 Classification and Regression Trees에서 결정트리 방법론을 기반으로 한 알고리즘 CART가 발표됐다. Classification And Regression Tree의 줄임말이다. 이어 CART의 업그레이드 버전인 ID3(Iterative Dichotomiser 3), C4.5, C5.0 등이 발표되면서 결정트리 모델이 더욱 발전해나갔다. 오늘날 많이 사용하는 Random Forest, XGBoost도 결정트리 방법론을 기반으로 개발된 알고리즘들이다.
+
+분할의 기준
+
+CART, ID3, C4.5, C5.0 알고리즘은 모두 결정트리 방법론을 기반으로 한다. 하지만 분할 기준을 무엇으로 설정하는지에 따라 다른 알고리즘으로 발전한 결과다. 앞서 언급한 예제에서는 간단하게 그룹별 직업 만족도의 평균값 차이를 기준으로 분할했지만, 실제 알고리즘에서는 더 효율적이거나 정교한 지표를 분할의 기준으로 삼는다.
+
+분할 기준의 본질은 불순도(impurity)를 낮추는 것이다. 앞서 그룹 내 동질성을 높이는 것이 중요하다고 언급했다. 이는 불순도를 낮춘다는 말과 의미가 동일하다.
+
+
+
+다른 데이터가 많이 섞여 있을수록 동질성이 떨어지며 이는 곧 불순도가 높은 상태다
+
+분할의 결과로 얼마나 동질성이 높아지거나 낮아졌는지, 불순도를 수치화하는 방식은 크게 두 가지. 지니 계수와 엔트로피(정보 이득)다.
+소개한 알고리즘 중 CART는 지니 계수를 사용하며, ID3, C4.5, C5.0은 엔트로피 및 정보 이득을 사용한다.
+
+지니 계수(Gini coefficient)
+
+지니 계수가 높을수록 불순도가 높다고 판단한다.
+
+\[\text{Gini} = \sum_{j=1}^{J} p_{j}(1-p_{j}) = 1 - \sum_{j=1}^{J} p_{j}^{2}\]
+
+
+  $J$
+  각 클래스
+  $p_{j}$
+  샘플이 클래스 $j$에 속할 확률
+  $p_{j}(1-p_{j})$
+  같은 클래스의 샘플을 뽑을 확률과 이어 다른 클래스의 샘플을 뽑을 확률을 곱하여 한 노드 안이 얼마나 섞여 있는지 나타내준다
+
+
+지니 계수는 경제학에서 소득이 얼마나 불평등하게 분포되었는지 나타내는 데 쓴다. 결정트리 모델의 맥락에서는 분할된 노드에 얼마나 다른 클래스 샘플이 섞여 있는지 표현해준다. 
+$p_{j}^{2}$은 그 클래스의 샘플이 두 번 연속 추출될 확률이기 때문에 값이 높을수록 동질성이 높다는 의미다. 지니 계수는 이를 전체에서 뺌으로써 불순도를 계산한 결과다.
+
+위에서 첨부한 이미지를 통해 분할 결과를 지니 계수로 평가해보겠다.
+
+
+
+각 클래스에 대해 $p(1-p)$를 구한 후 합친다.
+
+좌측 노드
+
+
+  노랑 클래스 : 4개 중 2개이므로, $p_{\text{노랑}} = 0.5$. 즉, $0.5 * (1 - 0.5)$.
+  초록 클래스 : 4개 중 1개이므로, $p_{\text{초록}} = 0.25$. 즉, $0.25 * (1 - 0.25)$.
+  검정 클래스 : 4개 중 1개이므로, $p_{\text{초록}} = 0.25$. 즉, $0.25 * (1 - 0.25)$.
+
+
+$\text{Gini}_{\text{좌측}} = 0.25 + 0.1875 + 0.1875 = 0.625$
+
+우측 노드
+
+
+  노랑 클래스 : 3개 중 1개이므로, $p_{\text{노랑}} \approx 0.333$. 즉, $0.333 * (1 - 0.3335)$.
+  초록 클래스 : 3개 중 2개이므로, $p_{\text{초록}} \approx 0.667$. 즉, $0.667 * (1 - 0.667)$.
+
+
+$\text{Gini}_{\text{좌측}} = 0.222 + 0.111 = 0.445$
+
+그 다음 분할된 개수를 기준으로 가중평균을 구한다. 좌측 노드는 네 개, 우측 노드는 세 개 샘플을 가져갔다.
+
+\[\text{Gini}_{\text{예시1}} = \frac{4}{7} \times 0.625 + \frac{3}{7} \times 0.445 \approx 0.548\]
+
+
+
+
+
+해당 분할 결과에 대해서도 동일하게 구한다.
+
+\[\text{Gini}_{\text{예시2}} = \frac{3}{7} \times 0 + \frac{4}{7} \times 0.375 = 0.214\]
+
+좌측 노드에서 다른 클래스가 추출될 확률($1-p$)는 $0$이므로 계산 결과도 $0$이 된다.
+
+
+
+분할 전 지니 계수가 $0.612$ 라는 점을 고려하면, 두 분할 방식 모두 지니 계수가 줄어들어 불순도가 낮아진 상태이다. 둘 중에서는 이렇게! 의 지니 계수 $0.214$ 가 이렇게? 의 $0.548$ 보다 더 낮으므로 더 적합한 분할이라고 판단할 수 있다.
+
+엔트로피(Entropy)
+
+엔트로피는 정보량의 기대값을 의미한다.
+
+\[\text{Entropy} = -\sum_{j=1}^{J} p_{j} \log{(p_{j})}\]
+
+
+  $J$
+  각 클래스
+  $p_{j}$
+  샘플이 클래스 $j$에 속할 확률
+  $-\log{(p_{j})}$
+  클래스 $j$에 대한 정보량
+
+
+정보 이론에서는 의외인 사건이 발생할 때 정보량(Information Content)이 더 많다고 본다. 여기서 ‘의외인 사건’은 곧 사건의 확률이 낮다는 것을 의미한다. (11월은 강우 확률이 낮으니까 11월에 눈이 오는 것은 의외인 사건이며 정보량이 많은 것이기도 하다. 1월에 눈이 오는 사건에 비해서 말이다.)
+
+
+
+이처럼 확률이 낮을수록 정보량이 많고 높을수록 정보량이 낮아지는 것은 확률에 로그를 취하고 음수화한 값으로 표현할 수 있다. 그리고 이 정보량에 확률을 곱함으로써 구한 기댓값을 엔트로피라고 부른다.
+
+\[-p_{j} \times \log{(p_{j})}\]
+
+
+  확률이 낮다 =&gt; 정보량이 많다 =&gt; 엔트로피가 높다 &lt;=&gt; 사건을 예측하기 어렵다
+
+
+노드에 다양한 클래스가 혼재되어 있을수록 어떤 클래스가 추출될지 예측하기 어렵다. 따라서 불순도를 측정하는 방식으로 엔트로피를 쓸 수 있다.
+
+정보획득량 (Information Gain)
+
+결정트리 알고리즘 ID3 에서는 ‘정보획득량’을 불순도 지표로 사용하는데, 이는 분할 전후의 엔트로피 차이를 계산한 값이다.
+
+\[IG(S, A) = H(S) - \sum_{t \in T} p(t) H(t) = H(S) - H(S|A)\]
+
+
+  $IG(S, A)$
+  $A$ 속성을 기준으로 $S$를 분할했을 때의 정보 획득량
+  $H(S)$
+  $S$의 엔트로피
+  $T$
+  $S$를 분할함으로써 생성된 노드들
+  $p(t)$
+  $S$ 대비 노드 $t$의 비율(크기)
+  $H(t)$
+  노드 $t$의 엔트로피
+  $H(S|A)$
+  $A$ 속성을 기준으로 $S$를 분할하여 생성된 노드들의 $H(t)$를 가중 평균한 값
+
+
+‘이렇게!’ 분할 방식을 정보 획득량에 따라 평가해보자. 나이 30살을 기준으로 샘플을 분할했다고 가정했다.
+
+
+
+먼저 분할 전 엔트로피 $H(S)$를 구한다. 엔트로피 식 $-\sum_{j=1}^{J} p_{j} \log{(p_{j})}$ 을 적용하면 된다.
+
+
+  노랑 클래스 : 7개 중 3개이므로, $- \frac{3}{7} \log \frac{3}{7}$
+  초록 클래스 : 7개 중 3개이므로, $- \frac{3}{7} \log \frac{3}{7}$
+  검정 클래스 : 7개 중 1개이므로, $- \frac{1}{7} \log \frac{1}{7}$
+
+
+$H(S) \approx 0.523 + 0.523 + 0.402 = 1.448$
+
+다음으로 분할 후 엔트로피 $H(S|A)$를 구한다. 이는 각 노드의 엔트로피를 가중 평균하여 계산한다.
+
+True 노드
+
+
+  초록 클래스 : 3개 중 3개이므로, $- \frac{3}{3} \log \frac{3}{3} = 0$
+
+
+$H(\text{True}) = 0$
+
+False 노드
+
+
+  노랑 클래스 : 4개 중 3개이므로, $- \frac{3}{4} \log \frac{3}{4} = 0$
+  검정 클래스 : 4개 중 1개이므로, $- \frac{1}{4} \log \frac{1}{4} = 0$
+
+
+$H(\text{True}) \approx 0.311 + 0.5 = 0.811$
+
+그 다음 분할된 비율을 기준으로 가중평균을 구한다. 좌측 노드는 네 개, 우측 노드는 세 개 샘플을 가져갔다.
+
+$H(S|A) = \frac{3}{7} \cdot H(\text{True}) + \frac{4}{7} \cdot H(\text{False}) \approx 0.463$
+
+최종적으로 분할 전에 비해 정보량을 비교한다.
+
+\[IG(S, A) = H(S) - H(S|A) \approx 1.448 - 0.463 = 0.985\]
+
+
+
+분할 전후의 엔트로피를 비교한 결과 정보 이득은 약 $0.985$이다. 반면 이렇게? 분할 방식의 정보 이득을 계산하면 $0.198$로 비교적 정보 이득이 적은 것을 알 수 있다.
+
+이처럼 불순도를 낮추는 방향으로 데이터를 분할하는 것을 반복함으로써 계층적인 트리 구조를 형성하는 것이 결정트리 방법론이다. 여기서 ‘불순도’를 어떤 지표로 평가할지, 언제까지 분할을 반복할지, 어떤 노드를 주로 참고할지 등 구체적인 활용 방식에 따라 다른 알고리즘이 될 수 있다.
+
+직관 설명하기
+
+
+  제한된 범위의 정수로 이루어진 응답 데이터를 처리하는 데 있어서 결정트리 모델이 적절한가?
+
+
+지금까지 결정트리 방법론의 등장 맥락, 분할의 기준을 살펴보았다. 이제 처음의 질문으로 돌아가보자.
+
+“제한된 범위”
+
+결정트리 모델은 값이 좁은 범위로 제한된 데이터에 대해 유리할 수 있다. 결정트리가 비모수적 모델(non-parametric models)이기 때문이다.
+결정트리 모델은 주어진 데이터를 거듭된 조건에 따라 쪼개 나간다. 특정 분포를 가정하지 않고 주어진 데이터에 따라 비선형적인 구조를 형성한다는 의미다. 반면 선형회귀와 같은 모수적 모델은 모든 범위의 데이터에 대해서 유효한 분포(함수)가 있다고 가정하고 이에 맞춰 파라미터를 학습(fit)한다. 실제 데이터에 비해 함수 가정이 과도할 수 있다. 우리는 0 ~ 10 의 범위에서 벗어나는 입력은 전혀 고려하지 않고 있단 말이다.
+
+“정수”
+
+결정트리 모델은 특정 임계값을 기준으로 데이터를 분할하는데, 정수형 데이터는 이산적(discrete) 성격을 띠므로 분할 자체가 직관적이고 간단해진다. 예를 들어 ‘5번 질문에 대한 응답이 3점 이상’이라는 분할 조건을 세우는 건 간단하고 직관적이다. 하지만 데이터가 연속형이었으면 ‘A 속성이 0.3728 이상’과 같이 정밀한 임계값을 정해야 했을 것이다. 당연히 더 많은 경우의 수를 고려해야 하기 때문에 난이도가 높아진다.
+
+“응답 데이터”
+
+설문 참여자들은 비슷한 질문에 대해 비슷하게 응답하는 경향이 있을 것이다. 예를 들어 ‘인생이 행복합니까?’ 라는 질문에 그렇다고 응답할수록, ‘생활이 만족스럽습니까?’ 라는 질문에도 그렇다고 응답할 것이다. 이처럼 변수 간 상관관계가 존재하는 다중공선성의 문제에 결정트리 모델이 유리하다. 애초에 결정트리는 사회과학 연구에서 일종의 교차분석과 유사한 방법론으로 제시되지 않았는가?
+결정트리는 불순도가 (지니 계수든 엔트로피든) 가장 크게 감소하는 조건을 선택하여 분할을 실시하기 때문에 가장 중요한 변수가 우선적으로 선택되는 효과가 있다. 그 결과 비슷한 패턴의 변수들은 자연스럽게 제외되기 때문에 변수 간 상관관계는 결정트리 모델에 큰 해가 되지 않는다.
+
+나가며
+
+결정트리의 작동 맥락과 주요 지표를 살펴봄으로써 나의 직관을 설명할 수 있었다. 이 과정에서 ‘비모수형 모델’의 개념을 명확하게 이해할 수 있게 되었고, 머신러닝 분야에서 ‘엔트로피’가 가지는 의미를 다시 상기할 수 있었다. 이번 공부를 통해 나의 직관이 어느 정도 의미 있었다는 결론을 내렸으므로, 이제 실제 적용하는 일만 남았다.
+
+분량이 너무 길어져서 가지치기나 정지규칙, 코드 등 더 깊은 내용은 다루지 못했지만 모델의 본질과 연결되는 직관을 이해했다는 점에서 만족스러운 공부였다. 이어서 결정트리 방법론을 기반으로 하는 다양한 머신러닝 모델에 대해서 하나씩 공부하는 시간을 가져보겠다.
+" />
+    <meta property="og:description" content="들어가며
+
+아래와 같은 설문조사가 있다. 응답자들은 0 ~ 10점 선지 중 하나를 선택한다.
+
+
+
+
+이러한 응답 데이터를 활용해서 특정 값을 예측하려 한다. 어떤 모델을 쓰면 좋을까? 이 문제 상황에서 가장 먼저 떠올린 것은 결정트리 모델이었다. 최소 0부터 최대 10으로 스케일이 한정된 정수 데이터가 주어졌으며, 결정트리 모델은 조건 (예를 들면, $x &gt; 4$ ?)에 따라 샘플을 나누며 가지를 뻗어나가기 때문이다. 문제를 해결하는 데 결정트리가 적절한 모델이라는 직관적인 느낌을 받았다.
+
+그러나 내가 설명할 수 있는 최선은 여기까지였다. “내가 모델의 개념과 원리를 근본적으로 이해하고 있나?” 반성하게 되었고, 이 글을 쓰게 된 계기가 되었다.
+
+
+  제한된 범위의 정수로 이루어진 응답 데이터를 처리하는 데 있어서 결정트리 모델이 적절한가?
+
+
+즉, 이 질문에 답변하기 위해 해당 모델을 공부한 글이다.
+
+개념
+
+결정트리 Decision Tree, 의사결정 나무라고도 부른다.
+
+데이터를 기준에 따라 반복 분할함으로써 계층적인 구조로 하위 집합을 형성하는 방법론
+
+역사로 이해하기
+
+결정트리 모델의 시초는 1960년대 사회과학에서 찾아볼 수 있다. 이후 1980년대 데이터 과학 분야의 발전과 함께 결정트리 방법론이 소개되고 다양한 모델이 개발, 활용되기 시작했다.
+
+우선 1963년에 발간된 사회과학서 Problems in the Analysis of Survey Data, and a Proposal에 초기 개념이 소개되었다. 고차원의 다중공선성을 띠는 설문조사 데이터를 다루기 위한 방법론으로, 오차제곱합(SSE)를 최소화하도록 하위 그룹으로 분할한다.
+
+사회과학 분야에서 다룰 법한 간단한 예제를 상상해봤다. 응답자의 나이, 성별, 연봉 수준을 수집했으며 이에 따른 직업 만족도를 비교하려 한다. 그런데 나이가 많을수록 연봉 수준이 높아지기도 하고, 분포 상 응답자가 여자일수록 나이대가 낮아진다. 이러한 변수 간 상호작용을 고려하면서 종속변수(직업 만족도)의 차이를 설명하기 위해 응답자를 그룹으로 나눠볼 수 있다. 30대 미만/이상으로 나눠도 좋고, 성별에 따라 나눠도 좋다. 중요한 건 나눠진 그룹끼리 직업 만족도를 비교했을 때 차이가 커지도록 하는 것이다.
+
+
+그룹끼리 차이가 커지도록 그룹을 나누는 이유는, 그룹 안의 동질성이 높다는 것과 같은 의미이기 때문이다. 한 그룹의 평균을 예측값으로 삼는다고 치자. 그룹의 동질성이 높을수록 그룹 내 샘플들은 평균에 가까이 몰려 있을 테니 실제값과 예측값 간의 오차가 전반적으로 줄어든다.
+
+이렇듯 직업 만족도가 가장 크게 차이나는 두 그룹으로 나눠 첫번째 분할을 마쳤다. 그 다음에 오차가 더 큰 그룹을 선택한 다음 그 안에서 또 분할한다. 마찬가지로 그룹 간 차이가 크게 발생하는, 다시 말해 오차를 최소화하는 분할 기준을 결정한다. 분할을 반복한다.
+
+
+Problems in the Analysis of Survey Data, and a Proposal(1963), 17페이지. 오늘날 결정트리 모델을 시각화한 모습과 같다.
+
+사회과학 분야에서 분할의 결과는 이렇게 활용할 수 있다. ‘30세 미만 남성 노동직 그룹과 여성 고졸 그룹의 직업 만족도가 75점 수준으로 비슷하다’ - 한편 머신러닝 분야라면? 입력 데이터에 대해 예측값을 출력하는 모델을 생성하는 데 활용할 수 있겠다! 30세 미만 남성 노동직이 입력으로 들어오면 75점 가량으로 예측하는 것이다.
+
+이어 1984년 Classification and Regression Trees에서 결정트리 방법론을 기반으로 한 알고리즘 CART가 발표됐다. Classification And Regression Tree의 줄임말이다. 이어 CART의 업그레이드 버전인 ID3(Iterative Dichotomiser 3), C4.5, C5.0 등이 발표되면서 결정트리 모델이 더욱 발전해나갔다. 오늘날 많이 사용하는 Random Forest, XGBoost도 결정트리 방법론을 기반으로 개발된 알고리즘들이다.
+
+분할의 기준
+
+CART, ID3, C4.5, C5.0 알고리즘은 모두 결정트리 방법론을 기반으로 한다. 하지만 분할 기준을 무엇으로 설정하는지에 따라 다른 알고리즘으로 발전한 결과다. 앞서 언급한 예제에서는 간단하게 그룹별 직업 만족도의 평균값 차이를 기준으로 분할했지만, 실제 알고리즘에서는 더 효율적이거나 정교한 지표를 분할의 기준으로 삼는다.
+
+분할 기준의 본질은 불순도(impurity)를 낮추는 것이다. 앞서 그룹 내 동질성을 높이는 것이 중요하다고 언급했다. 이는 불순도를 낮춘다는 말과 의미가 동일하다.
+
+
+
+다른 데이터가 많이 섞여 있을수록 동질성이 떨어지며 이는 곧 불순도가 높은 상태다
+
+분할의 결과로 얼마나 동질성이 높아지거나 낮아졌는지, 불순도를 수치화하는 방식은 크게 두 가지. 지니 계수와 엔트로피(정보 이득)다.
+소개한 알고리즘 중 CART는 지니 계수를 사용하며, ID3, C4.5, C5.0은 엔트로피 및 정보 이득을 사용한다.
+
+지니 계수(Gini coefficient)
+
+지니 계수가 높을수록 불순도가 높다고 판단한다.
+
+\[\text{Gini} = \sum_{j=1}^{J} p_{j}(1-p_{j}) = 1 - \sum_{j=1}^{J} p_{j}^{2}\]
+
+
+  $J$
+  각 클래스
+  $p_{j}$
+  샘플이 클래스 $j$에 속할 확률
+  $p_{j}(1-p_{j})$
+  같은 클래스의 샘플을 뽑을 확률과 이어 다른 클래스의 샘플을 뽑을 확률을 곱하여 한 노드 안이 얼마나 섞여 있는지 나타내준다
+
+
+지니 계수는 경제학에서 소득이 얼마나 불평등하게 분포되었는지 나타내는 데 쓴다. 결정트리 모델의 맥락에서는 분할된 노드에 얼마나 다른 클래스 샘플이 섞여 있는지 표현해준다. 
+$p_{j}^{2}$은 그 클래스의 샘플이 두 번 연속 추출될 확률이기 때문에 값이 높을수록 동질성이 높다는 의미다. 지니 계수는 이를 전체에서 뺌으로써 불순도를 계산한 결과다.
+
+위에서 첨부한 이미지를 통해 분할 결과를 지니 계수로 평가해보겠다.
+
+
+
+각 클래스에 대해 $p(1-p)$를 구한 후 합친다.
+
+좌측 노드
+
+
+  노랑 클래스 : 4개 중 2개이므로, $p_{\text{노랑}} = 0.5$. 즉, $0.5 * (1 - 0.5)$.
+  초록 클래스 : 4개 중 1개이므로, $p_{\text{초록}} = 0.25$. 즉, $0.25 * (1 - 0.25)$.
+  검정 클래스 : 4개 중 1개이므로, $p_{\text{초록}} = 0.25$. 즉, $0.25 * (1 - 0.25)$.
+
+
+$\text{Gini}_{\text{좌측}} = 0.25 + 0.1875 + 0.1875 = 0.625$
+
+우측 노드
+
+
+  노랑 클래스 : 3개 중 1개이므로, $p_{\text{노랑}} \approx 0.333$. 즉, $0.333 * (1 - 0.3335)$.
+  초록 클래스 : 3개 중 2개이므로, $p_{\text{초록}} \approx 0.667$. 즉, $0.667 * (1 - 0.667)$.
+
+
+$\text{Gini}_{\text{좌측}} = 0.222 + 0.111 = 0.445$
+
+그 다음 분할된 개수를 기준으로 가중평균을 구한다. 좌측 노드는 네 개, 우측 노드는 세 개 샘플을 가져갔다.
+
+\[\text{Gini}_{\text{예시1}} = \frac{4}{7} \times 0.625 + \frac{3}{7} \times 0.445 \approx 0.548\]
+
+
+
+
+
+해당 분할 결과에 대해서도 동일하게 구한다.
+
+\[\text{Gini}_{\text{예시2}} = \frac{3}{7} \times 0 + \frac{4}{7} \times 0.375 = 0.214\]
+
+좌측 노드에서 다른 클래스가 추출될 확률($1-p$)는 $0$이므로 계산 결과도 $0$이 된다.
+
+
+
+분할 전 지니 계수가 $0.612$ 라는 점을 고려하면, 두 분할 방식 모두 지니 계수가 줄어들어 불순도가 낮아진 상태이다. 둘 중에서는 이렇게! 의 지니 계수 $0.214$ 가 이렇게? 의 $0.548$ 보다 더 낮으므로 더 적합한 분할이라고 판단할 수 있다.
+
+엔트로피(Entropy)
+
+엔트로피는 정보량의 기대값을 의미한다.
+
+\[\text{Entropy} = -\sum_{j=1}^{J} p_{j} \log{(p_{j})}\]
+
+
+  $J$
+  각 클래스
+  $p_{j}$
+  샘플이 클래스 $j$에 속할 확률
+  $-\log{(p_{j})}$
+  클래스 $j$에 대한 정보량
+
+
+정보 이론에서는 의외인 사건이 발생할 때 정보량(Information Content)이 더 많다고 본다. 여기서 ‘의외인 사건’은 곧 사건의 확률이 낮다는 것을 의미한다. (11월은 강우 확률이 낮으니까 11월에 눈이 오는 것은 의외인 사건이며 정보량이 많은 것이기도 하다. 1월에 눈이 오는 사건에 비해서 말이다.)
+
+
+
+이처럼 확률이 낮을수록 정보량이 많고 높을수록 정보량이 낮아지는 것은 확률에 로그를 취하고 음수화한 값으로 표현할 수 있다. 그리고 이 정보량에 확률을 곱함으로써 구한 기댓값을 엔트로피라고 부른다.
+
+\[-p_{j} \times \log{(p_{j})}\]
+
+
+  확률이 낮다 =&gt; 정보량이 많다 =&gt; 엔트로피가 높다 &lt;=&gt; 사건을 예측하기 어렵다
+
+
+노드에 다양한 클래스가 혼재되어 있을수록 어떤 클래스가 추출될지 예측하기 어렵다. 따라서 불순도를 측정하는 방식으로 엔트로피를 쓸 수 있다.
+
+정보획득량 (Information Gain)
+
+결정트리 알고리즘 ID3 에서는 ‘정보획득량’을 불순도 지표로 사용하는데, 이는 분할 전후의 엔트로피 차이를 계산한 값이다.
+
+\[IG(S, A) = H(S) - \sum_{t \in T} p(t) H(t) = H(S) - H(S|A)\]
+
+
+  $IG(S, A)$
+  $A$ 속성을 기준으로 $S$를 분할했을 때의 정보 획득량
+  $H(S)$
+  $S$의 엔트로피
+  $T$
+  $S$를 분할함으로써 생성된 노드들
+  $p(t)$
+  $S$ 대비 노드 $t$의 비율(크기)
+  $H(t)$
+  노드 $t$의 엔트로피
+  $H(S|A)$
+  $A$ 속성을 기준으로 $S$를 분할하여 생성된 노드들의 $H(t)$를 가중 평균한 값
+
+
+‘이렇게!’ 분할 방식을 정보 획득량에 따라 평가해보자. 나이 30살을 기준으로 샘플을 분할했다고 가정했다.
+
+
+
+먼저 분할 전 엔트로피 $H(S)$를 구한다. 엔트로피 식 $-\sum_{j=1}^{J} p_{j} \log{(p_{j})}$ 을 적용하면 된다.
+
+
+  노랑 클래스 : 7개 중 3개이므로, $- \frac{3}{7} \log \frac{3}{7}$
+  초록 클래스 : 7개 중 3개이므로, $- \frac{3}{7} \log \frac{3}{7}$
+  검정 클래스 : 7개 중 1개이므로, $- \frac{1}{7} \log \frac{1}{7}$
+
+
+$H(S) \approx 0.523 + 0.523 + 0.402 = 1.448$
+
+다음으로 분할 후 엔트로피 $H(S|A)$를 구한다. 이는 각 노드의 엔트로피를 가중 평균하여 계산한다.
+
+True 노드
+
+
+  초록 클래스 : 3개 중 3개이므로, $- \frac{3}{3} \log \frac{3}{3} = 0$
+
+
+$H(\text{True}) = 0$
+
+False 노드
+
+
+  노랑 클래스 : 4개 중 3개이므로, $- \frac{3}{4} \log \frac{3}{4} = 0$
+  검정 클래스 : 4개 중 1개이므로, $- \frac{1}{4} \log \frac{1}{4} = 0$
+
+
+$H(\text{True}) \approx 0.311 + 0.5 = 0.811$
+
+그 다음 분할된 비율을 기준으로 가중평균을 구한다. 좌측 노드는 네 개, 우측 노드는 세 개 샘플을 가져갔다.
+
+$H(S|A) = \frac{3}{7} \cdot H(\text{True}) + \frac{4}{7} \cdot H(\text{False}) \approx 0.463$
+
+최종적으로 분할 전에 비해 정보량을 비교한다.
+
+\[IG(S, A) = H(S) - H(S|A) \approx 1.448 - 0.463 = 0.985\]
+
+
+
+분할 전후의 엔트로피를 비교한 결과 정보 이득은 약 $0.985$이다. 반면 이렇게? 분할 방식의 정보 이득을 계산하면 $0.198$로 비교적 정보 이득이 적은 것을 알 수 있다.
+
+이처럼 불순도를 낮추는 방향으로 데이터를 분할하는 것을 반복함으로써 계층적인 트리 구조를 형성하는 것이 결정트리 방법론이다. 여기서 ‘불순도’를 어떤 지표로 평가할지, 언제까지 분할을 반복할지, 어떤 노드를 주로 참고할지 등 구체적인 활용 방식에 따라 다른 알고리즘이 될 수 있다.
+
+직관 설명하기
+
+
+  제한된 범위의 정수로 이루어진 응답 데이터를 처리하는 데 있어서 결정트리 모델이 적절한가?
+
+
+지금까지 결정트리 방법론의 등장 맥락, 분할의 기준을 살펴보았다. 이제 처음의 질문으로 돌아가보자.
+
+“제한된 범위”
+
+결정트리 모델은 값이 좁은 범위로 제한된 데이터에 대해 유리할 수 있다. 결정트리가 비모수적 모델(non-parametric models)이기 때문이다.
+결정트리 모델은 주어진 데이터를 거듭된 조건에 따라 쪼개 나간다. 특정 분포를 가정하지 않고 주어진 데이터에 따라 비선형적인 구조를 형성한다는 의미다. 반면 선형회귀와 같은 모수적 모델은 모든 범위의 데이터에 대해서 유효한 분포(함수)가 있다고 가정하고 이에 맞춰 파라미터를 학습(fit)한다. 실제 데이터에 비해 함수 가정이 과도할 수 있다. 우리는 0 ~ 10 의 범위에서 벗어나는 입력은 전혀 고려하지 않고 있단 말이다.
+
+“정수”
+
+결정트리 모델은 특정 임계값을 기준으로 데이터를 분할하는데, 정수형 데이터는 이산적(discrete) 성격을 띠므로 분할 자체가 직관적이고 간단해진다. 예를 들어 ‘5번 질문에 대한 응답이 3점 이상’이라는 분할 조건을 세우는 건 간단하고 직관적이다. 하지만 데이터가 연속형이었으면 ‘A 속성이 0.3728 이상’과 같이 정밀한 임계값을 정해야 했을 것이다. 당연히 더 많은 경우의 수를 고려해야 하기 때문에 난이도가 높아진다.
+
+“응답 데이터”
+
+설문 참여자들은 비슷한 질문에 대해 비슷하게 응답하는 경향이 있을 것이다. 예를 들어 ‘인생이 행복합니까?’ 라는 질문에 그렇다고 응답할수록, ‘생활이 만족스럽습니까?’ 라는 질문에도 그렇다고 응답할 것이다. 이처럼 변수 간 상관관계가 존재하는 다중공선성의 문제에 결정트리 모델이 유리하다. 애초에 결정트리는 사회과학 연구에서 일종의 교차분석과 유사한 방법론으로 제시되지 않았는가?
+결정트리는 불순도가 (지니 계수든 엔트로피든) 가장 크게 감소하는 조건을 선택하여 분할을 실시하기 때문에 가장 중요한 변수가 우선적으로 선택되는 효과가 있다. 그 결과 비슷한 패턴의 변수들은 자연스럽게 제외되기 때문에 변수 간 상관관계는 결정트리 모델에 큰 해가 되지 않는다.
+
+나가며
+
+결정트리의 작동 맥락과 주요 지표를 살펴봄으로써 나의 직관을 설명할 수 있었다. 이 과정에서 ‘비모수형 모델’의 개념을 명확하게 이해할 수 있게 되었고, 머신러닝 분야에서 ‘엔트로피’가 가지는 의미를 다시 상기할 수 있었다. 이번 공부를 통해 나의 직관이 어느 정도 의미 있었다는 결론을 내렸으므로, 이제 실제 적용하는 일만 남았다.
+
+분량이 너무 길어져서 가지치기나 정지규칙, 코드 등 더 깊은 내용은 다루지 못했지만 모델의 본질과 연결되는 직관을 이해했다는 점에서 만족스러운 공부였다. 이어서 결정트리 방법론을 기반으로 하는 다양한 머신러닝 모델에 대해서 하나씩 공부하는 시간을 가져보겠다.
+" />
+    
+    <meta name="author" content="YunsooLog" />
+
+    
+    <meta property="og:title" content="결정트리 모델(Decision Tree)이 나의 문제를 해결해줄 수 있을까?" />
+    <meta property="twitter:title" content="결정트리 모델(Decision Tree)이 나의 문제를 해결해줄 수 있을까?" />
+    
+  <!-- Async font loading -->
+<script>
+  window.WebFontConfig = {
+      custom: {
+          families: ['Spoqa Han Sans:100,300,400,700'],
+          urls: ['https://spoqa.github.io/spoqa-han-sans/css/SpoqaHanSans-kr.css']
+      },
+      timeout: 60000
+  };
+  (function(d) {
+      var wf = d.createElement('script'), s = d.scripts[0];
+      wf.src = 'https://ajax.googleapis.com/ajax/libs/webfont/1.5.18/webfont.js';
+      s.parentNode.insertBefore(wf, s);
+  })(document);
+</script>
+
+  <!--[if lt IE 9]>
+    <script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+  <![endif]-->
+
+  <link rel="stylesheet" type="text/css" href="/style.css" />
+  <link rel="alternate" type="application/rss+xml" title="YunsooLog - 행간을 읽는 기계학습 이야기" href="/feed.xml" />
+  <script>
+    document.cookie = "promo_shown=1; SameSite=Lax; path=/";
+  </script>
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.13.11/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.13.11/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.13.11/dist/contrib/auto-render.min.js"
+          onload="renderMathInElement(document.body, {
+            delimiters: [
+              {left: '\\[', right: '\\]', display: true},
+              {left: '$$', right: '$$', display: true},
+              {left: '$', right: '$', display: false},
+            ]
+          });">
+  </script>
+
+  <!-- Created with Jekyll Now - http://github.com/barryclark/jekyll-now -->
+</head>
+  <body>
+    <div class="wrapper-masthead">
+  <div class="container">
+    <header class="masthead clearfix">
+      <a href="/" class="site-avatar"><img src="/images/avatar.png"/></a>
+      
+      <div class="site-info">
+        <h1 class="site-name"><a href="/">YunsooLog</a></h1>
+        <p class="site-description">행간을 읽는 기계학습 이야기</p>
+      </div>
+
+      <nav>
+        
+        
+        <a href="/about">About</a>
+        
+        
+        
+        <a href="/">Blog</a>
+        
+        
+        
+        <a href="/tags">Tags</a>
+        
+        
+        
+        <a href="/timeline">Timeline</a>
+        
+        
+        
+        <ul class="search-icon">
+          <a href="/search">
+          <svg 
+            width="24" 
+            height="24" 
+            viewBox="0 0 24 24" 
+            fill="none" 
+            xmlns="http://www.w3.org/2000/svg">
+            <path d="M10 2C5.58172 2 2 5.58172 2 10C2 14.4183 5.58172 18 10 18C11.8485 18 13.5451 17.3376 14.8458 16.2416L19.7071 21.1029C20.0976 21.4934 20.7308 21.4934 21.1213 21.1029C21.5118 20.7124 21.5118 20.0792 21.1213 19.6887L16.2416 14.809C17.3376 13.5083 18 11.8116 18 10C18 5.58172 14.4183 2 10 2ZM4 10C4 6.68629 6.68629 4 10 4C13.3137 4 16 6.68629 16 10C16 13.3137 13.3137 16 10 16C6.68629 16 4 13.3137 4 10Z" 
+            fill="currentColor"></path>
+          </svg>
+          </a>
+        </ul>
+
+      </nav>
+    </header>
+  </div>
+</div>
+
+    <div id="main" role="main" class="container">
+      <article class="post">
+  <div class="inner-wrap">
+    <h1>결정트리 모델(Decision Tree)이 나의 문제를 해결해줄 수 있을까?</h1>
+
+    <div>
+      <span class="date">
+        2024-10-23
+      </span>
+
+      <ul class="tag">
+        
+        <li>
+          <a href="https://woocosmos.github.io/tags#머신러닝">
+            머신러닝
+          </a>
+        </li>
+        
+      </ul>
+    </div>
+
+    <section class="entry">
+      
+      <aside>
+        <nav class="nav-toc">
+          <h3> 목차 </h3>
+          <ul id="toc" class="section-nav">
+<li class="toc-entry toc-h1"><a href="#들어가며">들어가며</a></li>
+<li class="toc-entry toc-h1"><a href="#개념">개념</a>
+<ul>
+<li class="toc-entry toc-h2"><a href="#역사로-이해하기">역사로 이해하기</a></li>
+</ul>
+</li>
+<li class="toc-entry toc-h1"><a href="#분할의-기준">분할의 기준</a>
+<ul>
+<li class="toc-entry toc-h2"><a href="#지니-계수gini-coefficient">지니 계수(Gini coefficient)</a></li>
+<li class="toc-entry toc-h2"><a href="#엔트로피entropy">엔트로피(Entropy)</a>
+<ul>
+<li class="toc-entry toc-h3"><a href="#정보획득량-information-gain">정보획득량 (Information Gain)</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toc-entry toc-h1"><a href="#직관-설명하기">직관 설명하기</a></li>
+<li class="toc-entry toc-h1"><a href="#나가며">나가며</a></li>
+</ul>
+        </nav>
+      </aside>
+      <script src="/assets/scroll-spy.js" type="text/javascript"></script>
+      
+      <h1 id="들어가며">들어가며</h1>
+
+<p>아래와 같은 설문조사가 있다. 응답자들은 0 ~ 10점 선지 중 하나를 선택한다.</p>
+
+<p><img src="https://github.com/user-attachments/assets/c7d0a9d9-b6cb-4888-93ec-d53b07c7a496" alt="image" /></p>
+
+<p><br />
+이러한 응답 데이터를 활용해서 특정 값을 예측하려 한다. 어떤 모델을 쓰면 좋을까? 이 문제 상황에서 가장 먼저 떠올린 것은 <strong>결정트리 모델</strong>이었다. 최소 0부터 최대 10으로 스케일이 한정된 정수 데이터가 주어졌으며, 결정트리 모델은 조건 (예를 들면, $x &gt; 4$ ?)에 따라 샘플을 나누며 가지를 뻗어나가기 때문이다. 문제를 해결하는 데 결정트리가 적절한 모델이라는 <em>직관적인</em> 느낌을 받았다.</p>
+
+<p>그러나 내가 설명할 수 있는 최선은 여기까지였다. “내가 모델의 개념과 원리를 근본적으로 이해하고 있나?” 반성하게 되었고, 이 글을 쓰게 된 계기가 되었다.</p>
+
+<blockquote>
+  <p>제한된 범위의 정수로 이루어진 응답 데이터를 처리하는 데 있어서 결정트리 모델이 적절한가?</p>
+</blockquote>
+
+<p>즉, 이 질문에 답변하기 위해 해당 모델을 공부한 글이다.</p>
+
+<h1 id="개념">개념</h1>
+
+<p><strong>결정트리 Decision Tree</strong>, 의사결정 나무라고도 부른다.</p>
+
+<p>데이터를 기준에 따라 반복 분할함으로써 계층적인 구조로 하위 집합을 형성하는 방법론</p>
+
+<h2 id="역사로-이해하기">역사로 이해하기</h2>
+
+<p>결정트리 모델의 시초는 1960년대 사회과학에서 찾아볼 수 있다. 이후 1980년대 데이터 과학 분야의 발전과 함께 결정트리 방법론이 소개되고 다양한 모델이 개발, 활용되기 시작했다.</p>
+
+<p>우선 1963년에 발간된 사회과학서 <a href="https://www.jstor.org/stable/2283276">Problems in the Analysis of Survey Data, and a Proposal</a>에 초기 개념이 소개되었다. 고차원의 다중공선성을 띠는 설문조사 데이터를 다루기 위한 방법론으로, 오차제곱합(SSE)를 최소화하도록 하위 그룹으로 분할한다.</p>
+
+<p>사회과학 분야에서 다룰 법한 간단한 예제를 상상해봤다. 응답자의 나이, 성별, 연봉 수준을 수집했으며 이에 따른 직업 만족도를 비교하려 한다. 그런데 나이가 많을수록 연봉 수준이 높아지기도 하고, 분포 상 응답자가 여자일수록 나이대가 낮아진다. 이러한 변수 간 상호작용을 고려하면서 종속변수(직업 만족도)의 차이를 설명하기 위해 응답자를 <mark>그룹</mark>으로 나눠볼 수 있다. 30대 미만/이상으로 나눠도 좋고, 성별에 따라 나눠도 좋다. 중요한 건 나눠진 <strong>그룹끼리 직업 만족도를 비교했을 때 차이가 커지도록</strong> 하는 것이다.</p>
+
+<p><img src="https://github.com/user-attachments/assets/ae6dc78a-b9d4-488a-9045-762f49075f6d" alt="image" />
+그룹끼리 차이가 커지도록 그룹을 나누는 이유는, 그룹 안의 <strong>동질성이 높다</strong>는 것과 같은 의미이기 때문이다. 한 그룹의 평균을 예측값으로 삼는다고 치자. 그룹의 동질성이 높을수록 그룹 내 샘플들은 평균에 가까이 몰려 있을 테니 <u>실제값과 예측값 간의 오차</u>가 전반적으로 줄어든다.</p>
+
+<p>이렇듯 직업 만족도가 가장 크게 차이나는 두 그룹으로 나눠 <em>첫번째</em> 분할을 마쳤다. 그 다음에 오차가 더 큰 그룹을 선택한 다음 그 안에서 또 분할한다. 마찬가지로 그룹 간 차이가 크게 발생하는, 다시 말해 오차를 최소화하는 분할 기준을 결정한다. 분할을 반복한다.</p>
+
+<p><img src="https://github.com/user-attachments/assets/8f40122d-dd94-4ca5-b1ce-b09108ae2e31" alt="image" />
+<em>Problems in the Analysis of Survey Data, and a Proposal(1963), 17페이지. 오늘날 결정트리 모델을 시각화한 모습과 같다.</em></p>
+
+<p>사회과학 분야에서 분할의 결과는 이렇게 활용할 수 있다. ‘30세 미만 남성 노동직 그룹과 여성 고졸 그룹의 직업 만족도가 75점 수준으로 비슷하다’ - 한편 머신러닝 분야라면? 입력 데이터에 대해 예측값을 출력하는 모델을 생성하는 데 활용할 수 있겠다! 30세 미만 남성 노동직이 입력으로 들어오면 75점 가량으로 예측하는 것이다.</p>
+
+<p>이어 1984년 <a href="https://books.google.co.kr/books/about/Classification_and_Regression_Trees.html?id=JwQx-WOmSyQC&amp;redir_esc=y">Classification and Regression Trees</a>에서 결정트리 방법론을 기반으로 한 알고리즘 CART가 발표됐다. Classification And Regression Tree의 줄임말이다. 이어 CART의 업그레이드 버전인 ID3(Iterative Dichotomiser 3), C4.5, C5.0 등이 발표되면서 결정트리 모델이 더욱 발전해나갔다. 오늘날 많이 사용하는 Random Forest, XGBoost도 결정트리 방법론을 기반으로 개발된 알고리즘들이다.</p>
+
+<h1 id="분할의-기준">분할의 기준</h1>
+
+<p>CART, ID3, C4.5, C5.0 알고리즘은 모두 결정트리 방법론을 기반으로 한다. 하지만 분할 기준을 무엇으로 설정하는지에 따라 다른 알고리즘으로 발전한 결과다. 앞서 언급한 예제에서는 간단하게 그룹별 직업 만족도의 평균값 차이를 기준으로 분할했지만, 실제 알고리즘에서는 더 효율적이거나 정교한 지표를 분할의 기준으로 삼는다.</p>
+
+<p>분할 기준의 본질은 <strong>불순도(impurity)</strong>를 낮추는 것이다. 앞서 그룹 내 동질성을 높이는 것이 중요하다고 언급했다. 이는 <strong>불순도를 낮춘다</strong>는 말과 의미가 동일하다.</p>
+
+<p><img src="https://github.com/user-attachments/assets/fbdefbc1-ead0-43b6-9e94-5c5de12ab235" alt="image" /></p>
+
+<p><em>다른 데이터가 많이 섞여 있을수록 동질성이 떨어지며 이는 곧 불순도가 높은 상태다</em></p>
+
+<p>분할의 결과로 얼마나 동질성이 높아지거나 낮아졌는지, 불순도를 수치화하는 방식은 크게 두 가지. 지니 계수와 엔트로피(정보 이득)다.
+소개한 알고리즘 중 CART는 지니 계수를 사용하며, ID3, C4.5, C5.0은 엔트로피 및 정보 이득을 사용한다.</p>
+
+<h2 id="지니-계수gini-coefficient">지니 계수(Gini coefficient)</h2>
+
+<p>지니 계수가 높을수록 불순도가 높다고 판단한다.</p>
+
+\[\text{Gini} = \sum_{j=1}^{J} p_{j}(1-p_{j}) = 1 - \sum_{j=1}^{J} p_{j}^{2}\]
+
+<dl>
+  <dt>$J$</dt>
+  <dd>각 클래스</dd>
+  <dt>$p_{j}$</dt>
+  <dd>샘플이 클래스 $j$에 속할 확률</dd>
+  <dt>$p_{j}(1-p_{j})$</dt>
+  <dd>같은 클래스의 샘플을 뽑을 확률과 이어 다른 클래스의 샘플을 뽑을 확률을 곱하여 한 노드 안이 얼마나 섞여 있는지 나타내준다</dd>
+</dl>
+
+<p>지니 계수는 경제학에서 소득이 얼마나 불평등하게 분포되었는지 나타내는 데 쓴다. 결정트리 모델의 맥락에서는 분할된 노드에 얼마나 다른 클래스 샘플이 섞여 있는지 표현해준다. <br />
+$p_{j}^{2}$은 그 클래스의 샘플이 두 번 연속 추출될 확률이기 때문에 값이 높을수록 동질성이 높다는 의미다. 지니 계수는 이를 전체에서 뺌으로써 불순도를 계산한 결과다.</p>
+
+<p>위에서 첨부한 이미지를 통해 분할 결과를 지니 계수로 평가해보겠다.</p>
+
+<p><img src="https://github.com/user-attachments/assets/ddaea2b9-6167-4293-ad45-550316e7b1e0" alt="image" /></p>
+
+<p>각 클래스에 대해 $p(1-p)$를 구한 후 합친다.</p>
+
+<p><strong>좌측 노드</strong></p>
+
+<ul>
+  <li>노랑 클래스 : 4개 중 2개이므로, $p_{\text{노랑}} = 0.5$. 즉, $0.5 * (1 - 0.5)$.</li>
+  <li>초록 클래스 : 4개 중 1개이므로, $p_{\text{초록}} = 0.25$. 즉, $0.25 * (1 - 0.25)$.</li>
+  <li>검정 클래스 : 4개 중 1개이므로, $p_{\text{초록}} = 0.25$. 즉, $0.25 * (1 - 0.25)$.</li>
+</ul>
+
+<p>$\text{Gini}_{\text{좌측}} = 0.25 + 0.1875 + 0.1875 = 0.625$</p>
+
+<p><strong>우측 노드</strong></p>
+
+<ul>
+  <li>노랑 클래스 : 3개 중 1개이므로, $p_{\text{노랑}} \approx 0.333$. 즉, $0.333 * (1 - 0.3335)$.</li>
+  <li>초록 클래스 : 3개 중 2개이므로, $p_{\text{초록}} \approx 0.667$. 즉, $0.667 * (1 - 0.667)$.</li>
+</ul>
+
+<p>$\text{Gini}_{\text{좌측}} = 0.222 + 0.111 = 0.445$</p>
+
+<p>그 다음 분할된 개수를 기준으로 가중평균을 구한다. 좌측 노드는 네 개, 우측 노드는 세 개 샘플을 가져갔다.</p>
+
+\[\text{Gini}_{\text{예시1}} = \frac{4}{7} \times 0.625 + \frac{3}{7} \times 0.445 \approx 0.548\]
+
+<p><br /></p>
+
+<p><img src="https://github.com/user-attachments/assets/2915e5fb-c00a-43ca-85ef-838f220f5032" alt="image" /></p>
+
+<p>해당 분할 결과에 대해서도 동일하게 구한다.</p>
+
+\[\text{Gini}_{\text{예시2}} = \frac{3}{7} \times 0 + \frac{4}{7} \times 0.375 = 0.214\]
+
+<p><em>좌측 노드에서 다른 클래스가 추출될 확률($1-p$)는 $0$이므로 계산 결과도 $0$이 된다.</em></p>
+
+<p><img src="https://github.com/user-attachments/assets/39f7029e-ff17-48d9-a4cf-2520dc142d50" alt="image" /></p>
+
+<p>분할 전 지니 계수가 $0.612$ 라는 점을 고려하면, 두 분할 방식 모두 지니 계수가 줄어들어 불순도가 낮아진 상태이다. 둘 중에서는 <em>이렇게!</em> 의 지니 계수 $0.214$ 가 <em>이렇게?</em> 의 $0.548$ 보다 더 낮으므로 더 적합한 분할이라고 판단할 수 있다.</p>
+
+<h2 id="엔트로피entropy">엔트로피(Entropy)</h2>
+
+<p>엔트로피는 <em>정보량의 기대값</em>을 의미한다.</p>
+
+\[\text{Entropy} = -\sum_{j=1}^{J} p_{j} \log{(p_{j})}\]
+
+<dl>
+  <dt>$J$</dt>
+  <dd>각 클래스</dd>
+  <dt>$p_{j}$</dt>
+  <dd>샘플이 클래스 $j$에 속할 확률</dd>
+  <dt>$-\log{(p_{j})}$</dt>
+  <dd>클래스 $j$에 대한 정보량</dd>
+</dl>
+
+<p>정보 이론에서는 <u>의외</u>인 사건이 발생할 때 <strong>정보량(Information Content)</strong>이 더 많다고 본다. 여기서 ‘의외인 사건’은 곧 사건의 확률이 낮다는 것을 의미한다. (11월은 강우 확률이 낮으니까 11월에 눈이 오는 것은 의외인 사건이며 정보량이 많은 것이기도 하다. 1월에 눈이 오는 사건에 비해서 말이다.)</p>
+
+<p><img src="https://github.com/user-attachments/assets/acb1c007-51cd-46f1-b27d-f7bc0d18fd31" alt="image" /></p>
+
+<p>이처럼 확률이 낮을수록 정보량이 많고 높을수록 정보량이 낮아지는 것은 확률에 로그를 취하고 음수화한 값으로 표현할 수 있다. 그리고 이 정보량에 확률을 곱함으로써 구한 <u>기댓값</u>을 엔트로피라고 부른다.</p>
+
+\[-p_{j} \times \log{(p_{j})}\]
+
+<blockquote>
+  <p>확률이 낮다 =&gt; 정보량이 많다 =&gt; 엔트로피가 높다 &lt;=&gt; 사건을 예측하기 어렵다</p>
+</blockquote>
+
+<p>노드에 다양한 클래스가 혼재되어 있을수록 어떤 클래스가 추출될지 예측하기 어렵다. 따라서 불순도를 측정하는 방식으로 엔트로피를 쓸 수 있다.</p>
+
+<h3 id="정보획득량-information-gain">정보획득량 (Information Gain)</h3>
+
+<p>결정트리 알고리즘 ID3 에서는 ‘정보획득량’을 불순도 지표로 사용하는데, 이는 분할 전후의 엔트로피 차이를 계산한 값이다.</p>
+
+\[IG(S, A) = H(S) - \sum_{t \in T} p(t) H(t) = H(S) - H(S|A)\]
+
+<dl>
+  <dt>$IG(S, A)$</dt>
+  <dd>$A$ 속성을 기준으로 $S$를 분할했을 때의 정보 획득량</dd>
+  <dt>$H(S)$</dt>
+  <dd>$S$의 엔트로피</dd>
+  <dt>$T$</dt>
+  <dd>$S$를 분할함으로써 생성된 노드들</dd>
+  <dt>$p(t)$</dt>
+  <dd>$S$ 대비 노드 $t$의 비율(크기)</dd>
+  <dt>$H(t)$</dt>
+  <dd>노드 $t$의 엔트로피</dd>
+  <dt>$H(S|A)$</dt>
+  <dd>$A$ 속성을 기준으로 $S$를 분할하여 생성된 노드들의 $H(t)$를 가중 평균한 값</dd>
+</dl>
+
+<p>‘<em>이렇게!</em>’ 분할 방식을 정보 획득량에 따라 평가해보자. 나이 30살을 기준으로 샘플을 분할했다고 가정했다.</p>
+
+<p><img src="https://github.com/user-attachments/assets/020adc3f-9cb1-4a3c-8d6f-e9fc7b754d58" alt="image" /></p>
+
+<p>먼저 분할 전 엔트로피 $H(S)$를 구한다. 엔트로피 식 $-\sum_{j=1}^{J} p_{j} \log{(p_{j})}$ 을 적용하면 된다.</p>
+
+<ul>
+  <li>노랑 클래스 : 7개 중 3개이므로, $- \frac{3}{7} \log \frac{3}{7}$</li>
+  <li>초록 클래스 : 7개 중 3개이므로, $- \frac{3}{7} \log \frac{3}{7}$</li>
+  <li>검정 클래스 : 7개 중 1개이므로, $- \frac{1}{7} \log \frac{1}{7}$</li>
+</ul>
+
+<p>$H(S) \approx 0.523 + 0.523 + 0.402 = 1.448$</p>
+
+<p>다음으로 분할 후 엔트로피 $H(S|A)$를 구한다. 이는 각 노드의 엔트로피를 가중 평균하여 계산한다.</p>
+
+<p><strong>True 노드</strong></p>
+
+<ul>
+  <li>초록 클래스 : 3개 중 3개이므로, $- \frac{3}{3} \log \frac{3}{3} = 0$</li>
+</ul>
+
+<p>$H(\text{True}) = 0$</p>
+
+<p><strong>False 노드</strong></p>
+
+<ul>
+  <li>노랑 클래스 : 4개 중 3개이므로, $- \frac{3}{4} \log \frac{3}{4} = 0$</li>
+  <li>검정 클래스 : 4개 중 1개이므로, $- \frac{1}{4} \log \frac{1}{4} = 0$</li>
+</ul>
+
+<p>$H(\text{True}) \approx 0.311 + 0.5 = 0.811$</p>
+
+<p>그 다음 분할된 비율을 기준으로 가중평균을 구한다. 좌측 노드는 네 개, 우측 노드는 세 개 샘플을 가져갔다.</p>
+
+<p>$H(S|A) = \frac{3}{7} \cdot H(\text{True}) + \frac{4}{7} \cdot H(\text{False}) \approx 0.463$</p>
+
+<p>최종적으로 분할 전에 비해 정보량을 비교한다.</p>
+
+\[IG(S, A) = H(S) - H(S|A) \approx 1.448 - 0.463 = 0.985\]
+
+<p><img src="https://github.com/user-attachments/assets/46c1934c-769d-4d09-b71f-b52ba8edb1bc" alt="image" /></p>
+
+<p>분할 전후의 엔트로피를 비교한 결과 정보 이득은 약 $0.985$이다. 반면 <em>이렇게?</em> 분할 방식의 정보 이득을 계산하면 $0.198$로 비교적 정보 이득이 적은 것을 알 수 있다.</p>
+
+<p>이처럼 불순도를 낮추는 방향으로 데이터를 분할하는 것을 반복함으로써 계층적인 트리 구조를 형성하는 것이 결정트리 방법론이다. 여기서 ‘불순도’를 어떤 지표로 평가할지, 언제까지 분할을 반복할지, 어떤 노드를 주로 참고할지 등 구체적인 활용 방식에 따라 다른 알고리즘이 될 수 있다.</p>
+
+<h1 id="직관-설명하기">직관 설명하기</h1>
+
+<blockquote>
+  <p>제한된 범위의 정수로 이루어진 응답 데이터를 처리하는 데 있어서 결정트리 모델이 적절한가?</p>
+</blockquote>
+
+<p>지금까지 결정트리 방법론의 등장 맥락, 분할의 기준을 살펴보았다. 이제 처음의 질문으로 돌아가보자.</p>
+
+<p><strong>“제한된 범위”</strong></p>
+
+<p>결정트리 모델은 값이 좁은 범위로 제한된 데이터에 대해 유리할 수 있다. 결정트리가 <u>비모수적 모델(non-parametric models)</u>이기 때문이다.<br />
+결정트리 모델은 주어진 데이터를 거듭된 조건에 따라 쪼개 나간다. 특정 분포를 가정하지 않고 <strong>주어진 데이터에 따라 비선형적인 구조를 형성</strong>한다는 의미다. 반면 선형회귀와 같은 모수적 모델은 <strong>모든 범위의 데이터에 대해서 유효한 분포(함수)</strong>가 있다고 가정하고 이에 맞춰 파라미터를 학습(fit)한다. 실제 데이터에 비해 함수 가정이 과도할 수 있다. 우리는 0 ~ 10 의 범위에서 벗어나는 입력은 전혀 고려하지 않고 있단 말이다.</p>
+
+<p><strong>“정수”</strong></p>
+
+<p>결정트리 모델은 특정 임계값을 기준으로 데이터를 분할하는데, 정수형 데이터는 이산적(discrete) 성격을 띠므로 <u>분할 자체가 직관적이고 간단해진다</u>. 예를 들어 ‘5번 질문에 대한 응답이 3점 이상’이라는 분할 조건을 세우는 건 간단하고 직관적이다. 하지만 데이터가 연속형이었으면 ‘A 속성이 0.3728 이상’과 같이 정밀한 임계값을 정해야 했을 것이다. 당연히 더 많은 경우의 수를 고려해야 하기 때문에 난이도가 높아진다.</p>
+
+<p><strong>“응답 데이터”</strong></p>
+
+<p>설문 참여자들은 비슷한 질문에 대해 비슷하게 응답하는 경향이 있을 것이다. 예를 들어 ‘인생이 행복합니까?’ 라는 질문에 그렇다고 응답할수록, ‘생활이 만족스럽습니까?’ 라는 질문에도 그렇다고 응답할 것이다. 이처럼 변수 간 상관관계가 존재하는 다중공선성의 문제에 결정트리 모델이 유리하다. 애초에 결정트리는 사회과학 연구에서 일종의 교차분석과 유사한 방법론으로 제시되지 않았는가?<br />
+결정트리는 불순도가 (지니 계수든 엔트로피든) 가장 크게 감소하는 조건을 선택하여 분할을 실시하기 때문에 <u>가장 중요한 변수가 우선적으로 선택되는 효과</u>가 있다. 그 결과 비슷한 패턴의 변수들은 자연스럽게 제외되기 때문에 변수 간 상관관계는 결정트리 모델에 큰 해가 되지 않는다.</p>
+
+<h1 id="나가며">나가며</h1>
+
+<p>결정트리의 작동 맥락과 주요 지표를 살펴봄으로써 나의 직관을 설명할 수 있었다. 이 과정에서 ‘비모수형 모델’의 개념을 명확하게 이해할 수 있게 되었고, 머신러닝 분야에서 ‘엔트로피’가 가지는 의미를 다시 상기할 수 있었다. 이번 공부를 통해 나의 직관이 어느 정도 의미 있었다는 결론을 내렸으므로, 이제 실제 적용하는 일만 남았다.</p>
+
+<p>분량이 너무 길어져서 가지치기나 정지규칙, 코드 등 더 깊은 내용은 다루지 못했지만 모델의 본질과 연결되는 직관을 이해했다는 점에서 만족스러운 공부였다. 이어서 결정트리 방법론을 기반으로 하는 다양한 머신러닝 모델에 대해서 하나씩 공부하는 시간을 가져보겠다.</p>
+
+    </section>
+  </div>
+
+  <div class="pagination">
+    
+      <span class="prev" >
+          <a href="https://woocosmos.github.io/jax-lev-up-review/">
+            &#xE000; 📖 『JAX/Flax로 딥러닝 레벨업』(제이펍) 리뷰
+          </a>
+      </span>
+    
+    
+      <span class="next" >
+          <a href="https://woocosmos.github.io/probation/">
+            내가 무엇을, 왜 하고 있는지 인지하기 [수습기간 회고]  &#xE001;
+          </a>
+      </span>
+    
+  </div>
+
+  <div class="comments">
+	<div id="disqus_thread"></div>
+	<script type="text/javascript">
+
+	    var disqus_shortname = 'woocosmos';
+
+	    (function() {
+	        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+	        dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+			dsq.setAttribute('data-timestamp', +new Date()); //추가
+	        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+	    })();
+
+	</script>
+	<noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+  <script type="text/javascript">
+    "use strict"; 
+    function addBackToTop() 
+        { function o() 
+            { 
+                t() >= z ? R && (D.className = "", R = !1) : R || (D.className = "hidden", R = !0) 
+            } 
+          function t() 
+            { 
+                return E.scrollTop || A && document.documentElement.scrollTop || 0 
+            } 
+          function e(o) 
+            { 
+                E.scrollTop = o, A && (document.documentElement.scrollTop = o) 
+            } 
+    
+    var n, i, d, r, c = arguments.length > 0 && void 0 !== arguments[0] ? arguments[0] : {}, a = c.backgroundColor, s = void 0 === a ? "#000" : a, l = c.cornerOffset, u = void 0 === l ? 20 : l, m = c.diameter, p = void 0 === m ? 56 : m, h = c.ease, b = void 0 === h ? function (o) { return .5 * (1 - Math.cos(Math.PI * o)) } : h, v = c.id, f = void 0 === v ? "back-to-top" : v, x = c.innerHTML, g = void 0 === x ? '<svg viewBox="0 0 24 24"><path d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z"></path></svg>' : x, w = c.onClickScrollTo, y = void 0 === w ? 0 : w, k = c.scrollContainer, E = void 0 === k ? document.body : k, T = c.scrollDuration, C = void 0 === T ? 100 : T, M = c.showWhenScrollTopIs, z = void 0 === M ? 1 : M, L = c.size, B = void 0 === L ? p : L, H = c.textColor, I = void 0 === H ? "#fff" : H, N = c.zIndex, S = void 0 === N ? 1 : N, q = E === document.body, A = q && document.documentElement; n = Math.round(.35 * B), i = Math.round(.2 * B), d = "#" + f + "{background:" + s + ";-webkit-border-radius:50%;-moz-border-radius:50%;border-radius:50%;bottom:" + u + "px;-webkit-box-shadow:0 2px 5px 0 rgba(0,0,0,.26);-moz-box-shadow:0 2px 5px 0 rgba(0,0,0,.26);box-shadow:0 2px 5px 0 rgba(0,0,0,.26);color:" + I + ";cursor:pointer;display:block;height:" + B + "px;opacity:1;outline:0;position:fixed;right:" + u + "px;-webkit-tap-highlight-color:transparent;-webkit-touch-callout:none;-webkit-transition:bottom .2s,opacity .2s;-o-transition:bottom .2s,opacity .2s;-moz-transition:bottom .2s,opacity .2s;transition:bottom .2s,opacity .2s;-webkit-user-select:none;-moz-user-select:none;-ms-user-select:none;user-select:none;width:" + B + "px;z-index:" + S + "}#" + f + " svg{display:block;fill:currentColor;height:" + n + "px;margin:" + i + "px auto 0;width:" + n + "px}#" + f + ".hidden{bottom:-" + B + "px;opacity:0}", (r = document.createElement("style")).appendChild(document.createTextNode(d)), document.head.insertAdjacentElement("afterbegin", r); var D = function () { var o = document.createElement("div"); return o.id = f, o.className = "hidden", o.innerHTML = g, o.addEventListener("click", function (o) { o.preventDefault(), function () { var o = "function" == typeof y ? y() : y, n = window, i = n.performance, d = n.requestAnimationFrame; if (C <= 0 || void 0 === i || void 0 === d) return e(o); var r = i.now(), c = t(), a = c - o; d(function o(t) { var n = Math.min((t - r) / C, 1); e(c - Math.round(b(n) * a)), n < 1 && d(o) }) }() }), document.body.appendChild(o), o }(), R = !0; (q ? window : E).addEventListener("scroll", o), o() } window.addEventListener("load", function () { var o = document.getElementById("back-to-top"), t = document.querySelector(".sticky-bottom"), e = document.querySelector(".fixed-bottom"); o && window.addEventListener("scroll", function () { if (t) { var n = t.getBoundingClientRect(); window.scrollY + window.innerHeight > document.body.scrollHeight - n.height ? (o.style.position = "fixed", o.style.bottom = n.height + 15 + "px") : (o.style.position = "fixed", o.style.bottom = "15px") } if (e) { var i = e.getBoundingClientRect(); o.style.position = "fixed", o.style.bottom = i.height + 15 + "px" } }) });
+</script>
+<script>
+    addBackToTop();
+</script>
+
+
+
+
+</article>
+
+    </div>
+    
+    <div class="wrapper-footer">
+      <div class="container">
+        <footer class="footer">
+          <!-- Refer to https://codepen.io/ruandre/pen/howFi -->
+<ul class="svg-icon">
+
+  
+
+  
+
+  
+  <li><a href="mailto:woocosmos@gmail.com" class="icon-8 email" title="Email"><svg viewBox="0 0 512 512"><path d="M101.3 141.6v228.9h0.3 308.4 0.8V141.6H101.3zM375.7 167.8l-119.7 91.5 -119.6-91.5H375.7zM127.6 194.1l64.1 49.1 -64.1 64.1V194.1zM127.8 344.2l84.9-84.9 43.2 33.1 43-32.9 84.7 84.7L127.8 344.2 127.8 344.2zM384.4 307.8l-64.4-64.4 64.4-49.3V307.8z"/></svg><!--[if lt IE 9]><em>Email</em><![endif]--></a></li>
+  
+
+  
+
+  
+
+  
+  <li><a href="https://github.com/woocosmos" class="icon-13 github" title="GitHub"><svg viewBox="0 0 512 512"><path d="M256 70.7c-102.6 0-185.9 83.2-185.9 185.9 0 82.1 53.3 151.8 127.1 176.4 9.3 1.7 12.3-4 12.3-8.9V389.4c-51.7 11.3-62.5-21.9-62.5-21.9 -8.4-21.5-20.6-27.2-20.6-27.2 -16.9-11.5 1.3-11.3 1.3-11.3 18.7 1.3 28.5 19.2 28.5 19.2 16.6 28.4 43.5 20.2 54.1 15.4 1.7-12 6.5-20.2 11.8-24.9 -41.3-4.7-84.7-20.6-84.7-91.9 0-20.3 7.3-36.9 19.2-49.9 -1.9-4.7-8.3-23.6 1.8-49.2 0 0 15.6-5 51.1 19.1 14.8-4.1 30.7-6.2 46.5-6.3 15.8 0.1 31.7 2.1 46.6 6.3 35.5-24 51.1-19.1 51.1-19.1 10.1 25.6 3.8 44.5 1.8 49.2 11.9 13 19.1 29.6 19.1 49.9 0 71.4-43.5 87.1-84.9 91.7 6.7 5.8 12.8 17.1 12.8 34.4 0 24.9 0 44.9 0 51 0 4.9 3 10.7 12.4 8.9 73.8-24.6 127-94.3 127-176.4C441.9 153.9 358.6 70.7 256 70.7z"/></svg><!--[if lt IE 9]><em>GitHub</em><![endif]--></a></li>
+  
+
+  
+
+  
+
+  
+  <li><a href="https://www.linkedin.com/in/yunsoo-woo-245946213" class="icon-17 linkedin" title="LinkedIn"><svg viewBox="0 0 512 512"><path d="M186.4 142.4c0 19-15.3 34.5-34.2 34.5 -18.9 0-34.2-15.4-34.2-34.5 0-19 15.3-34.5 34.2-34.5C171.1 107.9 186.4 123.4 186.4 142.4zM181.4 201.3h-57.8V388.1h57.8V201.3zM273.8 201.3h-55.4V388.1h55.4c0 0 0-69.3 0-98 0-26.3 12.1-41.9 35.2-41.9 21.3 0 31.5 15 31.5 41.9 0 26.9 0 98 0 98h57.5c0 0 0-68.2 0-118.3 0-50-28.3-74.2-68-74.2 -39.6 0-56.3 30.9-56.3 30.9v-25.2H273.8z"/></svg><!--[if lt IE 9]><em>LinkedIn</em><![endif]--></a></li>
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</ul>
+
+
+<p>© 2026 Yunsoo Woo</p>
+
+        </footer>
+      </div>
+    </div>
+
+    <!--  -->
+
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-1YCJCQRD4F"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-1YCJCQRD4F');
+</script>
+    <script type="text/javascript">
+    "use strict"; 
+    function addBackToTop() 
+        { function o() 
+            { 
+                t() >= z ? R && (D.className = "", R = !1) : R || (D.className = "hidden", R = !0) 
+            } 
+          function t() 
+            { 
+                return E.scrollTop || A && document.documentElement.scrollTop || 0 
+            } 
+          function e(o) 
+            { 
+                E.scrollTop = o, A && (document.documentElement.scrollTop = o) 
+            } 
+    
+    var n, i, d, r, c = arguments.length > 0 && void 0 !== arguments[0] ? arguments[0] : {}, a = c.backgroundColor, s = void 0 === a ? "#000" : a, l = c.cornerOffset, u = void 0 === l ? 20 : l, m = c.diameter, p = void 0 === m ? 56 : m, h = c.ease, b = void 0 === h ? function (o) { return .5 * (1 - Math.cos(Math.PI * o)) } : h, v = c.id, f = void 0 === v ? "back-to-top" : v, x = c.innerHTML, g = void 0 === x ? '<svg viewBox="0 0 24 24"><path d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z"></path></svg>' : x, w = c.onClickScrollTo, y = void 0 === w ? 0 : w, k = c.scrollContainer, E = void 0 === k ? document.body : k, T = c.scrollDuration, C = void 0 === T ? 100 : T, M = c.showWhenScrollTopIs, z = void 0 === M ? 1 : M, L = c.size, B = void 0 === L ? p : L, H = c.textColor, I = void 0 === H ? "#fff" : H, N = c.zIndex, S = void 0 === N ? 1 : N, q = E === document.body, A = q && document.documentElement; n = Math.round(.35 * B), i = Math.round(.2 * B), d = "#" + f + "{background:" + s + ";-webkit-border-radius:50%;-moz-border-radius:50%;border-radius:50%;bottom:" + u + "px;-webkit-box-shadow:0 2px 5px 0 rgba(0,0,0,.26);-moz-box-shadow:0 2px 5px 0 rgba(0,0,0,.26);box-shadow:0 2px 5px 0 rgba(0,0,0,.26);color:" + I + ";cursor:pointer;display:block;height:" + B + "px;opacity:1;outline:0;position:fixed;right:" + u + "px;-webkit-tap-highlight-color:transparent;-webkit-touch-callout:none;-webkit-transition:bottom .2s,opacity .2s;-o-transition:bottom .2s,opacity .2s;-moz-transition:bottom .2s,opacity .2s;transition:bottom .2s,opacity .2s;-webkit-user-select:none;-moz-user-select:none;-ms-user-select:none;user-select:none;width:" + B + "px;z-index:" + S + "}#" + f + " svg{display:block;fill:currentColor;height:" + n + "px;margin:" + i + "px auto 0;width:" + n + "px}#" + f + ".hidden{bottom:-" + B + "px;opacity:0}", (r = document.createElement("style")).appendChild(document.createTextNode(d)), document.head.insertAdjacentElement("afterbegin", r); var D = function () { var o = document.createElement("div"); return o.id = f, o.className = "hidden", o.innerHTML = g, o.addEventListener("click", function (o) { o.preventDefault(), function () { var o = "function" == typeof y ? y() : y, n = window, i = n.performance, d = n.requestAnimationFrame; if (C <= 0 || void 0 === i || void 0 === d) return e(o); var r = i.now(), c = t(), a = c - o; d(function o(t) { var n = Math.min((t - r) / C, 1); e(c - Math.round(b(n) * a)), n < 1 && d(o) }) }() }), document.body.appendChild(o), o }(), R = !0; (q ? window : E).addEventListener("scroll", o), o() } window.addEventListener("load", function () { var o = document.getElementById("back-to-top"), t = document.querySelector(".sticky-bottom"), e = document.querySelector(".fixed-bottom"); o && window.addEventListener("scroll", function () { if (t) { var n = t.getBoundingClientRect(); window.scrollY + window.innerHeight > document.body.scrollHeight - n.height ? (o.style.position = "fixed", o.style.bottom = n.height + 15 + "px") : (o.style.position = "fixed", o.style.bottom = "15px") } if (e) { var i = e.getBoundingClientRect(); o.style.position = "fixed", o.style.bottom = i.height + 15 + "px" } }) });
+</script>
+<script>
+    addBackToTop();
+</script>
+
+
+
+
+
+  </body>
+</html>

@@ -1,0 +1,1159 @@
+<!DOCTYPE html>
+<html>
+  <head>
+  <title>옵시디언(Obsidian)을 세팅해보자 - git 활용한 아이폰 동기화까지 – YunsooLog – 행간을 읽는 기계학습 이야기</title>
+  <link rel="icon" href="/images/favicon.ico">
+      <meta name="google-site-verification" content="NA4jg1Iffw6aA9VWjj3kqoo2jfOkPRxINJtYphd7VeI" />
+    <meta charset="utf-8" />
+    <meta content='text/html; charset=utf-8' http-equiv='Content-Type'>
+    <meta http-equiv='X-UA-Compatible' content='IE=edge'>
+    <meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1.0'>
+    <meta http-equiv="Permissions-Policy" content="interest-cohort=()">
+    
+    
+    <meta name="description" content="요약
+
+  - 옵시디언을 설치하고 vault, 노트 링크, 그래프 뷰 등 기본 기능을 살펴본다
+  - Git 플러그인으로 데스크탑 동기화를 설정하고, aShell을 활용해 아이폰에서도 SSH 기반 git 동기화를 구현한다
+  - iOS 단축어를 연동하여 옵시디언 앱의 열기/닫기 시 자동 pull/push가 되도록 설정한다
+
+
+개요
+
+나만의 지식 데이터베이스를 구축하기 위해 옵시디언을 세팅하려 한다.
+
+최근 공식 CLI를 지원한다고 하여 다른 메모 앱보다 에이전트에 친화적이라는 생각이 들기 때문이다.
+
+기존에 사용하던 어플리케이션의 불편함을 짚어보자면,
+
+
+  
+    
+      앱
+      문제점
+    
+  
+  
+    
+      노션
+      무겁고 군더더기가 너무 많음
+    
+    
+      iOS 메모앱
+      포맷팅이 불편하고 너무 가벼워 메모가 휘발적임
+    
+  
+
+
+(가만 생각해보니 이제껏 나만의 지식 데이터베이스의 역할을 해주던 건 “카카오톡 나에게 보내기” 기능이었다)
+
+시작
+
+
+
+Obsidian 공홈에서 MacOS 앱을 받아 설치했다. 오른편의 Graph View가 눈에 띈다.
+
+vault는 md 파일들이 저장되는 root 폴더를 가리킨다.
+
+link는 내외부 리소스와 연결해주는 방식이고, importer는 외부의 리소스를 마이그레이션해올 수 있는 플러그인이다.
+
+
+
+새 노트를 생성한 다음 내용을 작성해보았다.
+
+이때 특정 키워드를 [[이런 식]]으로 감싸주면, 그 키워드를 제목으로 하는 새 노트를 작성할 수 있는 링크가 생성된다.
+
+이렇게 노트끼리 서로 참조할 수 있다.
+
+
+
+그래프 뷰를 통해 노트 간 관계를 확인할 수 있다. 또 #태그 형식으로 태그 기능을 사용할 수 있다.
+
+추가로 비교적 최근에 공식 도입된 base 기능은 노션의 데이터베이스와 유사하게 사용할 수 있다고 하는데 …
+
+슥 둘러 봤을 땐 index 기능에 더 가까운 것 같다.
+
+아직은 입문 단계니까 base 는 패스.
+
+git 연동
+
+Obsidian Sync 는 유료 기능이기 때문에, git을 활용하여 무료로 데이터를 동기화할 수 있다.
+
+
+  
+    github 에 private repository 를 생성한다.
+  
+  
+    옵시디언의 설정 &gt; Community Plugins &gt; Git 설치한다.
+  
+  vault 가 위치한 경로로 가서 git init 해준다.
+    
+      왼쪽 하단 vault 이름을 클릭하면 manage vaults 가 뜨는데, 거기서 로컬 파일 시스템 내 어디에 위치하는지 경로가 보인다.
+      나의 경우, /Users/&lt;내 이름&gt;/Documents 에 있었음
+    
+
+    
+  
+  git 플러그인 설정에서 자동 sync 모드를 켜준다.
+    
+      옵시디언 화면에서 git commit/push 등 동작을 버튼으로 수행할 수 있게 된다.
+    
+  
+
+
+참고로 passphrase 를 입력하라는 창이 계속 떴었는데, vault 폴더에서 .git/config 의 url 정보를 아래와 같이 변경하니 바로 push 할 수 있게 되었다.
+
+# 수정 전
+[remote "origin"]
+	url = git@github.com:&lt;계정명&gt;/&lt;레포 이름&gt;.git
+
+# 수정 후
+[remote "origin"]
+	url = https://github.com/&lt;계정명&gt;/&lt;레포 이름&gt;.git
+
+
+처음에 ssh 인증 방식을 사용했기 때문에 키에 대한 비밀번호를 요구했던 것 같다.
+
+아이폰에서의 연동
+
+이전에는 obsidian-git 플러그인이 iOS 를 지원하지 않아,
+
+working copy 등 다른 git 클라이언트 앱을 통해 동기화를 해야 했던 것으로 보인다.
+
+2026년 2월 현재는 어떨까.
+
+obsidian-git 공식 리드미에 따르면 모바일 환경에서는 메모리 이슈 등 동작이 불안정하다는 것을 경고하고 있다. (그냥 안 된다고 봐야 할 듯)
+
+선택지는 두 개 정도로 좁혀진다.
+
+  Gitsync (repo 한 개까지 무료라는 얘길 봄) 같은 git 클라앱을 사용하거나,
+  iSH 같은 터미널 앱을 깔아 git 명령어를 입력하는 것.
+
+
+일단 자동 push 기능은 아이폰의 단축어로 구현해야 할 텐데, iSH 와 단축어 기능을 연동하기 어렵다는 논의가 보인다. - Can we run Shortcuts by a command ?
+
+반면 aShell 은 될 것 같은 느낌.
+
+우선 … aShell 로 동기화 도전!
+
+참고한 포럼 - [Mobile] Automatic sync with GitHub on iOS (for free) via a-shell
+
+1. 앱 설치
+
+(1) 앱스토어에서 Obsidian 앱을 설치한다 - create a new vault 로 진행 (이름은 Temp)
+
+(2) 앱스토에서 aShell mini 앱을 설치한다
+
+(3) aShell 에서 pickFolder 명령어 입력 &gt; 내 아이폰에서 Obsidian 폴더를 찾아 선택해준다
+
+
+  
+  
+
+
+1번 과정에서 설정한 Temp 가 보이는 상태
+
+2. SSH 키 등록
+
+aShell 에서 SSH 키를 생성
+
+ssh-keygen -t ed25519 -C "&lt;이메일&gt;@gmail.com"
+
+
+~home 으로 가서 .ssh/ 위치의 id_ed25519.pub 를 출력한다
+
+head id_ed25519.pub
+
+
+출력된 내용을 복사해서 github 의 ssh 관리탭에 키를 추가해준다.
+
+3. github 동기화
+
+다시 아까의 옵시디언 폴더로 돌아간다.
+
+앞서 만든 vault 폴더명을 ios-vault 로 이름을 변경해준다음 cd ios-vault 했다.
+
+lg2 init .
+lg2 remote add origin git@github.com:USERNAME/REPO-NAME.git
+lg2 pull origin
+
+
+host/key pair 를 등록할 거냐는 애스크가 뜰 텐데 y 를 입력하면 된다.
+
+
+
+git 으로부터 데이터가 불러와졌다!!
+
+
+
+마지막으로 세팅. 출력된 내용 중에서 Consider running 다음으로 나온 명령어들을 붙여 넣고 실행한다.
+
+lg2 config user.name "계정명"
+lg2 config user.email "이메일 주소"
+
+
+이렇게 git 사용을 위한 user 정보 설정까지 마친다.
+
+4. push 테스트
+
+아이폰에서 수정한 내역을 push 하고, 맥 데스크탑앱에서 pull 하는 간단한 실험을 진행한다.
+
+(브랜치명이 master 로 되어 있어서 중간에 엄청 삽질하고, 갑자기 not a valid reference ‘main’ 같은 에러가 뜨면서 push가 안 되기도 했음)
+
+(1) 아이폰 obsidian 앱에서 수정
+
+(2) (제발 브랜치명 확인하기)
+
+lg2 checkout main
+
+
+(3) lg2 status 확인 후,
+lg2 add . &amp; lg2 commit -m 'init commit from iPhone'
+
+
+(4) push 한다
+lg2 push origin main
+
+여기서 not a valid reference ‘main’ 에러가 뜨기도 했는데 lg2 push origin refs/heads/main 이렇게 명시했을 때 성공
+
+(5) 웹에서 push 됐는지 확인하고, 데스크탑에서 pull 버튼을 눌러주면 …
+
+
+
+성공 ㅠㅠ
+
+5. 단축어 설정
+
+단축어 설정을 하려면 jump 명령어로 obsidian 폴더에 접근할 수 있어야 한다.
+
+showmarks 를 입력해서 출력 결과를 보면 북마크명이 obsidian 이 아니라 Documents 라는 이름으로 되어 있는데, 이걸 이렇게 바꿔준다.
+
+renamemark Documents obsidian
+
+
+이제 jump obsidian 명령어로 폴더로 이동할 수 있다. (iOS의 aShell은 bookmark 기반 접근을 이용하기 때문이라고 함)
+
+자동 pull
+
+(1) 아이폰의 단축어 앱에서 ‘자동화’ 탭으로 간다
+
+(2) 새로운 개인용 자동화를 선택하여 “앱” 을 클릭한다
+
+
+
+  Obsidian 앱이 열릴 때를 조건으로 한다
+
+
+(3) 동작에서 새로운 단축어를 생성, a-shell mini 를 선택해 “명령 실행” 을 선택한다
+
+(4) 셸 명령어는 차례대로 아래와 같이 설정
+
+jump obsidian
+cd &lt;vault 이름&gt;
+lg2 pull origin
+
+
+(5) obsidian 앱을 열 때마다 단축어 실행 팝업이 뜬다
+
+
+
+자동 push
+
+(1) 똑같이 아이폰 단축어에서 자동화를 추가하여 Obsidian 이 닫힐 때를 조건으로 한다
+
+(2) 동작에서 새로운 단축어를 생성, 이번에는 commit 일시를 기록하기 위해 변수를 설정해준다
+
+  스크립트 하기 &gt; 변수 설정 &gt; 현재 날짜
+
+
+(3) a-shell mini 를 선택해 “명령 실행” 으로 아래와 같이 설정
+
+jump obsidian
+cd &lt;vault 이름&gt;
+lg2 add .
+lg2 commit -m "commit from iPhone &lt;시간 변수&gt;"
+lg2 push origin refs/heads/main
+
+
+
+
+실제 commit 메세지도 잘 설정된 것을 확인하였다.
+
+정리
+
+오늘 obsidian 을 처음 입문하면서, 켠 김에 모바일 자동 동기화까지 완료했다.
+
+obsidian 유료 서비스 쓰기 싫다고 돌고 돌아 온 느낌이 있지만 ㅋㅋㅋ
+
+이 과정에서 상당히 많이 배울 수 있었다. 특히 폰으로 리눅스 만져보는 건 완전히 새로운 경험!
+
+그 다음으로는 obsidian 데이터베이스를 RAG 으로 긁어와 LLM 개인비서가 참고할 수 있게 하는 시스템을 만들어 보고 싶은데.
+
+아니면 LLM 이 자동으로 금융 뉴스 스크랩핑 해서 obsidian 에 데이터 쌓고 참조하게 만드는 것도 좋겠다.
+
+하여튼, 그 프로젝트를 실행하기 전까지 obsidian과 친해지는 시간을 충분히 가져야겠다.
+" />
+    <meta property="og:description" content="요약
+
+  - 옵시디언을 설치하고 vault, 노트 링크, 그래프 뷰 등 기본 기능을 살펴본다
+  - Git 플러그인으로 데스크탑 동기화를 설정하고, aShell을 활용해 아이폰에서도 SSH 기반 git 동기화를 구현한다
+  - iOS 단축어를 연동하여 옵시디언 앱의 열기/닫기 시 자동 pull/push가 되도록 설정한다
+
+
+개요
+
+나만의 지식 데이터베이스를 구축하기 위해 옵시디언을 세팅하려 한다.
+
+최근 공식 CLI를 지원한다고 하여 다른 메모 앱보다 에이전트에 친화적이라는 생각이 들기 때문이다.
+
+기존에 사용하던 어플리케이션의 불편함을 짚어보자면,
+
+
+  
+    
+      앱
+      문제점
+    
+  
+  
+    
+      노션
+      무겁고 군더더기가 너무 많음
+    
+    
+      iOS 메모앱
+      포맷팅이 불편하고 너무 가벼워 메모가 휘발적임
+    
+  
+
+
+(가만 생각해보니 이제껏 나만의 지식 데이터베이스의 역할을 해주던 건 “카카오톡 나에게 보내기” 기능이었다)
+
+시작
+
+
+
+Obsidian 공홈에서 MacOS 앱을 받아 설치했다. 오른편의 Graph View가 눈에 띈다.
+
+vault는 md 파일들이 저장되는 root 폴더를 가리킨다.
+
+link는 내외부 리소스와 연결해주는 방식이고, importer는 외부의 리소스를 마이그레이션해올 수 있는 플러그인이다.
+
+
+
+새 노트를 생성한 다음 내용을 작성해보았다.
+
+이때 특정 키워드를 [[이런 식]]으로 감싸주면, 그 키워드를 제목으로 하는 새 노트를 작성할 수 있는 링크가 생성된다.
+
+이렇게 노트끼리 서로 참조할 수 있다.
+
+
+
+그래프 뷰를 통해 노트 간 관계를 확인할 수 있다. 또 #태그 형식으로 태그 기능을 사용할 수 있다.
+
+추가로 비교적 최근에 공식 도입된 base 기능은 노션의 데이터베이스와 유사하게 사용할 수 있다고 하는데 …
+
+슥 둘러 봤을 땐 index 기능에 더 가까운 것 같다.
+
+아직은 입문 단계니까 base 는 패스.
+
+git 연동
+
+Obsidian Sync 는 유료 기능이기 때문에, git을 활용하여 무료로 데이터를 동기화할 수 있다.
+
+
+  
+    github 에 private repository 를 생성한다.
+  
+  
+    옵시디언의 설정 &gt; Community Plugins &gt; Git 설치한다.
+  
+  vault 가 위치한 경로로 가서 git init 해준다.
+    
+      왼쪽 하단 vault 이름을 클릭하면 manage vaults 가 뜨는데, 거기서 로컬 파일 시스템 내 어디에 위치하는지 경로가 보인다.
+      나의 경우, /Users/&lt;내 이름&gt;/Documents 에 있었음
+    
+
+    
+  
+  git 플러그인 설정에서 자동 sync 모드를 켜준다.
+    
+      옵시디언 화면에서 git commit/push 등 동작을 버튼으로 수행할 수 있게 된다.
+    
+  
+
+
+참고로 passphrase 를 입력하라는 창이 계속 떴었는데, vault 폴더에서 .git/config 의 url 정보를 아래와 같이 변경하니 바로 push 할 수 있게 되었다.
+
+# 수정 전
+[remote "origin"]
+	url = git@github.com:&lt;계정명&gt;/&lt;레포 이름&gt;.git
+
+# 수정 후
+[remote "origin"]
+	url = https://github.com/&lt;계정명&gt;/&lt;레포 이름&gt;.git
+
+
+처음에 ssh 인증 방식을 사용했기 때문에 키에 대한 비밀번호를 요구했던 것 같다.
+
+아이폰에서의 연동
+
+이전에는 obsidian-git 플러그인이 iOS 를 지원하지 않아,
+
+working copy 등 다른 git 클라이언트 앱을 통해 동기화를 해야 했던 것으로 보인다.
+
+2026년 2월 현재는 어떨까.
+
+obsidian-git 공식 리드미에 따르면 모바일 환경에서는 메모리 이슈 등 동작이 불안정하다는 것을 경고하고 있다. (그냥 안 된다고 봐야 할 듯)
+
+선택지는 두 개 정도로 좁혀진다.
+
+  Gitsync (repo 한 개까지 무료라는 얘길 봄) 같은 git 클라앱을 사용하거나,
+  iSH 같은 터미널 앱을 깔아 git 명령어를 입력하는 것.
+
+
+일단 자동 push 기능은 아이폰의 단축어로 구현해야 할 텐데, iSH 와 단축어 기능을 연동하기 어렵다는 논의가 보인다. - Can we run Shortcuts by a command ?
+
+반면 aShell 은 될 것 같은 느낌.
+
+우선 … aShell 로 동기화 도전!
+
+참고한 포럼 - [Mobile] Automatic sync with GitHub on iOS (for free) via a-shell
+
+1. 앱 설치
+
+(1) 앱스토어에서 Obsidian 앱을 설치한다 - create a new vault 로 진행 (이름은 Temp)
+
+(2) 앱스토에서 aShell mini 앱을 설치한다
+
+(3) aShell 에서 pickFolder 명령어 입력 &gt; 내 아이폰에서 Obsidian 폴더를 찾아 선택해준다
+
+
+  
+  
+
+
+1번 과정에서 설정한 Temp 가 보이는 상태
+
+2. SSH 키 등록
+
+aShell 에서 SSH 키를 생성
+
+ssh-keygen -t ed25519 -C "&lt;이메일&gt;@gmail.com"
+
+
+~home 으로 가서 .ssh/ 위치의 id_ed25519.pub 를 출력한다
+
+head id_ed25519.pub
+
+
+출력된 내용을 복사해서 github 의 ssh 관리탭에 키를 추가해준다.
+
+3. github 동기화
+
+다시 아까의 옵시디언 폴더로 돌아간다.
+
+앞서 만든 vault 폴더명을 ios-vault 로 이름을 변경해준다음 cd ios-vault 했다.
+
+lg2 init .
+lg2 remote add origin git@github.com:USERNAME/REPO-NAME.git
+lg2 pull origin
+
+
+host/key pair 를 등록할 거냐는 애스크가 뜰 텐데 y 를 입력하면 된다.
+
+
+
+git 으로부터 데이터가 불러와졌다!!
+
+
+
+마지막으로 세팅. 출력된 내용 중에서 Consider running 다음으로 나온 명령어들을 붙여 넣고 실행한다.
+
+lg2 config user.name "계정명"
+lg2 config user.email "이메일 주소"
+
+
+이렇게 git 사용을 위한 user 정보 설정까지 마친다.
+
+4. push 테스트
+
+아이폰에서 수정한 내역을 push 하고, 맥 데스크탑앱에서 pull 하는 간단한 실험을 진행한다.
+
+(브랜치명이 master 로 되어 있어서 중간에 엄청 삽질하고, 갑자기 not a valid reference ‘main’ 같은 에러가 뜨면서 push가 안 되기도 했음)
+
+(1) 아이폰 obsidian 앱에서 수정
+
+(2) (제발 브랜치명 확인하기)
+
+lg2 checkout main
+
+
+(3) lg2 status 확인 후,
+lg2 add . &amp; lg2 commit -m 'init commit from iPhone'
+
+
+(4) push 한다
+lg2 push origin main
+
+여기서 not a valid reference ‘main’ 에러가 뜨기도 했는데 lg2 push origin refs/heads/main 이렇게 명시했을 때 성공
+
+(5) 웹에서 push 됐는지 확인하고, 데스크탑에서 pull 버튼을 눌러주면 …
+
+
+
+성공 ㅠㅠ
+
+5. 단축어 설정
+
+단축어 설정을 하려면 jump 명령어로 obsidian 폴더에 접근할 수 있어야 한다.
+
+showmarks 를 입력해서 출력 결과를 보면 북마크명이 obsidian 이 아니라 Documents 라는 이름으로 되어 있는데, 이걸 이렇게 바꿔준다.
+
+renamemark Documents obsidian
+
+
+이제 jump obsidian 명령어로 폴더로 이동할 수 있다. (iOS의 aShell은 bookmark 기반 접근을 이용하기 때문이라고 함)
+
+자동 pull
+
+(1) 아이폰의 단축어 앱에서 ‘자동화’ 탭으로 간다
+
+(2) 새로운 개인용 자동화를 선택하여 “앱” 을 클릭한다
+
+
+
+  Obsidian 앱이 열릴 때를 조건으로 한다
+
+
+(3) 동작에서 새로운 단축어를 생성, a-shell mini 를 선택해 “명령 실행” 을 선택한다
+
+(4) 셸 명령어는 차례대로 아래와 같이 설정
+
+jump obsidian
+cd &lt;vault 이름&gt;
+lg2 pull origin
+
+
+(5) obsidian 앱을 열 때마다 단축어 실행 팝업이 뜬다
+
+
+
+자동 push
+
+(1) 똑같이 아이폰 단축어에서 자동화를 추가하여 Obsidian 이 닫힐 때를 조건으로 한다
+
+(2) 동작에서 새로운 단축어를 생성, 이번에는 commit 일시를 기록하기 위해 변수를 설정해준다
+
+  스크립트 하기 &gt; 변수 설정 &gt; 현재 날짜
+
+
+(3) a-shell mini 를 선택해 “명령 실행” 으로 아래와 같이 설정
+
+jump obsidian
+cd &lt;vault 이름&gt;
+lg2 add .
+lg2 commit -m "commit from iPhone &lt;시간 변수&gt;"
+lg2 push origin refs/heads/main
+
+
+
+
+실제 commit 메세지도 잘 설정된 것을 확인하였다.
+
+정리
+
+오늘 obsidian 을 처음 입문하면서, 켠 김에 모바일 자동 동기화까지 완료했다.
+
+obsidian 유료 서비스 쓰기 싫다고 돌고 돌아 온 느낌이 있지만 ㅋㅋㅋ
+
+이 과정에서 상당히 많이 배울 수 있었다. 특히 폰으로 리눅스 만져보는 건 완전히 새로운 경험!
+
+그 다음으로는 obsidian 데이터베이스를 RAG 으로 긁어와 LLM 개인비서가 참고할 수 있게 하는 시스템을 만들어 보고 싶은데.
+
+아니면 LLM 이 자동으로 금융 뉴스 스크랩핑 해서 obsidian 에 데이터 쌓고 참조하게 만드는 것도 좋겠다.
+
+하여튼, 그 프로젝트를 실행하기 전까지 obsidian과 친해지는 시간을 충분히 가져야겠다.
+" />
+    
+    <meta name="author" content="YunsooLog" />
+
+    
+    <meta property="og:title" content="옵시디언(Obsidian)을 세팅해보자 - git 활용한 아이폰 동기화까지" />
+    <meta property="twitter:title" content="옵시디언(Obsidian)을 세팅해보자 - git 활용한 아이폰 동기화까지" />
+    
+  <!-- Async font loading -->
+<script>
+  window.WebFontConfig = {
+      custom: {
+          families: ['Spoqa Han Sans:100,300,400,700'],
+          urls: ['https://spoqa.github.io/spoqa-han-sans/css/SpoqaHanSans-kr.css']
+      },
+      timeout: 60000
+  };
+  (function(d) {
+      var wf = d.createElement('script'), s = d.scripts[0];
+      wf.src = 'https://ajax.googleapis.com/ajax/libs/webfont/1.5.18/webfont.js';
+      s.parentNode.insertBefore(wf, s);
+  })(document);
+</script>
+
+  <!--[if lt IE 9]>
+    <script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+  <![endif]-->
+
+  <link rel="stylesheet" type="text/css" href="/style.css" />
+  <link rel="alternate" type="application/rss+xml" title="YunsooLog - 행간을 읽는 기계학습 이야기" href="/feed.xml" />
+  <script>
+    document.cookie = "promo_shown=1; SameSite=Lax; path=/";
+  </script>
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.13.11/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.13.11/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.13.11/dist/contrib/auto-render.min.js"
+          onload="renderMathInElement(document.body, {
+            delimiters: [
+              {left: '\\[', right: '\\]', display: true},
+              {left: '$$', right: '$$', display: true},
+              {left: '$', right: '$', display: false},
+            ]
+          });">
+  </script>
+
+  <!-- Created with Jekyll Now - http://github.com/barryclark/jekyll-now -->
+</head>
+  <body>
+    <div class="wrapper-masthead">
+  <div class="container">
+    <header class="masthead clearfix">
+      <a href="/" class="site-avatar"><img src="/images/avatar.png"/></a>
+      
+      <div class="site-info">
+        <h1 class="site-name"><a href="/">YunsooLog</a></h1>
+        <p class="site-description">행간을 읽는 기계학습 이야기</p>
+      </div>
+
+      <nav>
+        
+        
+        <a href="/about">About</a>
+        
+        
+        
+        <a href="/">Blog</a>
+        
+        
+        
+        <a href="/tags">Tags</a>
+        
+        
+        
+        <a href="/timeline">Timeline</a>
+        
+        
+        
+        <ul class="search-icon">
+          <a href="/search">
+          <svg 
+            width="24" 
+            height="24" 
+            viewBox="0 0 24 24" 
+            fill="none" 
+            xmlns="http://www.w3.org/2000/svg">
+            <path d="M10 2C5.58172 2 2 5.58172 2 10C2 14.4183 5.58172 18 10 18C11.8485 18 13.5451 17.3376 14.8458 16.2416L19.7071 21.1029C20.0976 21.4934 20.7308 21.4934 21.1213 21.1029C21.5118 20.7124 21.5118 20.0792 21.1213 19.6887L16.2416 14.809C17.3376 13.5083 18 11.8116 18 10C18 5.58172 14.4183 2 10 2ZM4 10C4 6.68629 6.68629 4 10 4C13.3137 4 16 6.68629 16 10C16 13.3137 13.3137 16 10 16C6.68629 16 4 13.3137 4 10Z" 
+            fill="currentColor"></path>
+          </svg>
+          </a>
+        </ul>
+
+      </nav>
+    </header>
+  </div>
+</div>
+
+    <div id="main" role="main" class="container">
+      <article class="post">
+  <div class="inner-wrap">
+    <h1>옵시디언(Obsidian)을 세팅해보자 - git 활용한 아이폰 동기화까지</h1>
+
+    <div>
+      <span class="date">
+        2026-02-16
+      </span>
+
+      <ul class="tag">
+        
+        <li>
+          <a href="https://woocosmos.github.io/tags#생산성">
+            생산성
+          </a>
+        </li>
+        
+      </ul>
+    </div>
+
+    <section class="entry">
+      
+      <aside>
+        <nav class="nav-toc">
+          <h3> 목차 </h3>
+          <ul id="toc" class="section-nav">
+<li class="toc-entry toc-h1"><a href="#개요">개요</a></li>
+<li class="toc-entry toc-h1"><a href="#시작">시작</a></li>
+<li class="toc-entry toc-h1"><a href="#git-연동">git 연동</a></li>
+<li class="toc-entry toc-h1"><a href="#아이폰에서의-연동">아이폰에서의 연동</a>
+<ul>
+<li class="toc-entry toc-h2"><a href="#1-앱-설치">1. 앱 설치</a></li>
+<li class="toc-entry toc-h2"><a href="#2-ssh-키-등록">2. SSH 키 등록</a></li>
+<li class="toc-entry toc-h2"><a href="#3-github-동기화">3. github 동기화</a></li>
+<li class="toc-entry toc-h2"><a href="#4-push-테스트">4. push 테스트</a></li>
+<li class="toc-entry toc-h2"><a href="#5-단축어-설정">5. 단축어 설정</a>
+<ul>
+<li class="toc-entry toc-h4"><a href="#자동-pull">자동 pull</a></li>
+<li class="toc-entry toc-h4"><a href="#자동-push">자동 push</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toc-entry toc-h1"><a href="#정리">정리</a></li>
+</ul>
+        </nav>
+      </aside>
+      <script src="/assets/scroll-spy.js" type="text/javascript"></script>
+      
+      <p><strong>요약</strong></p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  - 옵시디언을 설치하고 vault, 노트 링크, 그래프 뷰 등 기본 기능을 살펴본다
+  - Git 플러그인으로 데스크탑 동기화를 설정하고, aShell을 활용해 아이폰에서도 SSH 기반 git 동기화를 구현한다
+  - iOS 단축어를 연동하여 옵시디언 앱의 열기/닫기 시 자동 pull/push가 되도록 설정한다
+</code></pre></div></div>
+
+<h1 id="개요">개요</h1>
+
+<p>나만의 <strong>지식 데이터베이스</strong>를 구축하기 위해 옵시디언을 세팅하려 한다.</p>
+
+<p>최근 <a href="https://help.obsidian.md/cli">공식 CLI</a>를 지원한다고 하여 다른 메모 앱보다 에이전트에 친화적이라는 생각이 들기 때문이다.</p>
+
+<p>기존에 사용하던 어플리케이션의 불편함을 짚어보자면,</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>앱</th>
+      <th>문제점</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>노션</td>
+      <td>무겁고 군더더기가 너무 많음</td>
+    </tr>
+    <tr>
+      <td>iOS 메모앱</td>
+      <td>포맷팅이 불편하고 너무 가벼워 메모가 휘발적임</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>(가만 생각해보니 이제껏 나만의 지식 데이터베이스의 역할을 해주던 건 “카카오톡 나에게 보내기” 기능이었다)</p>
+
+<h1 id="시작">시작</h1>
+
+<p><img src="/images/obsidian_00.png" alt="image" width="80%" /></p>
+
+<p><a href="https://obsidian.md/">Obsidian</a> 공홈에서 MacOS 앱을 받아 설치했다. 오른편의 Graph View가 눈에 띈다.</p>
+
+<p><code class="language-plaintext highlighter-rouge">vault</code>는 md 파일들이 저장되는 root 폴더를 가리킨다.</p>
+
+<p><code class="language-plaintext highlighter-rouge">link</code>는 내외부 리소스와 연결해주는 방식이고, <code class="language-plaintext highlighter-rouge">importer</code>는 외부의 리소스를 마이그레이션해올 수 있는 플러그인이다.</p>
+
+<p><img src="/images/obsidian_01.png" alt="image" width="80%" /></p>
+
+<p>새 노트를 생성한 다음 내용을 작성해보았다.</p>
+
+<p>이때 특정 키워드를 <code class="language-plaintext highlighter-rouge">[[이런 식]]</code>으로 감싸주면, 그 키워드를 제목으로 하는 새 노트를 작성할 수 있는 링크가 생성된다.</p>
+
+<p>이렇게 노트끼리 서로 참조할 수 있다.</p>
+
+<p><img src="/images/obsidian_02.png" alt="image" width="80%" /></p>
+
+<p>그래프 뷰를 통해 노트 간 관계를 확인할 수 있다. 또 <code class="language-plaintext highlighter-rouge">#태그</code> 형식으로 태그 기능을 사용할 수 있다.</p>
+
+<p>추가로 비교적 최근에 공식 도입된 <em>base</em> 기능은 노션의 데이터베이스와 유사하게 사용할 수 있다고 하는데 …</p>
+
+<p>슥 둘러 봤을 땐 index 기능에 더 가까운 것 같다.</p>
+
+<p>아직은 입문 단계니까 base 는 패스.</p>
+
+<h1 id="git-연동">git 연동</h1>
+
+<p>Obsidian Sync 는 유료 기능이기 때문에, git을 활용하여 무료로 데이터를 동기화할 수 있다.</p>
+
+<ol>
+  <li>
+    <p>github 에 private repository 를 생성한다.</p>
+  </li>
+  <li>
+    <p>옵시디언의 설정 &gt; Community Plugins &gt; Git 설치한다.</p>
+  </li>
+  <li>vault 가 위치한 경로로 가서 git init 해준다.
+    <ul>
+      <li>왼쪽 하단 vault 이름을 클릭하면 manage vaults 가 뜨는데, 거기서 로컬 파일 시스템 내 어디에 위치하는지 경로가 보인다.</li>
+      <li>나의 경우, /Users/<code class="language-plaintext highlighter-rouge">&lt;내 이름&gt;</code>/Documents 에 있었음</li>
+    </ul>
+
+    <p><img src="/images/obsidian_03.png" alt="image" width="80%" /></p>
+  </li>
+  <li>git 플러그인 설정에서 자동 sync 모드를 켜준다.
+    <ul>
+      <li>옵시디언 화면에서 git commit/push 등 동작을 버튼으로 수행할 수 있게 된다.</li>
+    </ul>
+  </li>
+</ol>
+
+<p>참고로 passphrase 를 입력하라는 창이 계속 떴었는데, vault 폴더에서 .git/config 의 url 정보를 아래와 같이 변경하니 바로 push 할 수 있게 되었다.</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code># 수정 전
+[remote "origin"]
+	url = git@github.com:&lt;계정명&gt;/&lt;레포 이름&gt;.git
+
+# 수정 후
+[remote "origin"]
+	url = https://github.com/&lt;계정명&gt;/&lt;레포 이름&gt;.git
+</code></pre></div></div>
+
+<p>처음에 ssh 인증 방식을 사용했기 때문에 키에 대한 비밀번호를 요구했던 것 같다.</p>
+
+<h1 id="아이폰에서의-연동">아이폰에서의 연동</h1>
+
+<p>이전에는 obsidian-git 플러그인이 iOS 를 지원하지 않아,</p>
+
+<p><em>working copy</em> 등 다른 git 클라이언트 앱을 통해 동기화를 해야 했던 것으로 보인다.</p>
+
+<p>2026년 2월 현재는 어떨까.</p>
+
+<p><a href="https://github.com/Vinzent03/obsidian-git?tab=readme-ov-file#-mobile-support-%EF%B8%8F--experimental">obsidian-git 공식 리드미</a>에 따르면 모바일 환경에서는 메모리 이슈 등 동작이 불안정하다는 것을 경고하고 있다. (그냥 안 된다고 봐야 할 듯)</p>
+
+<p>선택지는 두 개 정도로 좁혀진다.</p>
+<ul>
+  <li>Gitsync (repo 한 개까지 무료라는 얘길 봄) 같은 git 클라앱을 사용하거나,</li>
+  <li>iSH 같은 터미널 앱을 깔아 git 명령어를 입력하는 것.</li>
+</ul>
+
+<p>일단 자동 push 기능은 아이폰의 단축어로 구현해야 할 텐데, iSH 와 단축어 기능을 연동하기 어렵다는 논의가 보인다. - <a href="https://github.com/ish-app/ish/issues/1289">Can we run Shortcuts by a command ?</a></p>
+
+<p>반면 <a href="https://github.com/holzschu/a-shell?tab=readme-ov-file#shortcuts">aShell 은 될 것 같은 느낌</a>.</p>
+
+<p>우선 … <strong>aShell 로 동기화 도전!</strong></p>
+
+<p>참고한 포럼 - <a href="https://forum.obsidian.md/t/mobile-automatic-sync-with-github-on-ios-for-free-via-a-shell/46150?page=2">[Mobile] Automatic sync with GitHub on iOS (for free) via a-shell</a></p>
+
+<h2 id="1-앱-설치">1. 앱 설치</h2>
+
+<p>(1) 앱스토어에서 Obsidian 앱을 설치한다 - create a new vault 로 진행 (이름은 Temp)</p>
+
+<p>(2) 앱스토에서 aShell mini 앱을 설치한다</p>
+
+<p>(3) aShell 에서 <code class="language-plaintext highlighter-rouge">pickFolder</code> 명령어 입력 &gt; 내 아이폰에서 Obsidian 폴더를 찾아 선택해준다</p>
+
+<div style="display:flex; gap:8px;">
+  <img src="/images/obsidian_04.png" width="45%" />
+  <img src="/images/obsidian_05.png" width="45%" />
+</div>
+
+<p>1번 과정에서 설정한 Temp 가 보이는 상태</p>
+
+<h2 id="2-ssh-키-등록">2. SSH 키 등록</h2>
+
+<p>aShell 에서 SSH 키를 생성</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>ssh-keygen -t ed25519 -C "&lt;이메일&gt;@gmail.com"
+</code></pre></div></div>
+
+<p>~home 으로 가서 .ssh/ 위치의 id_ed25519.pub 를 출력한다</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>head id_ed25519.pub
+</code></pre></div></div>
+
+<p>출력된 내용을 복사해서 github 의 ssh 관리탭에 키를 추가해준다.</p>
+
+<h2 id="3-github-동기화">3. github 동기화</h2>
+
+<p>다시 아까의 옵시디언 폴더로 돌아간다.</p>
+
+<p>앞서 만든 vault 폴더명을 <code class="language-plaintext highlighter-rouge">ios-vault</code> 로 이름을 변경해준다음 cd ios-vault 했다.</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>lg2 init .
+lg2 remote add origin git@github.com:USERNAME/REPO-NAME.git
+lg2 pull origin
+</code></pre></div></div>
+
+<p>host/key pair 를 등록할 거냐는 애스크가 뜰 텐데 y 를 입력하면 된다.</p>
+
+<p><img src="/images/obsidian_06.png" alt="image" width="80%" /></p>
+
+<p><strong>git 으로부터 데이터가 불러와졌다!!</strong></p>
+
+<p><img src="/images/obsidian_07.jpeg" alt="image" width="40%" /></p>
+
+<p>마지막으로 세팅. 출력된 내용 중에서 <em>Consider running</em> 다음으로 나온 명령어들을 붙여 넣고 실행한다.</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>lg2 config user.name "계정명"
+lg2 config user.email "이메일 주소"
+</code></pre></div></div>
+
+<p>이렇게 git 사용을 위한 user 정보 설정까지 마친다.</p>
+
+<h2 id="4-push-테스트">4. push 테스트</h2>
+
+<p>아이폰에서 수정한 내역을 push 하고, 맥 데스크탑앱에서 pull 하는 간단한 실험을 진행한다.</p>
+
+<p>(브랜치명이 master 로 되어 있어서 중간에 엄청 삽질하고, 갑자기 not a valid reference ‘main’ 같은 에러가 뜨면서 push가 안 되기도 했음)</p>
+
+<p>(1) 아이폰 obsidian 앱에서 수정</p>
+
+<p>(2) (제발 브랜치명 확인하기)</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>lg2 checkout main
+</code></pre></div></div>
+
+<p>(3) lg2 status 확인 후,</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>lg2 add . &amp; lg2 commit -m 'init commit from iPhone'
+</code></pre></div></div>
+
+<p>(4) push 한다</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>lg2 push origin main
+</code></pre></div></div>
+<p>여기서 not a valid reference ‘main’ 에러가 뜨기도 했는데 <code class="language-plaintext highlighter-rouge">lg2 push origin refs/heads/main</code> 이렇게 명시했을 때 성공</p>
+
+<p>(5) 웹에서 push 됐는지 확인하고, 데스크탑에서 pull 버튼을 눌러주면 …</p>
+
+<p><img src="/images/obsidian_08.png" alt="image" width="80%" /></p>
+
+<p>성공 ㅠㅠ</p>
+
+<h2 id="5-단축어-설정">5. 단축어 설정</h2>
+
+<p>단축어 설정을 하려면 jump 명령어로 obsidian 폴더에 접근할 수 있어야 한다.</p>
+
+<p>showmarks 를 입력해서 출력 결과를 보면 북마크명이 obsidian 이 아니라 Documents 라는 이름으로 되어 있는데, 이걸 이렇게 바꿔준다.</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>renamemark Documents obsidian
+</code></pre></div></div>
+
+<p>이제 <code class="language-plaintext highlighter-rouge">jump obsidian</code> 명령어로 폴더로 이동할 수 있다. (iOS의 aShell은 bookmark 기반 접근을 이용하기 때문이라고 함)</p>
+
+<h4 id="자동-pull">자동 pull</h4>
+
+<p>(1) 아이폰의 단축어 앱에서 ‘자동화’ 탭으로 간다</p>
+
+<p>(2) 새로운 개인용 자동화를 선택하여 “앱” 을 클릭한다</p>
+
+<p><img src="/images/obsidian_09.png" alt="image" width="40%" /></p>
+<ul>
+  <li>Obsidian 앱이 열릴 때를 조건으로 한다</li>
+</ul>
+
+<p>(3) 동작에서 새로운 단축어를 생성, a-shell mini 를 선택해 “명령 실행” 을 선택한다</p>
+
+<p>(4) 셸 명령어는 차례대로 아래와 같이 설정</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>jump obsidian
+cd &lt;vault 이름&gt;
+lg2 pull origin
+</code></pre></div></div>
+
+<p>(5) obsidian 앱을 열 때마다 단축어 실행 팝업이 뜬다</p>
+
+<p><img src="/images/obsidian_10.png" alt="image" width="40%" /></p>
+
+<h4 id="자동-push">자동 push</h4>
+
+<p>(1) 똑같이 아이폰 단축어에서 자동화를 추가하여 Obsidian 이 닫힐 때를 조건으로 한다</p>
+
+<p>(2) 동작에서 새로운 단축어를 생성, 이번에는 commit 일시를 기록하기 위해 변수를 설정해준다</p>
+<ul>
+  <li>스크립트 하기 &gt; 변수 설정 &gt; 현재 날짜</li>
+</ul>
+
+<p>(3) a-shell mini 를 선택해 “명령 실행” 으로 아래와 같이 설정</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>jump obsidian
+cd &lt;vault 이름&gt;
+lg2 add .
+lg2 commit -m "commit from iPhone &lt;시간 변수&gt;"
+lg2 push origin refs/heads/main
+</code></pre></div></div>
+
+<p><img src="/images/obsidian_11.png" alt="image" width="80%" /></p>
+
+<p>실제 commit 메세지도 잘 설정된 것을 확인하였다.</p>
+
+<h1 id="정리">정리</h1>
+
+<p>오늘 obsidian 을 처음 입문하면서, 켠 김에 모바일 자동 동기화까지 완료했다.</p>
+
+<p>obsidian 유료 서비스 쓰기 싫다고 돌고 돌아 온 느낌이 있지만 ㅋㅋㅋ</p>
+
+<p>이 과정에서 상당히 많이 배울 수 있었다. 특히 폰으로 리눅스 만져보는 건 완전히 새로운 경험!</p>
+
+<p>그 다음으로는 obsidian 데이터베이스를 RAG 으로 긁어와 LLM 개인비서가 참고할 수 있게 하는 시스템을 만들어 보고 싶은데.</p>
+
+<p>아니면 LLM 이 자동으로 금융 뉴스 스크랩핑 해서 obsidian 에 데이터 쌓고 참조하게 만드는 것도 좋겠다.</p>
+
+<p>하여튼, 그 프로젝트를 실행하기 전까지 obsidian과 친해지는 시간을 충분히 가져야겠다.</p>
+
+    </section>
+  </div>
+
+  <div class="pagination">
+    
+      <span class="prev" >
+          <a href="https://woocosmos.github.io/raspberry-pi-01/">
+            &#xE000; [라즈베리 파이를 활용한 홈서버 구축] 01. 킥오프
+          </a>
+      </span>
+    
+    
+      <span class="next" >
+          <a href="https://woocosmos.github.io/obsidian-git-auth/">
+            Windows 옵시디언 앱에서 git username/password 를 계속 요구하는 문제 &#xE001;
+          </a>
+      </span>
+    
+  </div>
+
+  <div class="comments">
+	<div id="disqus_thread"></div>
+	<script type="text/javascript">
+
+	    var disqus_shortname = 'woocosmos';
+
+	    (function() {
+	        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+	        dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+			dsq.setAttribute('data-timestamp', +new Date()); //추가
+	        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+	    })();
+
+	</script>
+	<noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+  <script type="text/javascript">
+    "use strict"; 
+    function addBackToTop() 
+        { function o() 
+            { 
+                t() >= z ? R && (D.className = "", R = !1) : R || (D.className = "hidden", R = !0) 
+            } 
+          function t() 
+            { 
+                return E.scrollTop || A && document.documentElement.scrollTop || 0 
+            } 
+          function e(o) 
+            { 
+                E.scrollTop = o, A && (document.documentElement.scrollTop = o) 
+            } 
+    
+    var n, i, d, r, c = arguments.length > 0 && void 0 !== arguments[0] ? arguments[0] : {}, a = c.backgroundColor, s = void 0 === a ? "#000" : a, l = c.cornerOffset, u = void 0 === l ? 20 : l, m = c.diameter, p = void 0 === m ? 56 : m, h = c.ease, b = void 0 === h ? function (o) { return .5 * (1 - Math.cos(Math.PI * o)) } : h, v = c.id, f = void 0 === v ? "back-to-top" : v, x = c.innerHTML, g = void 0 === x ? '<svg viewBox="0 0 24 24"><path d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z"></path></svg>' : x, w = c.onClickScrollTo, y = void 0 === w ? 0 : w, k = c.scrollContainer, E = void 0 === k ? document.body : k, T = c.scrollDuration, C = void 0 === T ? 100 : T, M = c.showWhenScrollTopIs, z = void 0 === M ? 1 : M, L = c.size, B = void 0 === L ? p : L, H = c.textColor, I = void 0 === H ? "#fff" : H, N = c.zIndex, S = void 0 === N ? 1 : N, q = E === document.body, A = q && document.documentElement; n = Math.round(.35 * B), i = Math.round(.2 * B), d = "#" + f + "{background:" + s + ";-webkit-border-radius:50%;-moz-border-radius:50%;border-radius:50%;bottom:" + u + "px;-webkit-box-shadow:0 2px 5px 0 rgba(0,0,0,.26);-moz-box-shadow:0 2px 5px 0 rgba(0,0,0,.26);box-shadow:0 2px 5px 0 rgba(0,0,0,.26);color:" + I + ";cursor:pointer;display:block;height:" + B + "px;opacity:1;outline:0;position:fixed;right:" + u + "px;-webkit-tap-highlight-color:transparent;-webkit-touch-callout:none;-webkit-transition:bottom .2s,opacity .2s;-o-transition:bottom .2s,opacity .2s;-moz-transition:bottom .2s,opacity .2s;transition:bottom .2s,opacity .2s;-webkit-user-select:none;-moz-user-select:none;-ms-user-select:none;user-select:none;width:" + B + "px;z-index:" + S + "}#" + f + " svg{display:block;fill:currentColor;height:" + n + "px;margin:" + i + "px auto 0;width:" + n + "px}#" + f + ".hidden{bottom:-" + B + "px;opacity:0}", (r = document.createElement("style")).appendChild(document.createTextNode(d)), document.head.insertAdjacentElement("afterbegin", r); var D = function () { var o = document.createElement("div"); return o.id = f, o.className = "hidden", o.innerHTML = g, o.addEventListener("click", function (o) { o.preventDefault(), function () { var o = "function" == typeof y ? y() : y, n = window, i = n.performance, d = n.requestAnimationFrame; if (C <= 0 || void 0 === i || void 0 === d) return e(o); var r = i.now(), c = t(), a = c - o; d(function o(t) { var n = Math.min((t - r) / C, 1); e(c - Math.round(b(n) * a)), n < 1 && d(o) }) }() }), document.body.appendChild(o), o }(), R = !0; (q ? window : E).addEventListener("scroll", o), o() } window.addEventListener("load", function () { var o = document.getElementById("back-to-top"), t = document.querySelector(".sticky-bottom"), e = document.querySelector(".fixed-bottom"); o && window.addEventListener("scroll", function () { if (t) { var n = t.getBoundingClientRect(); window.scrollY + window.innerHeight > document.body.scrollHeight - n.height ? (o.style.position = "fixed", o.style.bottom = n.height + 15 + "px") : (o.style.position = "fixed", o.style.bottom = "15px") } if (e) { var i = e.getBoundingClientRect(); o.style.position = "fixed", o.style.bottom = i.height + 15 + "px" } }) });
+</script>
+<script>
+    addBackToTop();
+</script>
+
+
+
+
+</article>
+
+    </div>
+    
+    <div class="wrapper-footer">
+      <div class="container">
+        <footer class="footer">
+          <!-- Refer to https://codepen.io/ruandre/pen/howFi -->
+<ul class="svg-icon">
+
+  
+
+  
+
+  
+  <li><a href="mailto:woocosmos@gmail.com" class="icon-8 email" title="Email"><svg viewBox="0 0 512 512"><path d="M101.3 141.6v228.9h0.3 308.4 0.8V141.6H101.3zM375.7 167.8l-119.7 91.5 -119.6-91.5H375.7zM127.6 194.1l64.1 49.1 -64.1 64.1V194.1zM127.8 344.2l84.9-84.9 43.2 33.1 43-32.9 84.7 84.7L127.8 344.2 127.8 344.2zM384.4 307.8l-64.4-64.4 64.4-49.3V307.8z"/></svg><!--[if lt IE 9]><em>Email</em><![endif]--></a></li>
+  
+
+  
+
+  
+
+  
+  <li><a href="https://github.com/woocosmos" class="icon-13 github" title="GitHub"><svg viewBox="0 0 512 512"><path d="M256 70.7c-102.6 0-185.9 83.2-185.9 185.9 0 82.1 53.3 151.8 127.1 176.4 9.3 1.7 12.3-4 12.3-8.9V389.4c-51.7 11.3-62.5-21.9-62.5-21.9 -8.4-21.5-20.6-27.2-20.6-27.2 -16.9-11.5 1.3-11.3 1.3-11.3 18.7 1.3 28.5 19.2 28.5 19.2 16.6 28.4 43.5 20.2 54.1 15.4 1.7-12 6.5-20.2 11.8-24.9 -41.3-4.7-84.7-20.6-84.7-91.9 0-20.3 7.3-36.9 19.2-49.9 -1.9-4.7-8.3-23.6 1.8-49.2 0 0 15.6-5 51.1 19.1 14.8-4.1 30.7-6.2 46.5-6.3 15.8 0.1 31.7 2.1 46.6 6.3 35.5-24 51.1-19.1 51.1-19.1 10.1 25.6 3.8 44.5 1.8 49.2 11.9 13 19.1 29.6 19.1 49.9 0 71.4-43.5 87.1-84.9 91.7 6.7 5.8 12.8 17.1 12.8 34.4 0 24.9 0 44.9 0 51 0 4.9 3 10.7 12.4 8.9 73.8-24.6 127-94.3 127-176.4C441.9 153.9 358.6 70.7 256 70.7z"/></svg><!--[if lt IE 9]><em>GitHub</em><![endif]--></a></li>
+  
+
+  
+
+  
+
+  
+  <li><a href="https://www.linkedin.com/in/yunsoo-woo-245946213" class="icon-17 linkedin" title="LinkedIn"><svg viewBox="0 0 512 512"><path d="M186.4 142.4c0 19-15.3 34.5-34.2 34.5 -18.9 0-34.2-15.4-34.2-34.5 0-19 15.3-34.5 34.2-34.5C171.1 107.9 186.4 123.4 186.4 142.4zM181.4 201.3h-57.8V388.1h57.8V201.3zM273.8 201.3h-55.4V388.1h55.4c0 0 0-69.3 0-98 0-26.3 12.1-41.9 35.2-41.9 21.3 0 31.5 15 31.5 41.9 0 26.9 0 98 0 98h57.5c0 0 0-68.2 0-118.3 0-50-28.3-74.2-68-74.2 -39.6 0-56.3 30.9-56.3 30.9v-25.2H273.8z"/></svg><!--[if lt IE 9]><em>LinkedIn</em><![endif]--></a></li>
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</ul>
+
+
+<p>© 2026 Yunsoo Woo</p>
+
+        </footer>
+      </div>
+    </div>
+
+    <!--  -->
+
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-1YCJCQRD4F"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-1YCJCQRD4F');
+</script>
+    <script type="text/javascript">
+    "use strict"; 
+    function addBackToTop() 
+        { function o() 
+            { 
+                t() >= z ? R && (D.className = "", R = !1) : R || (D.className = "hidden", R = !0) 
+            } 
+          function t() 
+            { 
+                return E.scrollTop || A && document.documentElement.scrollTop || 0 
+            } 
+          function e(o) 
+            { 
+                E.scrollTop = o, A && (document.documentElement.scrollTop = o) 
+            } 
+    
+    var n, i, d, r, c = arguments.length > 0 && void 0 !== arguments[0] ? arguments[0] : {}, a = c.backgroundColor, s = void 0 === a ? "#000" : a, l = c.cornerOffset, u = void 0 === l ? 20 : l, m = c.diameter, p = void 0 === m ? 56 : m, h = c.ease, b = void 0 === h ? function (o) { return .5 * (1 - Math.cos(Math.PI * o)) } : h, v = c.id, f = void 0 === v ? "back-to-top" : v, x = c.innerHTML, g = void 0 === x ? '<svg viewBox="0 0 24 24"><path d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z"></path></svg>' : x, w = c.onClickScrollTo, y = void 0 === w ? 0 : w, k = c.scrollContainer, E = void 0 === k ? document.body : k, T = c.scrollDuration, C = void 0 === T ? 100 : T, M = c.showWhenScrollTopIs, z = void 0 === M ? 1 : M, L = c.size, B = void 0 === L ? p : L, H = c.textColor, I = void 0 === H ? "#fff" : H, N = c.zIndex, S = void 0 === N ? 1 : N, q = E === document.body, A = q && document.documentElement; n = Math.round(.35 * B), i = Math.round(.2 * B), d = "#" + f + "{background:" + s + ";-webkit-border-radius:50%;-moz-border-radius:50%;border-radius:50%;bottom:" + u + "px;-webkit-box-shadow:0 2px 5px 0 rgba(0,0,0,.26);-moz-box-shadow:0 2px 5px 0 rgba(0,0,0,.26);box-shadow:0 2px 5px 0 rgba(0,0,0,.26);color:" + I + ";cursor:pointer;display:block;height:" + B + "px;opacity:1;outline:0;position:fixed;right:" + u + "px;-webkit-tap-highlight-color:transparent;-webkit-touch-callout:none;-webkit-transition:bottom .2s,opacity .2s;-o-transition:bottom .2s,opacity .2s;-moz-transition:bottom .2s,opacity .2s;transition:bottom .2s,opacity .2s;-webkit-user-select:none;-moz-user-select:none;-ms-user-select:none;user-select:none;width:" + B + "px;z-index:" + S + "}#" + f + " svg{display:block;fill:currentColor;height:" + n + "px;margin:" + i + "px auto 0;width:" + n + "px}#" + f + ".hidden{bottom:-" + B + "px;opacity:0}", (r = document.createElement("style")).appendChild(document.createTextNode(d)), document.head.insertAdjacentElement("afterbegin", r); var D = function () { var o = document.createElement("div"); return o.id = f, o.className = "hidden", o.innerHTML = g, o.addEventListener("click", function (o) { o.preventDefault(), function () { var o = "function" == typeof y ? y() : y, n = window, i = n.performance, d = n.requestAnimationFrame; if (C <= 0 || void 0 === i || void 0 === d) return e(o); var r = i.now(), c = t(), a = c - o; d(function o(t) { var n = Math.min((t - r) / C, 1); e(c - Math.round(b(n) * a)), n < 1 && d(o) }) }() }), document.body.appendChild(o), o }(), R = !0; (q ? window : E).addEventListener("scroll", o), o() } window.addEventListener("load", function () { var o = document.getElementById("back-to-top"), t = document.querySelector(".sticky-bottom"), e = document.querySelector(".fixed-bottom"); o && window.addEventListener("scroll", function () { if (t) { var n = t.getBoundingClientRect(); window.scrollY + window.innerHeight > document.body.scrollHeight - n.height ? (o.style.position = "fixed", o.style.bottom = n.height + 15 + "px") : (o.style.position = "fixed", o.style.bottom = "15px") } if (e) { var i = e.getBoundingClientRect(); o.style.position = "fixed", o.style.bottom = i.height + 15 + "px" } }) });
+</script>
+<script>
+    addBackToTop();
+</script>
+
+
+
+
+
+  </body>
+</html>

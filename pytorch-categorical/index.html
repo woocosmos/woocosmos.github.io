@@ -1,0 +1,629 @@
+<!DOCTYPE html>
+<html>
+  <head>
+  <title>PyTorch의 확률분포 클래스 Categorical – YunsooLog – 행간을 읽는 기계학습 이야기</title>
+  <link rel="icon" href="/images/favicon.ico">
+      <meta name="google-site-verification" content="NA4jg1Iffw6aA9VWjj3kqoo2jfOkPRxINJtYphd7VeI" />
+    <meta charset="utf-8" />
+    <meta content='text/html; charset=utf-8' http-equiv='Content-Type'>
+    <meta http-equiv='X-UA-Compatible' content='IE=edge'>
+    <meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1.0'>
+    <meta http-equiv="Permissions-Policy" content="interest-cohort=()">
+    
+    
+    <meta name="description" content="요약
+- 분포값(softmax❌ 정규화❌)을 인자로 주어 Categorical 클래스 객체를 생성하면 파라미터에 따라 정규화된다
+- 입력값이 probs 일 경우 log을 적용하여 logits 속성을, logits일 경우 softmax를 적용하여 probs 속성을 저장한다
+- sample() 메소드를 사용하여 주어진 확률분포 기반으로 샘플링 할 수 있으며, log_prob() 메소드는 샘플된 값에 해당하는 logits를 리턴한다
+
+
+공식 문서와 공식 소스를 참고하여 작성
+
+Categorical
+
+from torch.distributions.categorical import Categorical
+
+
+probs 또는 logits 를 파라미터로 받아 확률분포를 구성하는 클래스.
+
+  logits : unnormalized log probabilities
+
+
+객체
+
+softmax를 거치지 않은 raw output 배치 샘플을 준비한다. 4개 클래스에 대한 확률값이고 배치 사이즈는 2이다.
+
+# torch.Size([2, 1, 4])
+raw_output = torch.tensor(
+            [[[0.25, 0.25, 0.25, 0.25,]],
+             [[0.33, 0.33, 0.33, 0.01]]]
+            )
+
+
+Categorical 클래스를 사용하여 두 개 확률분포 객체를 생성한다. 하나는 probs로, 하나는 logits로 파라미터화한다. 명시하지 않는 경우 default는 prob이다.
+dist1 = Categorical(probs=raw_output)
+dist2 = Categorical(logits=raw_output)
+
+
+클래스 내부적으로 input을 정규화(normalize) 하는 과정이 포함되어 있다. logits의 경우 log-sum-exp 공식을 활용한다.
+def __init__ ...
+    # dist1
+    if probs is not None:
+        self.probs = probs / probs.sum(-1, keep_dim=True)
+    # dist2
+    else:
+        self.logits = logits - logits.logsumexp(dim=-1, keepdim=True)
+
+
+속성
+
+내부적으로 probs, logits 속성을 계산하는데, 파라미터에 따라 다른 모듈을 사용한다.
+
+  logits 입력 =&gt; probs 속성 계산
+    # logits_to_probs
+F.softmax(logits, dim=-1)
+    
+  
+  probs 입력 =&gt; logits 속성 계산
+    # probs_to_logit
+ps_clamped = clamp_probs(probs) # eps ~ 1-eps 사이의 값으로 클립핑
+torch.log(ps_clamped)
+    
+  
+
+
+정리하자면,
+
+  probs 파라미터 입력
+    
+      probs 속성 : 입력값이 이미 정규화된 상태였기 때문에 동일하게 출력
+      logits 속성 : probs_to_logit 모듈을 적용한 결과 출력
+    
+
+      dist1.probs
+  # tensor([[[0.2500, 0.2500, 0.2500, 0.2500]],
+  #        [[0.3300, 0.3300, 0.3300, 0.0100]]])
+    
+  dist1.logits
+  # tensor([[[-1.3863, -1.3863, -1.3863, -1.3863]],
+  #        [[-1.1087, -1.1087, -1.1087, -4.6052]]])
+    
+  
+  logits 파라미터 입력
+    
+      probs 속성 : logits_to_probs 모듈을 적용한 결과 출력
+      logits 속성 : log-sum-exp 공식으로 정규화된 결과
+    
+
+      dist2.probs
+  # tensor([[[0.2500, 0.2500, 0.2500, 0.2500]],
+  #        [[0.2684, 0.2684, 0.2684, 0.1949]]])
+    
+  dist2.logits
+  # tensor([[[-1.3863, -1.3863, -1.3863, -1.3863]],
+  #        [[-1.3154, -1.3154, -1.3154, -1.6354]]])
+    
+  
+
+
+이들 속성은 @lazy_property로 값이 계산되기 때문에 호출하기 전까지 계산되지 않는다. 예를 들어 dist1.logits 을 호출하기 전까지 내부적으로 logits==None 으로 유지된다.
+
+샘플링
+
+sample 함수는 확률분포를 기반으로 표본을 샘플링할 수 있다. torch.multinomial으로 계산하는 것과 동일.
+
+s1 = dist1.sample() # [[1], [1]]
+s2 = dist2.sample() # [[2], [0]]
+
+
+이렇게 샘플링된 값에 해당하는 logits을 추적할 수도 있다. logits 속성에서 인덱싱해온 결과로 보면 된다.
+dist1.log_prob(s1) # [[-1.3863], [-1.1087]]
+dist2.log_prob(s2) # [[-1.3863], [-1.3154]]
+
+" />
+    <meta property="og:description" content="요약
+- 분포값(softmax❌ 정규화❌)을 인자로 주어 Categorical 클래스 객체를 생성하면 파라미터에 따라 정규화된다
+- 입력값이 probs 일 경우 log을 적용하여 logits 속성을, logits일 경우 softmax를 적용하여 probs 속성을 저장한다
+- sample() 메소드를 사용하여 주어진 확률분포 기반으로 샘플링 할 수 있으며, log_prob() 메소드는 샘플된 값에 해당하는 logits를 리턴한다
+
+
+공식 문서와 공식 소스를 참고하여 작성
+
+Categorical
+
+from torch.distributions.categorical import Categorical
+
+
+probs 또는 logits 를 파라미터로 받아 확률분포를 구성하는 클래스.
+
+  logits : unnormalized log probabilities
+
+
+객체
+
+softmax를 거치지 않은 raw output 배치 샘플을 준비한다. 4개 클래스에 대한 확률값이고 배치 사이즈는 2이다.
+
+# torch.Size([2, 1, 4])
+raw_output = torch.tensor(
+            [[[0.25, 0.25, 0.25, 0.25,]],
+             [[0.33, 0.33, 0.33, 0.01]]]
+            )
+
+
+Categorical 클래스를 사용하여 두 개 확률분포 객체를 생성한다. 하나는 probs로, 하나는 logits로 파라미터화한다. 명시하지 않는 경우 default는 prob이다.
+dist1 = Categorical(probs=raw_output)
+dist2 = Categorical(logits=raw_output)
+
+
+클래스 내부적으로 input을 정규화(normalize) 하는 과정이 포함되어 있다. logits의 경우 log-sum-exp 공식을 활용한다.
+def __init__ ...
+    # dist1
+    if probs is not None:
+        self.probs = probs / probs.sum(-1, keep_dim=True)
+    # dist2
+    else:
+        self.logits = logits - logits.logsumexp(dim=-1, keepdim=True)
+
+
+속성
+
+내부적으로 probs, logits 속성을 계산하는데, 파라미터에 따라 다른 모듈을 사용한다.
+
+  logits 입력 =&gt; probs 속성 계산
+    # logits_to_probs
+F.softmax(logits, dim=-1)
+    
+  
+  probs 입력 =&gt; logits 속성 계산
+    # probs_to_logit
+ps_clamped = clamp_probs(probs) # eps ~ 1-eps 사이의 값으로 클립핑
+torch.log(ps_clamped)
+    
+  
+
+
+정리하자면,
+
+  probs 파라미터 입력
+    
+      probs 속성 : 입력값이 이미 정규화된 상태였기 때문에 동일하게 출력
+      logits 속성 : probs_to_logit 모듈을 적용한 결과 출력
+    
+
+      dist1.probs
+  # tensor([[[0.2500, 0.2500, 0.2500, 0.2500]],
+  #        [[0.3300, 0.3300, 0.3300, 0.0100]]])
+    
+  dist1.logits
+  # tensor([[[-1.3863, -1.3863, -1.3863, -1.3863]],
+  #        [[-1.1087, -1.1087, -1.1087, -4.6052]]])
+    
+  
+  logits 파라미터 입력
+    
+      probs 속성 : logits_to_probs 모듈을 적용한 결과 출력
+      logits 속성 : log-sum-exp 공식으로 정규화된 결과
+    
+
+      dist2.probs
+  # tensor([[[0.2500, 0.2500, 0.2500, 0.2500]],
+  #        [[0.2684, 0.2684, 0.2684, 0.1949]]])
+    
+  dist2.logits
+  # tensor([[[-1.3863, -1.3863, -1.3863, -1.3863]],
+  #        [[-1.3154, -1.3154, -1.3154, -1.6354]]])
+    
+  
+
+
+이들 속성은 @lazy_property로 값이 계산되기 때문에 호출하기 전까지 계산되지 않는다. 예를 들어 dist1.logits 을 호출하기 전까지 내부적으로 logits==None 으로 유지된다.
+
+샘플링
+
+sample 함수는 확률분포를 기반으로 표본을 샘플링할 수 있다. torch.multinomial으로 계산하는 것과 동일.
+
+s1 = dist1.sample() # [[1], [1]]
+s2 = dist2.sample() # [[2], [0]]
+
+
+이렇게 샘플링된 값에 해당하는 logits을 추적할 수도 있다. logits 속성에서 인덱싱해온 결과로 보면 된다.
+dist1.log_prob(s1) # [[-1.3863], [-1.1087]]
+dist2.log_prob(s2) # [[-1.3863], [-1.3154]]
+
+" />
+    
+    <meta name="author" content="YunsooLog" />
+
+    
+    <meta property="og:title" content="PyTorch의 확률분포 클래스 Categorical" />
+    <meta property="twitter:title" content="PyTorch의 확률분포 클래스 Categorical" />
+    
+  <!-- Async font loading -->
+<script>
+  window.WebFontConfig = {
+      custom: {
+          families: ['Spoqa Han Sans:100,300,400,700'],
+          urls: ['https://spoqa.github.io/spoqa-han-sans/css/SpoqaHanSans-kr.css']
+      },
+      timeout: 60000
+  };
+  (function(d) {
+      var wf = d.createElement('script'), s = d.scripts[0];
+      wf.src = 'https://ajax.googleapis.com/ajax/libs/webfont/1.5.18/webfont.js';
+      s.parentNode.insertBefore(wf, s);
+  })(document);
+</script>
+
+  <!--[if lt IE 9]>
+    <script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+  <![endif]-->
+
+  <link rel="stylesheet" type="text/css" href="/style.css" />
+  <link rel="alternate" type="application/rss+xml" title="YunsooLog - 행간을 읽는 기계학습 이야기" href="/feed.xml" />
+  <script>
+    document.cookie = "promo_shown=1; SameSite=Lax; path=/";
+  </script>
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.13.11/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.13.11/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.13.11/dist/contrib/auto-render.min.js"
+          onload="renderMathInElement(document.body, {
+            delimiters: [
+              {left: '\\[', right: '\\]', display: true},
+              {left: '$$', right: '$$', display: true},
+              {left: '$', right: '$', display: false},
+            ]
+          });">
+  </script>
+
+  <!-- Created with Jekyll Now - http://github.com/barryclark/jekyll-now -->
+</head>
+  <body>
+    <div class="wrapper-masthead">
+  <div class="container">
+    <header class="masthead clearfix">
+      <a href="/" class="site-avatar"><img src="/images/avatar.png"/></a>
+      
+      <div class="site-info">
+        <h1 class="site-name"><a href="/">YunsooLog</a></h1>
+        <p class="site-description">행간을 읽는 기계학습 이야기</p>
+      </div>
+
+      <nav>
+        
+        
+        <a href="/about">About</a>
+        
+        
+        
+        <a href="/">Blog</a>
+        
+        
+        
+        <a href="/tags">Tags</a>
+        
+        
+        
+        <a href="/timeline">Timeline</a>
+        
+        
+        
+        <ul class="search-icon">
+          <a href="/search">
+          <svg 
+            width="24" 
+            height="24" 
+            viewBox="0 0 24 24" 
+            fill="none" 
+            xmlns="http://www.w3.org/2000/svg">
+            <path d="M10 2C5.58172 2 2 5.58172 2 10C2 14.4183 5.58172 18 10 18C11.8485 18 13.5451 17.3376 14.8458 16.2416L19.7071 21.1029C20.0976 21.4934 20.7308 21.4934 21.1213 21.1029C21.5118 20.7124 21.5118 20.0792 21.1213 19.6887L16.2416 14.809C17.3376 13.5083 18 11.8116 18 10C18 5.58172 14.4183 2 10 2ZM4 10C4 6.68629 6.68629 4 10 4C13.3137 4 16 6.68629 16 10C16 13.3137 13.3137 16 10 16C6.68629 16 4 13.3137 4 10Z" 
+            fill="currentColor"></path>
+          </svg>
+          </a>
+        </ul>
+
+      </nav>
+    </header>
+  </div>
+</div>
+
+    <div id="main" role="main" class="container">
+      <article class="post">
+  <div class="inner-wrap">
+    <h1>PyTorch의 확률분포 클래스 Categorical</h1>
+
+    <div>
+      <span class="date">
+        2024-05-16
+      </span>
+
+      <ul class="tag">
+        
+        <li>
+          <a href="https://woocosmos.github.io/tags#PyTorch">
+            PyTorch
+          </a>
+        </li>
+        
+      </ul>
+    </div>
+
+    <section class="entry">
+      
+      <aside>
+        <nav class="nav-toc">
+          <h3> 목차 </h3>
+          <ul id="toc" class="section-nav">
+<li class="toc-entry toc-h1"><a href="#categorical">Categorical</a></li>
+<li class="toc-entry toc-h1"><a href="#객체">객체</a></li>
+<li class="toc-entry toc-h1"><a href="#속성">속성</a></li>
+<li class="toc-entry toc-h1"><a href="#샘플링">샘플링</a></li>
+</ul>
+        </nav>
+      </aside>
+      <script src="/assets/scroll-spy.js" type="text/javascript"></script>
+      
+      <p><strong>요약</strong></p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>- 분포값(softmax❌ 정규화❌)을 인자로 주어 Categorical 클래스 객체를 생성하면 파라미터에 따라 정규화된다
+- 입력값이 probs 일 경우 log을 적용하여 logits 속성을, logits일 경우 softmax를 적용하여 probs 속성을 저장한다
+- sample() 메소드를 사용하여 주어진 확률분포 기반으로 샘플링 할 수 있으며, log_prob() 메소드는 샘플된 값에 해당하는 logits를 리턴한다
+</code></pre></div></div>
+
+<p><em><a href="https://pytorch.org/docs/stable/distributions.html#categorical">공식 문서</a>와 <a href="https://pytorch.org/docs/stable/_modules/torch/distributions/categorical.html#Categorical.log_prob">공식 소스</a>를 참고하여 작성</em></p>
+
+<h1 id="categorical">Categorical</h1>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>from torch.distributions.categorical import Categorical
+</code></pre></div></div>
+
+<p>probs 또는 logits 를 파라미터로 받아 확률분포를 구성하는 클래스.</p>
+<ul>
+  <li>logits : unnormalized log probabilities</li>
+</ul>
+
+<h1 id="객체">객체</h1>
+
+<p>softmax를 거치지 않은 raw output 배치 샘플을 준비한다. 4개 클래스에 대한 확률값이고 배치 사이즈는 2이다.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># torch.Size([2, 1, 4])
+</span><span class="n">raw_output</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="nf">tensor</span><span class="p">(</span>
+            <span class="p">[[[</span><span class="mf">0.25</span><span class="p">,</span> <span class="mf">0.25</span><span class="p">,</span> <span class="mf">0.25</span><span class="p">,</span> <span class="mf">0.25</span><span class="p">,]],</span>
+             <span class="p">[[</span><span class="mf">0.33</span><span class="p">,</span> <span class="mf">0.33</span><span class="p">,</span> <span class="mf">0.33</span><span class="p">,</span> <span class="mf">0.01</span><span class="p">]]]</span>
+            <span class="p">)</span>
+</code></pre></div></div>
+
+<p><code class="language-plaintext highlighter-rouge">Categorical</code> 클래스를 사용하여 두 개 확률분포 객체를 생성한다. 하나는 probs로, 하나는 logits로 파라미터화한다. 명시하지 않는 경우 default는 prob이다.</p>
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">dist1</span> <span class="o">=</span> <span class="nc">Categorical</span><span class="p">(</span><span class="n">probs</span><span class="o">=</span><span class="n">raw_output</span><span class="p">)</span>
+<span class="n">dist2</span> <span class="o">=</span> <span class="nc">Categorical</span><span class="p">(</span><span class="n">logits</span><span class="o">=</span><span class="n">raw_output</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p>클래스 내부적으로 <strong>input을 정규화(normalize) 하는 과정</strong>이 포함되어 있다. logits의 경우 <a href="https://gregorygundersen.com/blog/2020/02/09/log-sum-exp/">log-sum-exp 공식</a>을 활용한다.</p>
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="nf">__init__</span> <span class="bp">...</span>
+    <span class="c1"># dist1
+</span>    <span class="k">if</span> <span class="n">probs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">probs</span> <span class="o">=</span> <span class="n">probs</span> <span class="o">/</span> <span class="n">probs</span><span class="p">.</span><span class="nf">sum</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">keep_dim</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+    <span class="c1"># dist2
+</span>    <span class="k">else</span><span class="p">:</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">logits</span> <span class="o">=</span> <span class="n">logits</span> <span class="o">-</span> <span class="n">logits</span><span class="p">.</span><span class="nf">logsumexp</span><span class="p">(</span><span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span> <span class="n">keepdim</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+</code></pre></div></div>
+
+<h1 id="속성">속성</h1>
+
+<p>내부적으로 <code class="language-plaintext highlighter-rouge">probs</code>, <code class="language-plaintext highlighter-rouge">logits</code> 속성을 계산하는데, 파라미터에 따라 다른 모듈을 사용한다.</p>
+<ul>
+  <li>logits 입력 =&gt; probs 속성 계산
+    <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># logits_to_probs
+</span><span class="n">F</span><span class="p">.</span><span class="nf">softmax</span><span class="p">(</span><span class="n">logits</span><span class="p">,</span> <span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+</code></pre></div>    </div>
+  </li>
+  <li>probs 입력 =&gt; logits 속성 계산
+    <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># probs_to_logit
+</span><span class="n">ps_clamped</span> <span class="o">=</span> <span class="nf">clamp_probs</span><span class="p">(</span><span class="n">probs</span><span class="p">)</span> <span class="c1"># eps ~ 1-eps 사이의 값으로 클립핑
+</span><span class="n">torch</span><span class="p">.</span><span class="nf">log</span><span class="p">(</span><span class="n">ps_clamped</span><span class="p">)</span>
+</code></pre></div>    </div>
+  </li>
+</ul>
+
+<p>정리하자면,</p>
+<ul>
+  <li>probs 파라미터 입력
+    <ul>
+      <li><code class="language-plaintext highlighter-rouge">probs</code> 속성 : 입력값이 이미 정규화된 상태였기 때문에 동일하게 출력</li>
+      <li><code class="language-plaintext highlighter-rouge">logits</code> 속성 : <code class="language-plaintext highlighter-rouge">probs_to_logit</code> 모듈을 적용한 결과 출력</li>
+    </ul>
+
+    <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  <span class="n">dist1</span><span class="p">.</span><span class="n">probs</span>
+  <span class="c1"># tensor([[[0.2500, 0.2500, 0.2500, 0.2500]],
+</span>  <span class="c1">#        [[0.3300, 0.3300, 0.3300, 0.0100]]])
+</span>    
+  <span class="n">dist1</span><span class="p">.</span><span class="n">logits</span>
+  <span class="c1"># tensor([[[-1.3863, -1.3863, -1.3863, -1.3863]],
+</span>  <span class="c1">#        [[-1.1087, -1.1087, -1.1087, -4.6052]]])
+</span></code></pre></div>    </div>
+  </li>
+  <li>logits 파라미터 입력
+    <ul>
+      <li><code class="language-plaintext highlighter-rouge">probs</code> 속성 : <code class="language-plaintext highlighter-rouge">logits_to_probs</code> 모듈을 적용한 결과 출력</li>
+      <li><code class="language-plaintext highlighter-rouge">logits</code> 속성 : log-sum-exp 공식으로 정규화된 결과</li>
+    </ul>
+
+    <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  <span class="n">dist2</span><span class="p">.</span><span class="n">probs</span>
+  <span class="c1"># tensor([[[0.2500, 0.2500, 0.2500, 0.2500]],
+</span>  <span class="c1">#        [[0.2684, 0.2684, 0.2684, 0.1949]]])
+</span>    
+  <span class="n">dist2</span><span class="p">.</span><span class="n">logits</span>
+  <span class="c1"># tensor([[[-1.3863, -1.3863, -1.3863, -1.3863]],
+</span>  <span class="c1">#        [[-1.3154, -1.3154, -1.3154, -1.6354]]])
+</span></code></pre></div>    </div>
+  </li>
+</ul>
+
+<p>이들 속성은 <code class="language-plaintext highlighter-rouge">@lazy_property</code>로 값이 계산되기 때문에 <u>호출하기 전까지 계산되지 않는다</u>. 예를 들어 <code class="language-plaintext highlighter-rouge">dist1.logits</code> 을 호출하기 전까지 내부적으로 logits==None 으로 유지된다.</p>
+
+<h1 id="샘플링">샘플링</h1>
+
+<p><code class="language-plaintext highlighter-rouge">sample</code> 함수는 확률분포를 기반으로 표본을 샘플링할 수 있다. <code class="language-plaintext highlighter-rouge">torch.multinomial</code>으로 계산하는 것과 동일.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">s1</span> <span class="o">=</span> <span class="n">dist1</span><span class="p">.</span><span class="nf">sample</span><span class="p">()</span> <span class="c1"># [[1], [1]]
+</span><span class="n">s2</span> <span class="o">=</span> <span class="n">dist2</span><span class="p">.</span><span class="nf">sample</span><span class="p">()</span> <span class="c1"># [[2], [0]]
+</span></code></pre></div></div>
+
+<p>이렇게 샘플링된 값에 해당하는 logits을 추적할 수도 있다. <code class="language-plaintext highlighter-rouge">logits</code> 속성에서 인덱싱해온 결과로 보면 된다.</p>
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">dist1</span><span class="p">.</span><span class="nf">log_prob</span><span class="p">(</span><span class="n">s1</span><span class="p">)</span> <span class="c1"># [[-1.3863], [-1.1087]]
+</span><span class="n">dist2</span><span class="p">.</span><span class="nf">log_prob</span><span class="p">(</span><span class="n">s2</span><span class="p">)</span> <span class="c1"># [[-1.3863], [-1.3154]]
+</span></code></pre></div></div>
+
+    </section>
+  </div>
+
+  <div class="pagination">
+    
+      <span class="prev" >
+          <a href="https://woocosmos.github.io/pytorch-basic/">
+            &#xE000; PyTorch 파이토치 기초 모음집
+          </a>
+      </span>
+    
+    
+      <span class="next" >
+          <a href="https://woocosmos.github.io/swift-start/">
+            아이폰 iOS앱 개발 체험하기: 환경 세팅과 시뮬레이션 &#xE001;
+          </a>
+      </span>
+    
+  </div>
+
+  <div class="comments">
+	<div id="disqus_thread"></div>
+	<script type="text/javascript">
+
+	    var disqus_shortname = 'woocosmos';
+
+	    (function() {
+	        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+	        dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+			dsq.setAttribute('data-timestamp', +new Date()); //추가
+	        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+	    })();
+
+	</script>
+	<noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+  <script type="text/javascript">
+    "use strict"; 
+    function addBackToTop() 
+        { function o() 
+            { 
+                t() >= z ? R && (D.className = "", R = !1) : R || (D.className = "hidden", R = !0) 
+            } 
+          function t() 
+            { 
+                return E.scrollTop || A && document.documentElement.scrollTop || 0 
+            } 
+          function e(o) 
+            { 
+                E.scrollTop = o, A && (document.documentElement.scrollTop = o) 
+            } 
+    
+    var n, i, d, r, c = arguments.length > 0 && void 0 !== arguments[0] ? arguments[0] : {}, a = c.backgroundColor, s = void 0 === a ? "#000" : a, l = c.cornerOffset, u = void 0 === l ? 20 : l, m = c.diameter, p = void 0 === m ? 56 : m, h = c.ease, b = void 0 === h ? function (o) { return .5 * (1 - Math.cos(Math.PI * o)) } : h, v = c.id, f = void 0 === v ? "back-to-top" : v, x = c.innerHTML, g = void 0 === x ? '<svg viewBox="0 0 24 24"><path d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z"></path></svg>' : x, w = c.onClickScrollTo, y = void 0 === w ? 0 : w, k = c.scrollContainer, E = void 0 === k ? document.body : k, T = c.scrollDuration, C = void 0 === T ? 100 : T, M = c.showWhenScrollTopIs, z = void 0 === M ? 1 : M, L = c.size, B = void 0 === L ? p : L, H = c.textColor, I = void 0 === H ? "#fff" : H, N = c.zIndex, S = void 0 === N ? 1 : N, q = E === document.body, A = q && document.documentElement; n = Math.round(.35 * B), i = Math.round(.2 * B), d = "#" + f + "{background:" + s + ";-webkit-border-radius:50%;-moz-border-radius:50%;border-radius:50%;bottom:" + u + "px;-webkit-box-shadow:0 2px 5px 0 rgba(0,0,0,.26);-moz-box-shadow:0 2px 5px 0 rgba(0,0,0,.26);box-shadow:0 2px 5px 0 rgba(0,0,0,.26);color:" + I + ";cursor:pointer;display:block;height:" + B + "px;opacity:1;outline:0;position:fixed;right:" + u + "px;-webkit-tap-highlight-color:transparent;-webkit-touch-callout:none;-webkit-transition:bottom .2s,opacity .2s;-o-transition:bottom .2s,opacity .2s;-moz-transition:bottom .2s,opacity .2s;transition:bottom .2s,opacity .2s;-webkit-user-select:none;-moz-user-select:none;-ms-user-select:none;user-select:none;width:" + B + "px;z-index:" + S + "}#" + f + " svg{display:block;fill:currentColor;height:" + n + "px;margin:" + i + "px auto 0;width:" + n + "px}#" + f + ".hidden{bottom:-" + B + "px;opacity:0}", (r = document.createElement("style")).appendChild(document.createTextNode(d)), document.head.insertAdjacentElement("afterbegin", r); var D = function () { var o = document.createElement("div"); return o.id = f, o.className = "hidden", o.innerHTML = g, o.addEventListener("click", function (o) { o.preventDefault(), function () { var o = "function" == typeof y ? y() : y, n = window, i = n.performance, d = n.requestAnimationFrame; if (C <= 0 || void 0 === i || void 0 === d) return e(o); var r = i.now(), c = t(), a = c - o; d(function o(t) { var n = Math.min((t - r) / C, 1); e(c - Math.round(b(n) * a)), n < 1 && d(o) }) }() }), document.body.appendChild(o), o }(), R = !0; (q ? window : E).addEventListener("scroll", o), o() } window.addEventListener("load", function () { var o = document.getElementById("back-to-top"), t = document.querySelector(".sticky-bottom"), e = document.querySelector(".fixed-bottom"); o && window.addEventListener("scroll", function () { if (t) { var n = t.getBoundingClientRect(); window.scrollY + window.innerHeight > document.body.scrollHeight - n.height ? (o.style.position = "fixed", o.style.bottom = n.height + 15 + "px") : (o.style.position = "fixed", o.style.bottom = "15px") } if (e) { var i = e.getBoundingClientRect(); o.style.position = "fixed", o.style.bottom = i.height + 15 + "px" } }) });
+</script>
+<script>
+    addBackToTop();
+</script>
+
+
+
+
+</article>
+
+    </div>
+    
+    <div class="wrapper-footer">
+      <div class="container">
+        <footer class="footer">
+          <!-- Refer to https://codepen.io/ruandre/pen/howFi -->
+<ul class="svg-icon">
+
+  
+
+  
+
+  
+  <li><a href="mailto:woocosmos@gmail.com" class="icon-8 email" title="Email"><svg viewBox="0 0 512 512"><path d="M101.3 141.6v228.9h0.3 308.4 0.8V141.6H101.3zM375.7 167.8l-119.7 91.5 -119.6-91.5H375.7zM127.6 194.1l64.1 49.1 -64.1 64.1V194.1zM127.8 344.2l84.9-84.9 43.2 33.1 43-32.9 84.7 84.7L127.8 344.2 127.8 344.2zM384.4 307.8l-64.4-64.4 64.4-49.3V307.8z"/></svg><!--[if lt IE 9]><em>Email</em><![endif]--></a></li>
+  
+
+  
+
+  
+
+  
+  <li><a href="https://github.com/woocosmos" class="icon-13 github" title="GitHub"><svg viewBox="0 0 512 512"><path d="M256 70.7c-102.6 0-185.9 83.2-185.9 185.9 0 82.1 53.3 151.8 127.1 176.4 9.3 1.7 12.3-4 12.3-8.9V389.4c-51.7 11.3-62.5-21.9-62.5-21.9 -8.4-21.5-20.6-27.2-20.6-27.2 -16.9-11.5 1.3-11.3 1.3-11.3 18.7 1.3 28.5 19.2 28.5 19.2 16.6 28.4 43.5 20.2 54.1 15.4 1.7-12 6.5-20.2 11.8-24.9 -41.3-4.7-84.7-20.6-84.7-91.9 0-20.3 7.3-36.9 19.2-49.9 -1.9-4.7-8.3-23.6 1.8-49.2 0 0 15.6-5 51.1 19.1 14.8-4.1 30.7-6.2 46.5-6.3 15.8 0.1 31.7 2.1 46.6 6.3 35.5-24 51.1-19.1 51.1-19.1 10.1 25.6 3.8 44.5 1.8 49.2 11.9 13 19.1 29.6 19.1 49.9 0 71.4-43.5 87.1-84.9 91.7 6.7 5.8 12.8 17.1 12.8 34.4 0 24.9 0 44.9 0 51 0 4.9 3 10.7 12.4 8.9 73.8-24.6 127-94.3 127-176.4C441.9 153.9 358.6 70.7 256 70.7z"/></svg><!--[if lt IE 9]><em>GitHub</em><![endif]--></a></li>
+  
+
+  
+
+  
+
+  
+  <li><a href="https://www.linkedin.com/in/yunsoo-woo-245946213" class="icon-17 linkedin" title="LinkedIn"><svg viewBox="0 0 512 512"><path d="M186.4 142.4c0 19-15.3 34.5-34.2 34.5 -18.9 0-34.2-15.4-34.2-34.5 0-19 15.3-34.5 34.2-34.5C171.1 107.9 186.4 123.4 186.4 142.4zM181.4 201.3h-57.8V388.1h57.8V201.3zM273.8 201.3h-55.4V388.1h55.4c0 0 0-69.3 0-98 0-26.3 12.1-41.9 35.2-41.9 21.3 0 31.5 15 31.5 41.9 0 26.9 0 98 0 98h57.5c0 0 0-68.2 0-118.3 0-50-28.3-74.2-68-74.2 -39.6 0-56.3 30.9-56.3 30.9v-25.2H273.8z"/></svg><!--[if lt IE 9]><em>LinkedIn</em><![endif]--></a></li>
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</ul>
+
+
+<p>© 2026 Yunsoo Woo</p>
+
+        </footer>
+      </div>
+    </div>
+
+    <!--  -->
+
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-1YCJCQRD4F"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-1YCJCQRD4F');
+</script>
+    <script type="text/javascript">
+    "use strict"; 
+    function addBackToTop() 
+        { function o() 
+            { 
+                t() >= z ? R && (D.className = "", R = !1) : R || (D.className = "hidden", R = !0) 
+            } 
+          function t() 
+            { 
+                return E.scrollTop || A && document.documentElement.scrollTop || 0 
+            } 
+          function e(o) 
+            { 
+                E.scrollTop = o, A && (document.documentElement.scrollTop = o) 
+            } 
+    
+    var n, i, d, r, c = arguments.length > 0 && void 0 !== arguments[0] ? arguments[0] : {}, a = c.backgroundColor, s = void 0 === a ? "#000" : a, l = c.cornerOffset, u = void 0 === l ? 20 : l, m = c.diameter, p = void 0 === m ? 56 : m, h = c.ease, b = void 0 === h ? function (o) { return .5 * (1 - Math.cos(Math.PI * o)) } : h, v = c.id, f = void 0 === v ? "back-to-top" : v, x = c.innerHTML, g = void 0 === x ? '<svg viewBox="0 0 24 24"><path d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z"></path></svg>' : x, w = c.onClickScrollTo, y = void 0 === w ? 0 : w, k = c.scrollContainer, E = void 0 === k ? document.body : k, T = c.scrollDuration, C = void 0 === T ? 100 : T, M = c.showWhenScrollTopIs, z = void 0 === M ? 1 : M, L = c.size, B = void 0 === L ? p : L, H = c.textColor, I = void 0 === H ? "#fff" : H, N = c.zIndex, S = void 0 === N ? 1 : N, q = E === document.body, A = q && document.documentElement; n = Math.round(.35 * B), i = Math.round(.2 * B), d = "#" + f + "{background:" + s + ";-webkit-border-radius:50%;-moz-border-radius:50%;border-radius:50%;bottom:" + u + "px;-webkit-box-shadow:0 2px 5px 0 rgba(0,0,0,.26);-moz-box-shadow:0 2px 5px 0 rgba(0,0,0,.26);box-shadow:0 2px 5px 0 rgba(0,0,0,.26);color:" + I + ";cursor:pointer;display:block;height:" + B + "px;opacity:1;outline:0;position:fixed;right:" + u + "px;-webkit-tap-highlight-color:transparent;-webkit-touch-callout:none;-webkit-transition:bottom .2s,opacity .2s;-o-transition:bottom .2s,opacity .2s;-moz-transition:bottom .2s,opacity .2s;transition:bottom .2s,opacity .2s;-webkit-user-select:none;-moz-user-select:none;-ms-user-select:none;user-select:none;width:" + B + "px;z-index:" + S + "}#" + f + " svg{display:block;fill:currentColor;height:" + n + "px;margin:" + i + "px auto 0;width:" + n + "px}#" + f + ".hidden{bottom:-" + B + "px;opacity:0}", (r = document.createElement("style")).appendChild(document.createTextNode(d)), document.head.insertAdjacentElement("afterbegin", r); var D = function () { var o = document.createElement("div"); return o.id = f, o.className = "hidden", o.innerHTML = g, o.addEventListener("click", function (o) { o.preventDefault(), function () { var o = "function" == typeof y ? y() : y, n = window, i = n.performance, d = n.requestAnimationFrame; if (C <= 0 || void 0 === i || void 0 === d) return e(o); var r = i.now(), c = t(), a = c - o; d(function o(t) { var n = Math.min((t - r) / C, 1); e(c - Math.round(b(n) * a)), n < 1 && d(o) }) }() }), document.body.appendChild(o), o }(), R = !0; (q ? window : E).addEventListener("scroll", o), o() } window.addEventListener("load", function () { var o = document.getElementById("back-to-top"), t = document.querySelector(".sticky-bottom"), e = document.querySelector(".fixed-bottom"); o && window.addEventListener("scroll", function () { if (t) { var n = t.getBoundingClientRect(); window.scrollY + window.innerHeight > document.body.scrollHeight - n.height ? (o.style.position = "fixed", o.style.bottom = n.height + 15 + "px") : (o.style.position = "fixed", o.style.bottom = "15px") } if (e) { var i = e.getBoundingClientRect(); o.style.position = "fixed", o.style.bottom = i.height + 15 + "px" } }) });
+</script>
+<script>
+    addBackToTop();
+</script>
+
+
+
+
+
+  </body>
+</html>

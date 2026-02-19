@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html>
+  <head>
+  <title>삶의 지도(1) – YunsooLog – 행간을 읽는 기계학습 이야기</title>
+  <link rel="icon" href="/images/favicon.ico">
+      <meta name="google-site-verification" content="NA4jg1Iffw6aA9VWjj3kqoo2jfOkPRxINJtYphd7VeI" />
+    <meta charset="utf-8" />
+    <meta content='text/html; charset=utf-8' http-equiv='Content-Type'>
+    <meta http-equiv='X-UA-Compatible' content='IE=edge'>
+    <meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1.0'>
+    <meta http-equiv="Permissions-Policy" content="interest-cohort=()">
+    
+    
+    <meta name="description" content="작성일: 2024-09-15(일)
+
+판교, 2024년 가을. 길고도 짧은 대기발령 끝에 본사 OO본부로 배치되었다. 이번주가 입사 첫 주였다. 이제 막 셋업되어 가는 팀이라 해야 할 게 너무나도 많았다. 사업 중심의 조직은 처음이어서 심적으로 낯설기도 했다. 금요일 밤 9시가 다 되어가는 시간에 퇴근하고 곧바로 자취방 근처 삼겹살 집으로 향했다. 고깃집이 혼밥이야말로 만렙이라더니, 생각보다 할 만 했다. 집에서 챗지피티에게 취한 상태로 샤워를 해도 되는지 물어봐놓고 껌뻑 잠에 들어버렸다.
+
+테헤란로, 2024년
+
+인원 감축이 공식적으로 발표되었다. 발표 직후 팀장님이 얼빠진 우리를 회의실로 불러 모았다. 그 자리에서 J님은 안경을 한번 치켜올리고 “이제 우린 어떻게 되나요?”라고 물어보았다. 왜 “왜 이렇게 되었나요?”는 묻지 않지? 지금 당장 살아남기 위해 던져야 할 질문은 그게 아니기 때문이다. 며칠 후, 모두가 퇴근한 저녁에 J님은 나에게 다가와 다시 한 번 말해주었다. “앞으로 무엇을 해야 할지를 생각해야 돼요. 왜 이렇게 되었는지는 누구도 설명할 수 없기 때문에.” 그 다음 절차는 하나씩 신속하게 이루어졌다. 오전 안에 본체와 모니터를 뽑아 자리를 옮기고 백지의 워드 파일에 이력서를 작성하기 시작했다. 뉴스에 우리 회사 이름이 오르내리고 사내 메신저에는 갈 곳을 잃은 사람들이 옹기종기 모였다. 아침 10시에 출근해서 저녁 7시에 퇴근할 때까지 ‘앞으로 무엇을 해야 할지’ 생각했다. 취업을 준비하던 4년 전 2020년으로 거슬러 올라가 자료를 뒤져 포트폴리오를 기워 넣었다. 상황이 왜 이렇게 되었는지는 해명할 수 없었지만 ‘왜 지금의 내가 되었는지’는 스스로 증명해야 했다.
+
+이곳 회사는 2022년 겨울에 전환형 인턴으로 들어왔다. 회사에 몇 없는 공채 출신이라며 사람들은 농담 반 진담 반으로 놀리곤 했다. 동기는 다섯 명이었고 다들 실력이 출중했다. 그들에 비해 부족한 내가 합격한 것은 운이 매우 좋았기 때문에 그리고 이 회사 서비스의 열혈 유저였기 때문이라고 생각했다. 사실 다들 비슷한 불안감을 하나씩 품고 있었던 터라 동기들과는 참 끈끈하게 지냈다. 게다가 프로그래머, 아트, 기획, 데이터 - 일하는 분야가 제각각이어서 흥미로웠고 애정이 갔다. 회사 사정이 불안정할 때마다 우리는 퇴근 후 술잔을 부딪히며 함께하기를 다짐했다. 불확신으로 가득한 6개월이 지나고 인턴 평가 결과가 나왔다. 동기 한 명은 다른 길을 걷게 되었다. 그토록 원하던 정직원 전환에 성공했는데 기쁘지 않았다. 이 회사가, 이 사회가 원망스러웠다. 그래도 해야 할 일은 해야 했다. 바뀐 건 인사 시스템 상 정보일 뿐, 똑같은 자리에서 데이터를 분석하고 대시보드를 만드는 일을 이어나갔다. 금새 일 년이 지나고 미지의 영역이었던 강화학습에도 발을 들였다. 인원 감축 발표가 있던 그날까지도 gymnasium 의 wrapper 객체를 뜯어 고쳤다.
+
+그 전 회사에서 정확히 일 년을 채우고 제 발로 나온 게 2022년 여름이었다. 그곳은 공덕역의 한 공유 오피스에 입주해 있었다. 서로를 영어 닉네임으로 부르고 주에 한 번씩 개발자들끼리 스터디도 하는 전형적인 개발자 중심의 젊은 스타트업이었다. 입사와 동시에 실험적이고 도전적인 프로젝트에 투입되었다. 그 프로젝트는 이름에 인공지능이나 청년과 같은 단어가 들어가는 국가 사업에 지원할 때 요긴하게 쓰였다. 그렇게 지급 받은 지원금으로 꽤 괜찮은 워크스테이션을 하나 맞출 수 있었다. 워크스테이션의 서버명은 페르세포네(Persephone), 하데스에게 납치 당해 지하 세계로 끌려간 페르세포네의 신화에서 딴 이름이었다. 페르세포네를 통해서 처음으로 리눅스 환경에서 개발을 하기 시작했다. 잘 몰라서 버벅이는 스스로가 답답했다. 컴퓨터에 대해 더 알고 싶었다. 잘하고 싶었다. 이렇게나 갈 길이 멀었는데도 퇴사를 결심한 것은 회사가 그 프로젝트에 이만 흥미를 잃었기 때문이다. 사업 지원금이 끊긴 이후로 회사는 서운할 정도로 나의 작업에 무관심해졌지만 혼자서 프로젝트를 끝까지 마무리했고 앞으로 더 잘하기 위해 그곳에서 나왔다.
+
+오늘날 개발자 양성 학원 광고에서 전형적으로 어필하는 것과 같이 - 아무런 스펙 없는 비전공자가 그곳에 취업한 것은 2020년 겨울부터 6개월 동안 진행된 국비지원 부트캠프에서 연계해준 덕분이었다. 코로나로 온 나라가 뒤집혀 강의는 온라인으로 진행되었지만 주관 측에 양해를 구하고 홀로 강의실에 나와 수업을 들었다. 1.5평짜리 대학가 자취방에서 접이식 테이블 앞에 쪼그려 앉아 그램 노트북으로 8시간 수업을 듣느니 충무로에 위치한 교육장으로 가겠다고 결심한 것이다. 같은 공간에서 강사님과 나 이렇게 두 사람이 각자 노트북 카메라를 바라보며 수업을 진행하는 건 퍽 웃긴 광경이었다. 게다가 40명 규모의 강의실에 달랑 두 인원만 들어 앉아 있으니 히터를 최대로 틀어놔도 입김이 풀풀 나왔다. 굳이 강의장에 오겠다고 고집 부린 수강생 한 명 때문에 덩달아 출근하게 된 J 선생님은 나의 존재가 야속할 법한데도 매일 점심 밥을 사주었다. 뭣도 없이 지원한 인턴 공고에 떨어져 좌절하던 날에도 J 선생님은 똑같이 밥을 사주며 앞으로 많이 떨어져봐야 한다고 말해주었다. 신기하게도 그 말이 어떤 위로보다도 도움이 되어 다시 다른 인턴에 다시 지원했다. 결과적으로 그 공고에서도 떨어졌지만, 판교까지 목발 짚고 가서 면접을 보는 귀한 경험도 할 수 있었다.
+
+국제관 라운지, 2020년
+
+부트캠프 직전에는 자대 교직원 인턴으로 일하고 있었다. 대학교 막학기를 다니면서 졸업 후 무엇을 해야 할지 보이는 대로 고민하던 시기였다. 그간 대외 스펙은 엄두가 안 나서 학내 활동에만 무식하게 참여했다. 그 이력이 오히려 기회가 되어 교직원 인턴에 합격하게 됐다. 입사 경쟁률은 어마어마하지만 공무원만큼 안정적이라는 교직원을 본격적으로 준비해볼까, 자연스럽게 고민하게 되었다. 졸업 이후 공무원 시험의 길로 흘러 간 그 많은 친구들과 비슷하게 말이다. 한편 외국어로서의 한국어 강사라는 직종도 오래 전부터 고려하고 있었다. 강사 처우와 체계도 제대로 갖춰지지 않았으면서 석박사는 필수여야 한다는 그 분야. 마침 인턴으로 일하던 부서도 학내 국제교류를 담당하는 곳이었다.
+
+인턴 종료일이 다가오던 어느날 P 부장님이 슬쩍 내 옆으로 와서 졸업 후 무슨 일을 하고 싶냐고 물어보았다. 학내 어학당에서 일하다가 지금 부서로 넘어온 만큼 한국어 교육 분야로 잔뼈가 굵은 사람이었다. 그때 P 부장님이 들려준 이야기들은 내가 완전히 다른 분야로 고개를 돌리게 될 만큼 현실적이었다. 그저 외국어를 할 줄 알고 모국어를 애정한다는 것은 그 분야로 향하는 고생을 감수할 만큼 확실한 동기가 아니었다. 적당히 할 만한 일만 좇아 살아 가다가 현실에 잘근잘근 잡아 먹히는 것뿐이었다. 일종의 생존본능인지 역설적으로 용기와 도전정신이 샘솟았다. ‘원래의 나라면 안 해 볼만한 재밌는 일에 한 번 도전해보자.‘
+
+이어 나의 관심은 교직원도, 한국어 교육도 아닌 인공지능으로 향했다. 막학기에 수강한 ‘인문학도를위한한국어인공지능데이터과학이론과실제’ 수업이 재밌었기 때문이다. 터무니 없이 긴 강의명이 주는 압도감 때문인지 인문학도 자존심에 순수 학문도 아닌 코딩을 한다고 해서 그런지 개강 첫 주에 수강생 대부분이 도망갔다. 폐강 기준을 아슬아슬하게 넘긴 인원끼리 파이썬 print 함수부터 배우기 시작했다. 기말 과제로는 데이팅앱 프로필 자기소개 문구를 다룬 자연어처리 프로젝트를 진행했다. 신기하게도 과제를 수행하다가 어딘가 막혀도 인터넷에 검색하면 같은 고민을 한 사람들이 넘쳐나서 스스로 해결할 수가 있었다. 또 매일 같이 새로운 연구와 모델이 공개되고 트렌드가 바뀌어가는 것이 눈에 띄었다. 기껏 최근 연구라봤자 1990년대 그것도 논문 스캔본을 직접 출력해서 한자어 독음을 하나씩 표시해 가며 공부하던 원래 방식과는 딴판이었다. 만족스러운 성적으로 학기를 마무리하고 졸업을 신청했다. 컴퓨터 앞에 앉아 무작정 자연어처리 취업을 구글링하기 시작했다. 모집 중인 부트캠프가 있었다.
+" />
+    <meta property="og:description" content="작성일: 2024-09-15(일)
+
+판교, 2024년 가을. 길고도 짧은 대기발령 끝에 본사 OO본부로 배치되었다. 이번주가 입사 첫 주였다. 이제 막 셋업되어 가는 팀이라 해야 할 게 너무나도 많았다. 사업 중심의 조직은 처음이어서 심적으로 낯설기도 했다. 금요일 밤 9시가 다 되어가는 시간에 퇴근하고 곧바로 자취방 근처 삼겹살 집으로 향했다. 고깃집이 혼밥이야말로 만렙이라더니, 생각보다 할 만 했다. 집에서 챗지피티에게 취한 상태로 샤워를 해도 되는지 물어봐놓고 껌뻑 잠에 들어버렸다.
+
+테헤란로, 2024년
+
+인원 감축이 공식적으로 발표되었다. 발표 직후 팀장님이 얼빠진 우리를 회의실로 불러 모았다. 그 자리에서 J님은 안경을 한번 치켜올리고 “이제 우린 어떻게 되나요?”라고 물어보았다. 왜 “왜 이렇게 되었나요?”는 묻지 않지? 지금 당장 살아남기 위해 던져야 할 질문은 그게 아니기 때문이다. 며칠 후, 모두가 퇴근한 저녁에 J님은 나에게 다가와 다시 한 번 말해주었다. “앞으로 무엇을 해야 할지를 생각해야 돼요. 왜 이렇게 되었는지는 누구도 설명할 수 없기 때문에.” 그 다음 절차는 하나씩 신속하게 이루어졌다. 오전 안에 본체와 모니터를 뽑아 자리를 옮기고 백지의 워드 파일에 이력서를 작성하기 시작했다. 뉴스에 우리 회사 이름이 오르내리고 사내 메신저에는 갈 곳을 잃은 사람들이 옹기종기 모였다. 아침 10시에 출근해서 저녁 7시에 퇴근할 때까지 ‘앞으로 무엇을 해야 할지’ 생각했다. 취업을 준비하던 4년 전 2020년으로 거슬러 올라가 자료를 뒤져 포트폴리오를 기워 넣었다. 상황이 왜 이렇게 되었는지는 해명할 수 없었지만 ‘왜 지금의 내가 되었는지’는 스스로 증명해야 했다.
+
+이곳 회사는 2022년 겨울에 전환형 인턴으로 들어왔다. 회사에 몇 없는 공채 출신이라며 사람들은 농담 반 진담 반으로 놀리곤 했다. 동기는 다섯 명이었고 다들 실력이 출중했다. 그들에 비해 부족한 내가 합격한 것은 운이 매우 좋았기 때문에 그리고 이 회사 서비스의 열혈 유저였기 때문이라고 생각했다. 사실 다들 비슷한 불안감을 하나씩 품고 있었던 터라 동기들과는 참 끈끈하게 지냈다. 게다가 프로그래머, 아트, 기획, 데이터 - 일하는 분야가 제각각이어서 흥미로웠고 애정이 갔다. 회사 사정이 불안정할 때마다 우리는 퇴근 후 술잔을 부딪히며 함께하기를 다짐했다. 불확신으로 가득한 6개월이 지나고 인턴 평가 결과가 나왔다. 동기 한 명은 다른 길을 걷게 되었다. 그토록 원하던 정직원 전환에 성공했는데 기쁘지 않았다. 이 회사가, 이 사회가 원망스러웠다. 그래도 해야 할 일은 해야 했다. 바뀐 건 인사 시스템 상 정보일 뿐, 똑같은 자리에서 데이터를 분석하고 대시보드를 만드는 일을 이어나갔다. 금새 일 년이 지나고 미지의 영역이었던 강화학습에도 발을 들였다. 인원 감축 발표가 있던 그날까지도 gymnasium 의 wrapper 객체를 뜯어 고쳤다.
+
+그 전 회사에서 정확히 일 년을 채우고 제 발로 나온 게 2022년 여름이었다. 그곳은 공덕역의 한 공유 오피스에 입주해 있었다. 서로를 영어 닉네임으로 부르고 주에 한 번씩 개발자들끼리 스터디도 하는 전형적인 개발자 중심의 젊은 스타트업이었다. 입사와 동시에 실험적이고 도전적인 프로젝트에 투입되었다. 그 프로젝트는 이름에 인공지능이나 청년과 같은 단어가 들어가는 국가 사업에 지원할 때 요긴하게 쓰였다. 그렇게 지급 받은 지원금으로 꽤 괜찮은 워크스테이션을 하나 맞출 수 있었다. 워크스테이션의 서버명은 페르세포네(Persephone), 하데스에게 납치 당해 지하 세계로 끌려간 페르세포네의 신화에서 딴 이름이었다. 페르세포네를 통해서 처음으로 리눅스 환경에서 개발을 하기 시작했다. 잘 몰라서 버벅이는 스스로가 답답했다. 컴퓨터에 대해 더 알고 싶었다. 잘하고 싶었다. 이렇게나 갈 길이 멀었는데도 퇴사를 결심한 것은 회사가 그 프로젝트에 이만 흥미를 잃었기 때문이다. 사업 지원금이 끊긴 이후로 회사는 서운할 정도로 나의 작업에 무관심해졌지만 혼자서 프로젝트를 끝까지 마무리했고 앞으로 더 잘하기 위해 그곳에서 나왔다.
+
+오늘날 개발자 양성 학원 광고에서 전형적으로 어필하는 것과 같이 - 아무런 스펙 없는 비전공자가 그곳에 취업한 것은 2020년 겨울부터 6개월 동안 진행된 국비지원 부트캠프에서 연계해준 덕분이었다. 코로나로 온 나라가 뒤집혀 강의는 온라인으로 진행되었지만 주관 측에 양해를 구하고 홀로 강의실에 나와 수업을 들었다. 1.5평짜리 대학가 자취방에서 접이식 테이블 앞에 쪼그려 앉아 그램 노트북으로 8시간 수업을 듣느니 충무로에 위치한 교육장으로 가겠다고 결심한 것이다. 같은 공간에서 강사님과 나 이렇게 두 사람이 각자 노트북 카메라를 바라보며 수업을 진행하는 건 퍽 웃긴 광경이었다. 게다가 40명 규모의 강의실에 달랑 두 인원만 들어 앉아 있으니 히터를 최대로 틀어놔도 입김이 풀풀 나왔다. 굳이 강의장에 오겠다고 고집 부린 수강생 한 명 때문에 덩달아 출근하게 된 J 선생님은 나의 존재가 야속할 법한데도 매일 점심 밥을 사주었다. 뭣도 없이 지원한 인턴 공고에 떨어져 좌절하던 날에도 J 선생님은 똑같이 밥을 사주며 앞으로 많이 떨어져봐야 한다고 말해주었다. 신기하게도 그 말이 어떤 위로보다도 도움이 되어 다시 다른 인턴에 다시 지원했다. 결과적으로 그 공고에서도 떨어졌지만, 판교까지 목발 짚고 가서 면접을 보는 귀한 경험도 할 수 있었다.
+
+국제관 라운지, 2020년
+
+부트캠프 직전에는 자대 교직원 인턴으로 일하고 있었다. 대학교 막학기를 다니면서 졸업 후 무엇을 해야 할지 보이는 대로 고민하던 시기였다. 그간 대외 스펙은 엄두가 안 나서 학내 활동에만 무식하게 참여했다. 그 이력이 오히려 기회가 되어 교직원 인턴에 합격하게 됐다. 입사 경쟁률은 어마어마하지만 공무원만큼 안정적이라는 교직원을 본격적으로 준비해볼까, 자연스럽게 고민하게 되었다. 졸업 이후 공무원 시험의 길로 흘러 간 그 많은 친구들과 비슷하게 말이다. 한편 외국어로서의 한국어 강사라는 직종도 오래 전부터 고려하고 있었다. 강사 처우와 체계도 제대로 갖춰지지 않았으면서 석박사는 필수여야 한다는 그 분야. 마침 인턴으로 일하던 부서도 학내 국제교류를 담당하는 곳이었다.
+
+인턴 종료일이 다가오던 어느날 P 부장님이 슬쩍 내 옆으로 와서 졸업 후 무슨 일을 하고 싶냐고 물어보았다. 학내 어학당에서 일하다가 지금 부서로 넘어온 만큼 한국어 교육 분야로 잔뼈가 굵은 사람이었다. 그때 P 부장님이 들려준 이야기들은 내가 완전히 다른 분야로 고개를 돌리게 될 만큼 현실적이었다. 그저 외국어를 할 줄 알고 모국어를 애정한다는 것은 그 분야로 향하는 고생을 감수할 만큼 확실한 동기가 아니었다. 적당히 할 만한 일만 좇아 살아 가다가 현실에 잘근잘근 잡아 먹히는 것뿐이었다. 일종의 생존본능인지 역설적으로 용기와 도전정신이 샘솟았다. ‘원래의 나라면 안 해 볼만한 재밌는 일에 한 번 도전해보자.‘
+
+이어 나의 관심은 교직원도, 한국어 교육도 아닌 인공지능으로 향했다. 막학기에 수강한 ‘인문학도를위한한국어인공지능데이터과학이론과실제’ 수업이 재밌었기 때문이다. 터무니 없이 긴 강의명이 주는 압도감 때문인지 인문학도 자존심에 순수 학문도 아닌 코딩을 한다고 해서 그런지 개강 첫 주에 수강생 대부분이 도망갔다. 폐강 기준을 아슬아슬하게 넘긴 인원끼리 파이썬 print 함수부터 배우기 시작했다. 기말 과제로는 데이팅앱 프로필 자기소개 문구를 다룬 자연어처리 프로젝트를 진행했다. 신기하게도 과제를 수행하다가 어딘가 막혀도 인터넷에 검색하면 같은 고민을 한 사람들이 넘쳐나서 스스로 해결할 수가 있었다. 또 매일 같이 새로운 연구와 모델이 공개되고 트렌드가 바뀌어가는 것이 눈에 띄었다. 기껏 최근 연구라봤자 1990년대 그것도 논문 스캔본을 직접 출력해서 한자어 독음을 하나씩 표시해 가며 공부하던 원래 방식과는 딴판이었다. 만족스러운 성적으로 학기를 마무리하고 졸업을 신청했다. 컴퓨터 앞에 앉아 무작정 자연어처리 취업을 구글링하기 시작했다. 모집 중인 부트캠프가 있었다.
+" />
+    
+    <meta name="author" content="YunsooLog" />
+
+    
+    <meta property="og:title" content="삶의 지도(1)" />
+    <meta property="twitter:title" content="삶의 지도(1)" />
+    
+  <!-- Async font loading -->
+<script>
+  window.WebFontConfig = {
+      custom: {
+          families: ['Spoqa Han Sans:100,300,400,700'],
+          urls: ['https://spoqa.github.io/spoqa-han-sans/css/SpoqaHanSans-kr.css']
+      },
+      timeout: 60000
+  };
+  (function(d) {
+      var wf = d.createElement('script'), s = d.scripts[0];
+      wf.src = 'https://ajax.googleapis.com/ajax/libs/webfont/1.5.18/webfont.js';
+      s.parentNode.insertBefore(wf, s);
+  })(document);
+</script>
+
+  <!--[if lt IE 9]>
+    <script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+  <![endif]-->
+
+  <link rel="stylesheet" type="text/css" href="/style.css" />
+  <link rel="alternate" type="application/rss+xml" title="YunsooLog - 행간을 읽는 기계학습 이야기" href="/feed.xml" />
+  <script>
+    document.cookie = "promo_shown=1; SameSite=Lax; path=/";
+  </script>
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.13.11/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.13.11/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.13.11/dist/contrib/auto-render.min.js"
+          onload="renderMathInElement(document.body, {
+            delimiters: [
+              {left: '\\[', right: '\\]', display: true},
+              {left: '$$', right: '$$', display: true},
+              {left: '$', right: '$', display: false},
+            ]
+          });">
+  </script>
+
+  <!-- Created with Jekyll Now - http://github.com/barryclark/jekyll-now -->
+</head>
+  <body>
+    <div class="wrapper-masthead">
+  <div class="container">
+    <header class="masthead clearfix">
+      <a href="/" class="site-avatar"><img src="/images/avatar.png"/></a>
+      
+      <div class="site-info">
+        <h1 class="site-name"><a href="/">YunsooLog</a></h1>
+        <p class="site-description">행간을 읽는 기계학습 이야기</p>
+      </div>
+
+      <nav>
+        
+        
+        <a href="/about">About</a>
+        
+        
+        
+        <a href="/">Blog</a>
+        
+        
+        
+        <a href="/tags">Tags</a>
+        
+        
+        
+        <a href="/timeline">Timeline</a>
+        
+        
+        
+        <ul class="search-icon">
+          <a href="/search">
+          <svg 
+            width="24" 
+            height="24" 
+            viewBox="0 0 24 24" 
+            fill="none" 
+            xmlns="http://www.w3.org/2000/svg">
+            <path d="M10 2C5.58172 2 2 5.58172 2 10C2 14.4183 5.58172 18 10 18C11.8485 18 13.5451 17.3376 14.8458 16.2416L19.7071 21.1029C20.0976 21.4934 20.7308 21.4934 21.1213 21.1029C21.5118 20.7124 21.5118 20.0792 21.1213 19.6887L16.2416 14.809C17.3376 13.5083 18 11.8116 18 10C18 5.58172 14.4183 2 10 2ZM4 10C4 6.68629 6.68629 4 10 4C13.3137 4 16 6.68629 16 10C16 13.3137 13.3137 16 10 16C6.68629 16 4 13.3137 4 10Z" 
+            fill="currentColor"></path>
+          </svg>
+          </a>
+        </ul>
+
+      </nav>
+    </header>
+  </div>
+</div>
+
+    <div id="main" role="main" class="container">
+      <article class="post">
+  <div class="inner-wrap">
+    <h1>삶의 지도(1)</h1>
+
+    <div>
+      <span class="date">
+        1996-12-10
+      </span>
+
+      <ul class="tag">
+        
+        <li>
+          <a href="https://woocosmos.github.io/tags#회고">
+            회고
+          </a>
+        </li>
+        
+      </ul>
+    </div>
+
+    <section class="entry">
+      
+      <p>작성일: 2024-09-15(일)</p>
+
+<p><strong>판교, 2024년 가을</strong>. 길고도 짧은 대기발령 끝에 본사 OO본부로 배치되었다. 이번주가 입사 첫 주였다. 이제 막 셋업되어 가는 팀이라 해야 할 게 너무나도 많았다. 사업 중심의 조직은 처음이어서 심적으로 낯설기도 했다. 금요일 밤 9시가 다 되어가는 시간에 퇴근하고 곧바로 자취방 근처 삼겹살 집으로 향했다. 고깃집이 혼밥이야말로 만렙이라더니, 생각보다 할 만 했다. 집에서 챗지피티에게 취한 상태로 샤워를 해도 되는지 물어봐놓고 껌뻑 잠에 들어버렸다.</p>
+
+<h1 id="테헤란로-2024년">테헤란로, 2024년</h1>
+
+<p>인원 감축이 공식적으로 발표되었다. 발표 직후 팀장님이 얼빠진 우리를 회의실로 불러 모았다. 그 자리에서 J님은 안경을 한번 치켜올리고 “이제 우린 어떻게 되나요?”라고 물어보았다. 왜 “왜 이렇게 되었나요?”는 묻지 않지? 지금 당장 살아남기 위해 던져야 할 질문은 그게 아니기 때문이다. 며칠 후, 모두가 퇴근한 저녁에 J님은 나에게 다가와 다시 한 번 말해주었다. <em>“앞으로 무엇을 해야 할지를 생각해야 돼요. 왜 이렇게 되었는지는 누구도 설명할 수 없기 때문에.”</em> 그 다음 절차는 하나씩 신속하게 이루어졌다. 오전 안에 본체와 모니터를 뽑아 자리를 옮기고 백지의 워드 파일에 이력서를 작성하기 시작했다. 뉴스에 우리 회사 이름이 오르내리고 사내 메신저에는 갈 곳을 잃은 사람들이 옹기종기 모였다. 아침 10시에 출근해서 저녁 7시에 퇴근할 때까지 ‘앞으로 무엇을 해야 할지’ 생각했다. 취업을 준비하던 4년 전 2020년으로 거슬러 올라가 자료를 뒤져 포트폴리오를 기워 넣었다. 상황이 왜 이렇게 되었는지는 해명할 수 없었지만 <strong>‘왜 지금의 내가 되었는지’는 스스로 증명해야 했다</strong>.</p>
+
+<p>이곳 회사는 2022년 겨울에 전환형 인턴으로 들어왔다. 회사에 몇 없는 공채 출신이라며 사람들은 농담 반 진담 반으로 놀리곤 했다. 동기는 다섯 명이었고 다들 실력이 출중했다. 그들에 비해 부족한 내가 합격한 것은 운이 매우 좋았기 때문에 그리고 이 회사 서비스의 열혈 유저였기 때문이라고 생각했다. 사실 다들 비슷한 불안감을 하나씩 품고 있었던 터라 동기들과는 참 끈끈하게 지냈다. 게다가 프로그래머, 아트, 기획, 데이터 - 일하는 분야가 제각각이어서 흥미로웠고 애정이 갔다. 회사 사정이 불안정할 때마다 우리는 퇴근 후 술잔을 부딪히며 함께하기를 다짐했다. 불확신으로 가득한 6개월이 지나고 인턴 평가 결과가 나왔다. 동기 한 명은 다른 길을 걷게 되었다. 그토록 원하던 정직원 전환에 성공했는데 기쁘지 않았다. 이 회사가, 이 사회가 원망스러웠다. <strong>그래도 해야 할 일은 해야 했다</strong>. 바뀐 건 인사 시스템 상 정보일 뿐, 똑같은 자리에서 데이터를 분석하고 대시보드를 만드는 일을 이어나갔다. 금새 일 년이 지나고 미지의 영역이었던 강화학습에도 발을 들였다. 인원 감축 발표가 있던 그날까지도 gymnasium 의 wrapper 객체를 뜯어 고쳤다.</p>
+
+<p>그 전 회사에서 정확히 일 년을 채우고 제 발로 나온 게 2022년 여름이었다. 그곳은 공덕역의 한 공유 오피스에 입주해 있었다. 서로를 영어 닉네임으로 부르고 주에 한 번씩 개발자들끼리 스터디도 하는 전형적인 개발자 중심의 젊은 스타트업이었다. 입사와 동시에 실험적이고 도전적인 프로젝트에 투입되었다. 그 프로젝트는 이름에 인공지능이나 청년과 같은 단어가 들어가는 국가 사업에 지원할 때 요긴하게 쓰였다. 그렇게 지급 받은 지원금으로 꽤 괜찮은 워크스테이션을 하나 맞출 수 있었다. 워크스테이션의 서버명은 페르세포네(Persephone), 하데스에게 납치 당해 지하 세계로 끌려간 페르세포네의 신화에서 딴 이름이었다. 페르세포네를 통해서 처음으로 리눅스 환경에서 개발을 하기 시작했다. 잘 몰라서 버벅이는 스스로가 답답했다. <strong>컴퓨터에 대해 더 알고 싶었다. 잘하고 싶었다</strong>. 이렇게나 갈 길이 멀었는데도 퇴사를 결심한 것은 회사가 그 프로젝트에 이만 흥미를 잃었기 때문이다. 사업 지원금이 끊긴 이후로 회사는 서운할 정도로 나의 작업에 무관심해졌지만 혼자서 프로젝트를 끝까지 마무리했고 <strong>앞으로 더 잘하기 위해 그곳에서 나왔다</strong>.</p>
+
+<p>오늘날 개발자 양성 학원 광고에서 전형적으로 어필하는 것과 같이 - 아무런 스펙 없는 비전공자가 그곳에 취업한 것은 2020년 겨울부터 6개월 동안 진행된 국비지원 부트캠프에서 연계해준 덕분이었다. 코로나로 온 나라가 뒤집혀 강의는 온라인으로 진행되었지만 주관 측에 양해를 구하고 홀로 강의실에 나와 수업을 들었다. 1.5평짜리 대학가 자취방에서 접이식 테이블 앞에 쪼그려 앉아 그램 노트북으로 8시간 수업을 듣느니 충무로에 위치한 교육장으로 가겠다고 결심한 것이다. 같은 공간에서 강사님과 나 이렇게 두 사람이 각자 노트북 카메라를 바라보며 수업을 진행하는 건 퍽 웃긴 광경이었다. 게다가 40명 규모의 강의실에 달랑 두 인원만 들어 앉아 있으니 히터를 최대로 틀어놔도 입김이 풀풀 나왔다. 굳이 강의장에 오겠다고 고집 부린 수강생 한 명 때문에 덩달아 출근하게 된 J 선생님은 나의 존재가 야속할 법한데도 매일 점심 밥을 사주었다. 뭣도 없이 지원한 인턴 공고에 떨어져 좌절하던 날에도 J 선생님은 <strong>똑같이 밥을 사주며 앞으로 많이 떨어져봐야 한다고 말해주었다</strong>. 신기하게도 그 말이 어떤 위로보다도 도움이 되어 다시 다른 인턴에 다시 지원했다. 결과적으로 그 공고에서도 떨어졌지만, 판교까지 목발 짚고 가서 면접을 보는 귀한 경험도 할 수 있었다.</p>
+
+<h1 id="국제관-라운지-2020년">국제관 라운지, 2020년</h1>
+
+<p>부트캠프 직전에는 자대 교직원 인턴으로 일하고 있었다. 대학교 막학기를 다니면서 졸업 후 무엇을 해야 할지 보이는 대로 고민하던 시기였다. 그간 대외 스펙은 엄두가 안 나서 학내 활동에만 무식하게 참여했다. 그 이력이 오히려 기회가 되어 교직원 인턴에 합격하게 됐다. 입사 경쟁률은 어마어마하지만 공무원만큼 안정적이라는 교직원을 본격적으로 준비해볼까, 자연스럽게 고민하게 되었다. 졸업 이후 공무원 시험의 길로 흘러 간 그 많은 친구들과 비슷하게 말이다. 한편 외국어로서의 한국어 강사라는 직종도 오래 전부터 고려하고 있었다. 강사 처우와 체계도 제대로 갖춰지지 않았으면서 석박사는 필수여야 한다는 그 분야. 마침 인턴으로 일하던 부서도 학내 국제교류를 담당하는 곳이었다.</p>
+
+<p>인턴 종료일이 다가오던 어느날 P 부장님이 슬쩍 내 옆으로 와서 졸업 후 무슨 일을 하고 싶냐고 물어보았다. 학내 어학당에서 일하다가 지금 부서로 넘어온 만큼 한국어 교육 분야로 잔뼈가 굵은 사람이었다. 그때 P 부장님이 들려준 이야기들은 내가 완전히 다른 분야로 고개를 돌리게 될 만큼 현실적이었다. 그저 외국어를 할 줄 알고 모국어를 애정한다는 것은 그 분야로 향하는 고생을 감수할 만큼 확실한 동기가 아니었다. 적당히 할 만한 일만 좇아 살아 가다가 현실에 잘근잘근 잡아 먹히는 것뿐이었다. 일종의 생존본능인지 역설적으로 용기와 도전정신이 샘솟았다. ‘<strong>원래의 나라면 안 해 볼만한 재밌는 일에 한 번 도전해보자</strong>.‘</p>
+
+<p>이어 나의 관심은 교직원도, 한국어 교육도 아닌 인공지능으로 향했다. 막학기에 수강한 ‘인문학도를위한한국어인공지능데이터과학이론과실제’ 수업이 <strong>재밌었기 때문이다</strong>. 터무니 없이 긴 강의명이 주는 압도감 때문인지 인문학도 자존심에 순수 학문도 아닌 코딩을 한다고 해서 그런지 개강 첫 주에 수강생 대부분이 도망갔다. 폐강 기준을 아슬아슬하게 넘긴 인원끼리 파이썬 print 함수부터 배우기 시작했다. 기말 과제로는 데이팅앱 프로필 자기소개 문구를 다룬 자연어처리 프로젝트를 진행했다. 신기하게도 과제를 수행하다가 어딘가 막혀도 인터넷에 검색하면 같은 고민을 한 사람들이 넘쳐나서 스스로 해결할 수가 있었다. 또 매일 같이 새로운 연구와 모델이 공개되고 트렌드가 바뀌어가는 것이 눈에 띄었다. 기껏 최근 연구라봤자 1990년대 그것도 논문 스캔본을 직접 출력해서 한자어 독음을 하나씩 표시해 가며 공부하던 원래 방식과는 딴판이었다. 만족스러운 성적으로 학기를 마무리하고 졸업을 신청했다. 컴퓨터 앞에 앉아 무작정 자연어처리 취업을 구글링하기 시작했다. 모집 중인 부트캠프가 있었다.</p>
+
+    </section>
+  </div>
+
+  <div class="pagination">
+    
+      <span class="prev" >
+          <a href="https://woocosmos.github.io/code-highlighting-post/">
+            &#xE000; Code Highlighting Cheatsheet
+          </a>
+      </span>
+    
+    
+      <span class="next" >
+          <a href="https://woocosmos.github.io/style-test-ko/">
+            Markdown Cheatsheet &#xE001;
+          </a>
+      </span>
+    
+  </div>
+
+  <div class="comments">
+	<div id="disqus_thread"></div>
+	<script type="text/javascript">
+
+	    var disqus_shortname = 'woocosmos';
+
+	    (function() {
+	        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+	        dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+			dsq.setAttribute('data-timestamp', +new Date()); //추가
+	        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+	    })();
+
+	</script>
+	<noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+  <script type="text/javascript">
+    "use strict"; 
+    function addBackToTop() 
+        { function o() 
+            { 
+                t() >= z ? R && (D.className = "", R = !1) : R || (D.className = "hidden", R = !0) 
+            } 
+          function t() 
+            { 
+                return E.scrollTop || A && document.documentElement.scrollTop || 0 
+            } 
+          function e(o) 
+            { 
+                E.scrollTop = o, A && (document.documentElement.scrollTop = o) 
+            } 
+    
+    var n, i, d, r, c = arguments.length > 0 && void 0 !== arguments[0] ? arguments[0] : {}, a = c.backgroundColor, s = void 0 === a ? "#000" : a, l = c.cornerOffset, u = void 0 === l ? 20 : l, m = c.diameter, p = void 0 === m ? 56 : m, h = c.ease, b = void 0 === h ? function (o) { return .5 * (1 - Math.cos(Math.PI * o)) } : h, v = c.id, f = void 0 === v ? "back-to-top" : v, x = c.innerHTML, g = void 0 === x ? '<svg viewBox="0 0 24 24"><path d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z"></path></svg>' : x, w = c.onClickScrollTo, y = void 0 === w ? 0 : w, k = c.scrollContainer, E = void 0 === k ? document.body : k, T = c.scrollDuration, C = void 0 === T ? 100 : T, M = c.showWhenScrollTopIs, z = void 0 === M ? 1 : M, L = c.size, B = void 0 === L ? p : L, H = c.textColor, I = void 0 === H ? "#fff" : H, N = c.zIndex, S = void 0 === N ? 1 : N, q = E === document.body, A = q && document.documentElement; n = Math.round(.35 * B), i = Math.round(.2 * B), d = "#" + f + "{background:" + s + ";-webkit-border-radius:50%;-moz-border-radius:50%;border-radius:50%;bottom:" + u + "px;-webkit-box-shadow:0 2px 5px 0 rgba(0,0,0,.26);-moz-box-shadow:0 2px 5px 0 rgba(0,0,0,.26);box-shadow:0 2px 5px 0 rgba(0,0,0,.26);color:" + I + ";cursor:pointer;display:block;height:" + B + "px;opacity:1;outline:0;position:fixed;right:" + u + "px;-webkit-tap-highlight-color:transparent;-webkit-touch-callout:none;-webkit-transition:bottom .2s,opacity .2s;-o-transition:bottom .2s,opacity .2s;-moz-transition:bottom .2s,opacity .2s;transition:bottom .2s,opacity .2s;-webkit-user-select:none;-moz-user-select:none;-ms-user-select:none;user-select:none;width:" + B + "px;z-index:" + S + "}#" + f + " svg{display:block;fill:currentColor;height:" + n + "px;margin:" + i + "px auto 0;width:" + n + "px}#" + f + ".hidden{bottom:-" + B + "px;opacity:0}", (r = document.createElement("style")).appendChild(document.createTextNode(d)), document.head.insertAdjacentElement("afterbegin", r); var D = function () { var o = document.createElement("div"); return o.id = f, o.className = "hidden", o.innerHTML = g, o.addEventListener("click", function (o) { o.preventDefault(), function () { var o = "function" == typeof y ? y() : y, n = window, i = n.performance, d = n.requestAnimationFrame; if (C <= 0 || void 0 === i || void 0 === d) return e(o); var r = i.now(), c = t(), a = c - o; d(function o(t) { var n = Math.min((t - r) / C, 1); e(c - Math.round(b(n) * a)), n < 1 && d(o) }) }() }), document.body.appendChild(o), o }(), R = !0; (q ? window : E).addEventListener("scroll", o), o() } window.addEventListener("load", function () { var o = document.getElementById("back-to-top"), t = document.querySelector(".sticky-bottom"), e = document.querySelector(".fixed-bottom"); o && window.addEventListener("scroll", function () { if (t) { var n = t.getBoundingClientRect(); window.scrollY + window.innerHeight > document.body.scrollHeight - n.height ? (o.style.position = "fixed", o.style.bottom = n.height + 15 + "px") : (o.style.position = "fixed", o.style.bottom = "15px") } if (e) { var i = e.getBoundingClientRect(); o.style.position = "fixed", o.style.bottom = i.height + 15 + "px" } }) });
+</script>
+<script>
+    addBackToTop();
+</script>
+
+
+
+
+</article>
+
+    </div>
+    
+    <div class="wrapper-footer">
+      <div class="container">
+        <footer class="footer">
+          <!-- Refer to https://codepen.io/ruandre/pen/howFi -->
+<ul class="svg-icon">
+
+  
+
+  
+
+  
+  <li><a href="mailto:woocosmos@gmail.com" class="icon-8 email" title="Email"><svg viewBox="0 0 512 512"><path d="M101.3 141.6v228.9h0.3 308.4 0.8V141.6H101.3zM375.7 167.8l-119.7 91.5 -119.6-91.5H375.7zM127.6 194.1l64.1 49.1 -64.1 64.1V194.1zM127.8 344.2l84.9-84.9 43.2 33.1 43-32.9 84.7 84.7L127.8 344.2 127.8 344.2zM384.4 307.8l-64.4-64.4 64.4-49.3V307.8z"/></svg><!--[if lt IE 9]><em>Email</em><![endif]--></a></li>
+  
+
+  
+
+  
+
+  
+  <li><a href="https://github.com/woocosmos" class="icon-13 github" title="GitHub"><svg viewBox="0 0 512 512"><path d="M256 70.7c-102.6 0-185.9 83.2-185.9 185.9 0 82.1 53.3 151.8 127.1 176.4 9.3 1.7 12.3-4 12.3-8.9V389.4c-51.7 11.3-62.5-21.9-62.5-21.9 -8.4-21.5-20.6-27.2-20.6-27.2 -16.9-11.5 1.3-11.3 1.3-11.3 18.7 1.3 28.5 19.2 28.5 19.2 16.6 28.4 43.5 20.2 54.1 15.4 1.7-12 6.5-20.2 11.8-24.9 -41.3-4.7-84.7-20.6-84.7-91.9 0-20.3 7.3-36.9 19.2-49.9 -1.9-4.7-8.3-23.6 1.8-49.2 0 0 15.6-5 51.1 19.1 14.8-4.1 30.7-6.2 46.5-6.3 15.8 0.1 31.7 2.1 46.6 6.3 35.5-24 51.1-19.1 51.1-19.1 10.1 25.6 3.8 44.5 1.8 49.2 11.9 13 19.1 29.6 19.1 49.9 0 71.4-43.5 87.1-84.9 91.7 6.7 5.8 12.8 17.1 12.8 34.4 0 24.9 0 44.9 0 51 0 4.9 3 10.7 12.4 8.9 73.8-24.6 127-94.3 127-176.4C441.9 153.9 358.6 70.7 256 70.7z"/></svg><!--[if lt IE 9]><em>GitHub</em><![endif]--></a></li>
+  
+
+  
+
+  
+
+  
+  <li><a href="https://www.linkedin.com/in/yunsoo-woo-245946213" class="icon-17 linkedin" title="LinkedIn"><svg viewBox="0 0 512 512"><path d="M186.4 142.4c0 19-15.3 34.5-34.2 34.5 -18.9 0-34.2-15.4-34.2-34.5 0-19 15.3-34.5 34.2-34.5C171.1 107.9 186.4 123.4 186.4 142.4zM181.4 201.3h-57.8V388.1h57.8V201.3zM273.8 201.3h-55.4V388.1h55.4c0 0 0-69.3 0-98 0-26.3 12.1-41.9 35.2-41.9 21.3 0 31.5 15 31.5 41.9 0 26.9 0 98 0 98h57.5c0 0 0-68.2 0-118.3 0-50-28.3-74.2-68-74.2 -39.6 0-56.3 30.9-56.3 30.9v-25.2H273.8z"/></svg><!--[if lt IE 9]><em>LinkedIn</em><![endif]--></a></li>
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</ul>
+
+
+<p>© 2026 Yunsoo Woo</p>
+
+        </footer>
+      </div>
+    </div>
+
+    <!--  -->
+
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-1YCJCQRD4F"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-1YCJCQRD4F');
+</script>
+    <script type="text/javascript">
+    "use strict"; 
+    function addBackToTop() 
+        { function o() 
+            { 
+                t() >= z ? R && (D.className = "", R = !1) : R || (D.className = "hidden", R = !0) 
+            } 
+          function t() 
+            { 
+                return E.scrollTop || A && document.documentElement.scrollTop || 0 
+            } 
+          function e(o) 
+            { 
+                E.scrollTop = o, A && (document.documentElement.scrollTop = o) 
+            } 
+    
+    var n, i, d, r, c = arguments.length > 0 && void 0 !== arguments[0] ? arguments[0] : {}, a = c.backgroundColor, s = void 0 === a ? "#000" : a, l = c.cornerOffset, u = void 0 === l ? 20 : l, m = c.diameter, p = void 0 === m ? 56 : m, h = c.ease, b = void 0 === h ? function (o) { return .5 * (1 - Math.cos(Math.PI * o)) } : h, v = c.id, f = void 0 === v ? "back-to-top" : v, x = c.innerHTML, g = void 0 === x ? '<svg viewBox="0 0 24 24"><path d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z"></path></svg>' : x, w = c.onClickScrollTo, y = void 0 === w ? 0 : w, k = c.scrollContainer, E = void 0 === k ? document.body : k, T = c.scrollDuration, C = void 0 === T ? 100 : T, M = c.showWhenScrollTopIs, z = void 0 === M ? 1 : M, L = c.size, B = void 0 === L ? p : L, H = c.textColor, I = void 0 === H ? "#fff" : H, N = c.zIndex, S = void 0 === N ? 1 : N, q = E === document.body, A = q && document.documentElement; n = Math.round(.35 * B), i = Math.round(.2 * B), d = "#" + f + "{background:" + s + ";-webkit-border-radius:50%;-moz-border-radius:50%;border-radius:50%;bottom:" + u + "px;-webkit-box-shadow:0 2px 5px 0 rgba(0,0,0,.26);-moz-box-shadow:0 2px 5px 0 rgba(0,0,0,.26);box-shadow:0 2px 5px 0 rgba(0,0,0,.26);color:" + I + ";cursor:pointer;display:block;height:" + B + "px;opacity:1;outline:0;position:fixed;right:" + u + "px;-webkit-tap-highlight-color:transparent;-webkit-touch-callout:none;-webkit-transition:bottom .2s,opacity .2s;-o-transition:bottom .2s,opacity .2s;-moz-transition:bottom .2s,opacity .2s;transition:bottom .2s,opacity .2s;-webkit-user-select:none;-moz-user-select:none;-ms-user-select:none;user-select:none;width:" + B + "px;z-index:" + S + "}#" + f + " svg{display:block;fill:currentColor;height:" + n + "px;margin:" + i + "px auto 0;width:" + n + "px}#" + f + ".hidden{bottom:-" + B + "px;opacity:0}", (r = document.createElement("style")).appendChild(document.createTextNode(d)), document.head.insertAdjacentElement("afterbegin", r); var D = function () { var o = document.createElement("div"); return o.id = f, o.className = "hidden", o.innerHTML = g, o.addEventListener("click", function (o) { o.preventDefault(), function () { var o = "function" == typeof y ? y() : y, n = window, i = n.performance, d = n.requestAnimationFrame; if (C <= 0 || void 0 === i || void 0 === d) return e(o); var r = i.now(), c = t(), a = c - o; d(function o(t) { var n = Math.min((t - r) / C, 1); e(c - Math.round(b(n) * a)), n < 1 && d(o) }) }() }), document.body.appendChild(o), o }(), R = !0; (q ? window : E).addEventListener("scroll", o), o() } window.addEventListener("load", function () { var o = document.getElementById("back-to-top"), t = document.querySelector(".sticky-bottom"), e = document.querySelector(".fixed-bottom"); o && window.addEventListener("scroll", function () { if (t) { var n = t.getBoundingClientRect(); window.scrollY + window.innerHeight > document.body.scrollHeight - n.height ? (o.style.position = "fixed", o.style.bottom = n.height + 15 + "px") : (o.style.position = "fixed", o.style.bottom = "15px") } if (e) { var i = e.getBoundingClientRect(); o.style.position = "fixed", o.style.bottom = i.height + 15 + "px" } }) });
+</script>
+<script>
+    addBackToTop();
+</script>
+
+
+
+
+
+  </body>
+</html>

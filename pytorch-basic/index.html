@@ -1,0 +1,2234 @@
+<!DOCTYPE html>
+<html>
+  <head>
+  <title>PyTorch 파이토치 기초 모음집 – YunsooLog – 행간을 읽는 기계학습 이야기</title>
+  <link rel="icon" href="/images/favicon.ico">
+      <meta name="google-site-verification" content="NA4jg1Iffw6aA9VWjj3kqoo2jfOkPRxINJtYphd7VeI" />
+    <meta charset="utf-8" />
+    <meta content='text/html; charset=utf-8' http-equiv='Content-Type'>
+    <meta http-equiv='X-UA-Compatible' content='IE=edge'>
+    <meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1.0'>
+    <meta http-equiv="Permissions-Policy" content="interest-cohort=()">
+    
+    
+    <meta name="description" content="PyTorch의 구성 요소와 동작 원리를 살펴본다.
+
+개발 환경
+
+Windows
+
+
+  파이썬과 패키지툴을 준비한다
+    
+      python 3.8 : 공식 문서에 따르면 현재2024-09-03 윈도우에서 파이토치는 파이썬 3.8-3.11 버전만 지원된다. 나는 파이썬 버전 관리를 위해 윈도우용 pyenv인 pyenv-win를 사용했다
+      pipenv : 파이썬에서 공식으로 권장하는 패키지 관리툴
+    
+  
+  프로젝트 폴더에 접근하여 pipenv 의 파이썬 버전과 가상환경을 설정한다
+    cd /path/to/project
+pipenv --python 3.8
+pipenv shell
+    
+  
+  생성된 Pipfile파일에 파이토치 설치를 위한 주소를 추가한다.
+    [[source]]
+url = "https://download.pytorch.org/whl/cu118"
+verify_ssl = true
+name = "pytorch"
+    
+  
+  파이토치를 설치한다
+    pipenv install --index=pytorch torch
+    
+    
+  
+
+
+Ubuntu (WSL)
+
+  miniconda 로 파이썬 버전을 명시한 새 환경을 생성한다
+    conda create -n my-env python==3.8.2
+    
+  
+  PyTorch 및 CUDA를 설치한다
+    conda install cudatoolkit=11.8 -c conda-forge
+conda install pytorch torchvision torchaudio pytorch-cuda=11.8 -c pytorch -c nvidia
+    
+    
+  
+
+
+테스트
+pipenv shell 혹은 conda activate my-env 으로 가상 환경에 접근한 다음, 파이썬으로 아래 요소들을 호출한다.
+import torch
+
+torch.cuda.is_available()
+torch.cuda.device_count()
+torch.cuda.current_device()
+torch.cuda.device(0)
+torch.cuda.get_device_name(0)
+
+torch.__version__ 
+torch.version.cuda
+
+
+Tensor(텐서)
+
+Tensor는 모델의 파라미터와 입출력을 인코딩할 때 사용하는, 배열 및 행렬과 매우 유사한 자료구조이다. list나 numpy array로부터 텐서를 생성할 수 있다.
+
+# 원본 데이터
+my_list = [[1, 2, 3], [4, 5, 6]]
+my_arr = np.array(my_list)
+ 
+# 방법1. tensor() 함수
+t1 = torch.tensor(my_arr)
+ 
+# 방법2. from_numpy() 함수
+t2 = torch.from_numpy(my_arr)
+ 
+# 방법3. as_tensor() 함수
+t3 = torch.as_tensor(my_arr)
+
+
+전달된 배열을 sharing 하는 from_numpy(), as_tensor() 과 다르게, tensor()은 배열을 복제(copy)한다. 따라서 원본 배열의 요소를 수정하여도 tensor()로 변환된 텐서는 영향을 받지 않는다.
+my_arr[0, 0] = 999
+ 
+print(t1)   # tensor([[1, 2, 3], [4, 5, 6]])
+print(t2)   # tensor([[999, 2, 3], [4, 5, 6]])
+print(t3)   # tensor([[999, 2, 3], [4, 5, 6]])
+
+
+별도 인자를 주어 dtype을 오버라이딩할 수 있다. t1.dtype을 출력하여 비교할 수 있다. 단, from_numpy는 이런 기능이 없다.
+t1 = torch.tensor(my_list, dtype=torch.float)
+
+
+텐서를 생성할 때 shape(size)를 지정할 수 있다.
+shape = (2,3,)
+rand_tensor = torch.rand(shape)
+ones_tensor = torch.ones(shape)
+zeros_tensor = torch.zeros(shape)
+
+
+
+✅ torch.Tensor vs. torch.tensor
+torch.Tensor 는 클래스(class)다. 따라서 모든 텐서는 torch.Tensor 클래스의 객체이다. 반면 torch.tensor() 는 텐서를 반환하는 함수다.
+각각을 인자 없이 호출할 경우, 전자는 빈 텐서 객체로 생성되지만 후자는 변환할 배열 즉 data를 인자로 받지 못해 에러가 발생한다.
+torch.Tensor() # tensor([])
+torch.tensor() # TypeError: tensor() missing 1 required positional arguments: "data"
+
+
+
+
+PyTorch의 텐서는 CPU에 생성되는 것이 디폴트지만 GPU에 올려 연산할 수 있다. GPU의 RAM에 저장된다는 의미다.
+t1 = torch.FloatTensor([0., 1., 2.])
+t1.is_cuda  #False
+
+
+텐서를 GPU에 올리는 두 가지 방법이 있다.
+
+  처음부터 GPU에서 텐서를 생성한다
+    gpu_tensor = torch.tensor([[1, 2], [3, 4]], device='cuda')
+    
+  
+  CPU에서 생성된 텐서를 GPU로 복사한다. 한번 GPU에 복사된 텐서는 계속해서 GPU에서 연산된다.
+    gpu_tensor = cpu_tensor.to(device='cuda')
+    
+    다시 CPU로 돌아가게 만드는 방법도 있다.
+    back_to_cpu = gpu_tensor.to(dvice='cpu')    # 모델을 GPU에 올릴 때에도 사용
+back_to_cpu = gpu_tensor.cpu()
+    
+    
+  
+
+
+✅ CUDA Caching Memory Allocator
+
+  파이토치는 tensor를 GPU에 올릴 때 메모리를 빠르게 할당하기 위해 caching allocator를 사용한다. allocator는 CUDA로부터 메모리 블럭들을 요청한 후, 블럭을 쪼개고 (CUDA에 반환하지 않은 채로) 재사용한다. 따라서 tensor가 지워져도 allocator는 메모리를 keep해둔다. 결국에 메모리가 실제로는 사용되고 있지 않더라도 이 allocator에 의해 차지되어 사용 중인 것으로 표기될 수 있다.
+
+
+# 파이토치에서 실제로 사용하고 있는 메모리를 확인하기 (1024로 두 번 나누어주어야 MB 단위가 됨)
+torch.cuda.memory_allocated()
+
+# 실제로는 사용하지 않는 메모리를 반환시키기
+torch.cuda.empty_cache() 
+
+
+
+✅ in-place operations
+언더스코어(_)로 끝나는 연산 함수는 텐서 변수를 in-place로 변환한다. 메모리를 아끼는 데 도움이 될 수 있지만 derivative를 계산할 때 문제가 될 수 있으므로 사용을 권장하지는 않는다.
+t1 = torch.rand(2,3,)
+t1.add_(5)
+
+
+
+Autograd (자동미분)
+
+Autograd는 역전파(back propagation)를 시행하여 체인룰(chain rule)에 따라 말단 노드(leaf)까지 변화도(=gradient)를 연산하는 기능이다.
+
+
+  Forward
+  loss function의 값을 계산하는 것. 레이어의 output이 다음 레이어의 input으로 전달됨으로써 연산된다.
+  Backward
+  학습 파라미터의 gradient를 계산하는 것. chain rule를 기반으로, 파라미터가 loss fuction에 기여한 가중치를 연산한다.
+
+
+
+자동미분은 뿌리 노드가 계산되기까지 사용된 모든 변수의 미분값, 즉 ‘history’ 를 그래프 형태로 저장함으로써 동작한다. 이때 그래프는 방향이 있는 비순환 그래프(DAG, directed acyclic graph) 이며 학습 iteration 마다 새로 구성된다. (c.f. tensorflow의 경우 Static Computational Graphs 를 사용한다)
+예를 들어 아래 연산 과정을 그래프로 나타낼 수 있다.
+
+A = torch.tensor([10.], requires_grad=True)
+B = torch.tensor([20.], requires_grad=True)
+F = A * B
+G = F * 2
+
+
+
+이렇듯 역전파는 그래프를 거꾸로 거슬러 올라가며 G가 계산되기까지 A, B의 gradient를 계산하는 과정이다.
+
+
+✅ Leaf Tensor &amp; gradient
+
+텐서는 두 가지 조건에 따라 분류할 수 있다.
+
+  그래디언트 계산이 필요한가? (requires gradient)
+  연산의 결과인가? (explicitly created by the user, 즉 사용자가 명시적으로 생성한)
+
+
+
+  “그래디언트 계산이 필요한가?” 는 결국 “상수(constant)인가 변수(variable)인가?”라는 질문과 같다
+
+
+이는 텐서의 두 가지 속성과 관련되는 것이다.
+
+  requires_grad : boolean으로 표현
+  grad_fn : 연산에 사용된 함수(ex. Add, Mul, …)
+
+
+
+  유저가 생성했거나 (=연산의 결과가 아님) 그래디언트 계산이 필요하지 않으면, grad_fn는 값이 없다(None)
+
+
+user_created_tensor = torch.tensor([10.], requires_grad=True)   # 텐서를 초기화하면서 gradient 계산이 필요하다고 설정하였습니다
+print(user_created_tensor.requires_grad)                        # True
+print(user_created_tensor.grad_fn)                              # None
+ 
+calcuated_tensor = user_created_tensor*2                        # 이 텐서는 곱셈 연산의 결과입니다
+print(calcuated_tensor.requires_grad)                           # True
+print(calcuated_tensor.grad_fn)                                 # &lt;MulBackward0 object at 0x7fc5d71a5df0&gt;
+
+
+
+이처럼 텐서는 조건에 따라 leaf tensor인지, gradient를 저장할지(populated) 결정된다.
+
+  Grad Populated : 해당 텐서에 대한 gradient 저장. backward 후 grad 속성이 존재.
+
+
+
+
+
+  
+    
+      case
+      requires_grad
+      grad_fn
+      is_leaf
+      grad
+    
+  
+  
+    
+      gradient 계산이 필요하고, 유저가 생성하였다
+      True
+      None
+      True
+      True
+    
+    
+      gradient 계산이 필요하고, 연산의 결과이다
+      True
+      not None
+      False
+      False
+    
+    
+      gradient 계산이 필요하지 않고, 유저가 생성하였다
+      False
+      None
+      True
+      False
+    
+    
+      gradient 계산이 필요하지 않고, 연산의 결과이다
+      False
+      None
+      True
+      False
+    
+  
+
+
+leaf는 그래프 상 자식이 없는 말단 노드를 말한다. 파이토치에서 gradient 계산이 필요하지 않은 텐서는 모두 leaf tensor로 여긴다. 중요한 것은 ‘gradient 계산이 필요하고 유저가 명시적으로 생성한 텐서’를 leaf tensor로 여긴다는 것이다.
+
+grad는 누적 계산된 gradient다. gradient 계산이 필요한 leaf tensor에 대해 누적 연산한 결과다. 이때 어떤 tensor가 gradient 계산이 필요하더라도 연산의 결과라면 non-leaf tensor로 여겨 grad가 저장되지 않는다.
+
+print(user_created_tensor.is_leaf)  # True
+print(calcuated_tensor.is_leaf)     # False
+ 
+# gradient 계산하여 grad 가 저장되는지 확인
+calcuated_tensor.backward()
+print(user_created_tensor.grad)     # tensor([2.])
+print(calcuated_tensor.grad)        # None (UserWarning: The .grad attribute of a Tensor that is not a leaf Tensor is being accessed)
+
+
+
+  왜 이러한 개념들을 알아야 하는가? 자동 미분은 어떤 변수가 계산되는 데 사용된 모든 변수의 미분값, 즉 history를 computational graph 형태로 저장함으로써 동작하기 때문이다. requires_grad=True 옵션으로 표시해야만 처음 연산이 시작된 곳까지 거슬러 올라가며 그 변수의 연산들을 역추적한다.
+
+
+참고 // 텐서에 저장된 gradient 관련 속성을 확인하는 코드.
+
+def check_attr(t : torch.tensor):
+    print(t.requires_grad)
+    print(t.grad_fn)
+    print(t.is_leaf)
+    print(t.grad)
+
+
+
+✅ requires_grad
+
+requires_grad를 통해 어떤 텐서에 대해 gradient 계산이 필요한지 설정할 수 있다.
+
+# 방법1. 변수 초기화할 때 인자로 표시하기
+t1 = torch.randn((3, 3), requires_grad=True)
+ 
+# 방법2. 변수를 생성한 후에 속성 바꾸기
+t2 = torch.randn((3, 3))
+t2.requires_grad = True
+t2.requires_grad_(True)
+
+
+requires_grad는 전염된다. 연산에 사용된 텐서 중 하나라도 requires_grad 가 True로 설정되어 있다면, 그 연산 결과의 requires_grad도 True이다
+
+# 두 텐서 중 하나만 requires_grad=True로 설정한다
+t1 = torch.randn((3, 3))
+t2 = torch.randn((3, 3))
+t1.requires_grad = True
+ 
+# 연산 결과가 requires_grad=True로 나타난다
+t3 = t1 @ t2
+print(t3.requires_grad)     # True
+
+이러한 특성을 활용해 layer freezing과 같은 기법을 구사할 수 있다. 이미지는 b 의 requires_grad를 false로 세팅한 경우.
+
+
+✅ torch.no_grad()
+
+모델로부터 값을 추론(inference)할 때는 그래프를 생성하고 gradient를 계산하는 과정이 필요없기 때문에 context manager를 활용해 메모리를 아낄 수 있다.
+
+with torch.no_grad():
+    ...
+
+
+eval()과는 무슨 차이?
+eval 함수는 train과 evaluation 시 다르게 동작하는 layer들 (ex. Dropout, BatchNorm) 을 eval 모드로 바꿔준다. 따라서 모델을 평가할 때는 no_grad와 eval을 모두 사용하는 것이 옳다.
+
+model.eval()
+with torch.no_grad():
+   ... 
+
+
+
+✅ backward()
+
+지금까지의 개념을 토대로 역전파 과정을 유사코드로 구현해본다. graph 를 거꾸로 거슬러 올라가며 recursive하게 반복하다가, leaf node에 다다르면 grad_fn가 None이기 때문에 중단된다.
+
+def backward(gradients):
+    '''self.Tensor : 역전파 연산의 대상이 되는 텐서(=loss)'''
+    self.Tensor.grad = gradients
+     
+    for inp in self.inputs:
+        if inp.grad_fn is not None:
+            new_gradients = gradients * local_grad(self.Tensor, inp)
+            inp.grad_fn.backward(new_gradients)
+        else:
+            pass
+
+
+한편 backward() 함수는 scalar 텐서에만 작동한다. vector 텐서에 부를 경우 이러한 에러를 마주하게 된다.
+
+  RuntimeError: grad can be implicitly created only for scalar outputs
+
+
+만약 벡터 텐서에 대해 역전파를 수행하고 싶다면 Jacobian Matix를 활용하거나, 사이즈에 맞는 1값 텐서를 입력으로 주어 처리할 수 있다.
+
+G.backward(torch.ones(G.shape))
+
+
+예제
+
+앞서 살펴본 연산식을 활용해 backward 함수를 호출하고 grad 속성을 확인해본다.
+
+a = torch.tensor([10.], requires_grad=True)
+b = torch.tensor([20.], requires_grad=True)
+F = a * b
+G = F * 2
+
+
+
+
+  
+    
+      case
+      node
+    
+  
+  
+    
+      gradient 계산이 필요하고, 유저가 생성하였다
+      A, B
+    
+    
+      gradient 계산이 필요하고, 연산의 결과이다
+      F, G
+    
+    
+      gradient 계산이 필요하지 않고, 유저가 생성하였다
+      -
+    
+    
+      gradient 계산이 필요하지 않고, 연산의 결과이다
+      -
+    
+  
+
+
+여기서 최적화하고자 하는 대상은 G이다. chain rule에 따라 backward 하여 G가 출력되기까지 a, b의 gradient를 계산한다.
+F 또한 requires_grad=True를 상속 받기 때문에 gradient를 계산하며 grad_fn을 확인할 수 있다. 하지만 leaf tensor가 아니기 때문에 grad를 저장하지 않는다.
+
+G.backward()
+ 
+# a의 gradient(가중치)가 상대적으로 높게 계산됨
+print(a.grad) # tensor([40.])
+print(b.grad) # tensor([20.])
+print(F.grad) # UserWarning: The .grad attribute of a Tensor that is not a leaf Tensor is being accessed. Its .grad attribute won't be populated during autograd.backward()
+print(F.grad_fn)    # &lt;MulBackward0 object at 0x7f0cb7703250&gt;
+
+
+만약 F.grad를 저장하고 싶다면 backward 전에 retain_grad()를 호출하여 중간 텐서 F에 대해서도 gradient를 유지하도록 할 수 있다.
+F.retain_grad()  
+G.backward()     
+
+print(F.grad)  # F의 gradient 출력
+
+
+
+
+✅ GPU 케이스
+
+앞선 예제와 동일한 연산을 수행하되, 이번에는 a와 b를 GPU에 할당하는 중간 단계를 거친다.
+
+a = torch.tensor([10.], requires_grad=True)
+b = torch.tensor([20.], requires_grad=True)
+
+# 추가
+a_cuda = a.to('cuda')
+b_cuda = b.to('cuda')
+ 
+F = a_cuda * b_cuda
+G = F * 2
+
+
+backward 결과 CPU 위의 a, b에만 gradient가 저장되고, GPU 위의 a_cuda, b_cuda는 비어 있다. 이는 CPU 위의 텐서들이 최적화 변수로 남아있고, a와 b 로부터 생성된 a_cuda, b_cuda는 leaf tensor가 아닌 중간 텐서(intermediate tensor)로 여겨지기 때문이다. 텐서를 GPU로 옮기는 intermediate한 과정으로 인한 것이다.
+
+G.backward()
+print(a.grad)       # tensor([40.])
+print(b.grad)       # tensor([20.])
+print(a_cuda.grad)  # None (UserWarning: The .grad attribute of a Tensor that is not a leaf Tensor is being accessed.)
+print(b_cuda.grad)  # None (UserWarning: The .grad attribute of a Tensor that is not a leaf Tensor is being accessed.)
+
+
+따라서 처음부터 GPU 위에서 변수를 생성한 후 역전파를 수행하자.
+
+a_cuda = torch.tensor([10.], requires_grad=True, device='cuda')
+b_cuda = torch.tensor([20.], requires_grad=True, device='cuda')
+ 
+F = a_cuda * b_cuda
+G = F * 2
+ 
+G.backward()
+ 
+print(a_cuda.grad)      # tensor([40.], device='cuda:0')
+print(b_cuda.grad)      # tensor([20.], device='cuda:0')
+
+
+학습
+
+파이토치에서의 학습 과정을 예제를 통해 살펴본다. 전체 과정은 아래 단계로 이루어진다.
+
+
+  DataLoader 클래스 정의 및 객체 생성
+  model 클래스 정의 및 객체 생성
+  loss function, optimizer 정의
+  epoch와 training loop
+
+
+
+1. DataLoader 클래스 정의 및 객체 생성
+
+커스텀 DataLoader 클래스에는 __init__, __len__, __getitem__ 함수를 정의해야 한다. 이 중 __getitem__ 함수는 인자 index를 통해 데이터 샘플을 반환하는 역할을 한다.
+학습과 평가를 위한 DataLoader 객체를 각각 생성한다: train_dataloader, test_dataloader
+
+import pandas as pd
+
+from torch.utils.data import Dataset
+from torch.utils.data import DataLoader
+
+class CustomDataset(Dataset):
+    def __init__(self):
+        self.sample = pd.read_csv('/path/to/data.csv')
+        self.x = np.array(self.sample[['feature1', 'feature2', 'feature3']])
+        self.y = np.array(self.sample[['label']])
+ 
+    def __len__(self):
+        return len(self.sample)
+     
+    def __getitem__(self, index):
+        x = torch.tensor(self.x[index].reshape(1, -1), dtype=torch.float32)
+        y = self.y[index]
+        return x, y
+ 
+training_data = CustomDataset()
+train_dataloader = DataLoader(training_data, batch_size=64, shuffle=True)
+
+
+DataLoader 객체에서 데이터 샘플을 뽑아보고 싶다면 iter, next 내장함수를 사용한다.
+
+data_iterator = iter(train_dataloader)
+features, label = next(data_iterator)
+
+
+
+2. model 클래스 정의 및 객체 생성
+
+파이토치의 nn.Module를 상속 받아 모델 클래스를 정의한다. __init__ 함수에서 레이어를 초기화하고 forward 함수에서 순전파 구조를 정의한다.
+입력 데이터와 아웃풋의 사이즈를 잘 고려해야 한다. 연속된 레이어를 쌓아주는 nn.Sequential도 쓸 수 있다.
+
+import torch.nn as nn
+import torch.nn.functional as F
+ 
+class CustomClassifier(nn.Module):
+    def __init__(self):
+        super(CustomClassifier, self).__init__()
+ 
+        self.input_size = 3
+        self.output_size = 10
+        self.hidden_dim1 = 64
+        self.hidden_dim2 = 128
+ 
+        self.fc1 = nn.Linear(self.input_size, self.hidden_dim1)
+        self.fc2 = nn.Linear(self.hidden_dim1, self.hidden_dim2)
+        self.fc3 = nn.Linear(self.hidden_dim2, self.output_size)
+
+        # 이렇게도 할 수 있다
+        # self.net = nn.Sequential(
+        #     nn.Linear(self.feature_num, self.hidden_dim1),
+        #     nn.ReLU(),
+        #     nn.Linear(self.hidden_dim1, self.hidden_dim2),
+        #     nn.ReLU(),
+        #    nn.Linear(self.hidden_dim2, self.output_size),
+        # )
+ 
+    def forward(self, x):
+        x = F.relu(self.fc1(x))
+        x = F.relu(self.fc2(x))
+        output = self.fc3(x)
+        
+        # 이것과 같다
+        # output = net(x)
+
+        return output
+
+
+모델 클래스를 생성하고 전반적인 정보를 확인한다. torchsummary를 활용하면 그냥 print하는 것보다 훨씬 보기 좋게 확인할 수 있다.
+
+from torchsummary import summary
+
+model = CustomClassifier()
+model = model.to('cuda')
+
+batch_size, feature_num = 64, 3
+summary(model, input_size=(batch_size,  feature_num))
+
+
+
+
+특정 레이어의 파라미터 값을 확인하고 싶다면 named_parameters() 혹은 parameters()를 사용한다.
+
+# for param in model.parameters():
+for name, param in model.named_parameters():
+    if param.requires_grad:
+        print(name, param.data)
+
+
+
+3. loss function, optimizer 정의
+
+라벨 수가 10인 다중분류를 상정하여 CrossEntropyLoss를 손실함수로 정의하고 임의의 입력값을 통해 loss를 연산한다.
+
+loss_fn = nn.CrossEntropyLoss()
+ 
+output_size = 10
+dummy_outputs = torch.rand(batch_size, output_size)
+dummy_labels = torch.randint(output_size, (batch_size,))
+ 
+loss = loss_fn(dummy_outputs, dummy_labels)
+
+
+옵티마이저(otpimizer)는 아주 다양한 종류가 있지만 이곳에서는 SGD를 예시로 든다.
+
+optimizer = torch.optim.SGD(model.parameters(), lr=0.001)
+
+
+
+4. epoch와 training loop
+
+한 번의 학습 epoch를 정의했다.
+
+  dataloader 객체에서 한 배치의 데이터를 꺼내며 gradient를 초기화한다(zero_grad)
+  한 배치의 데이터를 모델에 통과시키고(model) 그 값으로 loss를 계산한다(loss_fn)
+  loss에 대해 gradient를 계산한 후(loss.backward), 그 값을 기반으로 모델을 업데이트한다(optimizer.step)
+
+
+running_loss = 0.0
+model.train()
+
+for data in training_loader:
+    inputs, labels = data
+    
+    optimizer.zero_grad()
+ 
+    outputs = model(inputs)
+    loss = loss_fn(outputs, labels)
+
+    loss.backward()
+    optimizer.step()
+ 
+    running_loss += loss.item()
+
+
+ ✅ 동 떨어져 있는 optimizer.zero_grad(), loss.backward(), optimizer.step()이 각각 호출되는데 어떻게 모델이 업데이트되는가? 
+
+optimizer 를 정의할 때 모델의 파라미터를 넘겨주기 때문에 - torch.optim.SGD(model.parameters(), lr=0.001)
+내부적으로 grad를 저장하고 값을 업데이트한다. 달리 말해 optimizer가 활용하는 값은 loss도 아닌 model.parameters()의 param.grad 이다.
+
+이때 모델을 GPU로 옮기고 난 후에 optimizer를 정의하는 것이 좋다.
+만약 모델을 GPU로 옮기기 전에 optimizer를 정의하면, optimizer는 CPU 위 파라미터를 추적하게 된다. 그 결과 optimizer가 추적하는 파라미터와 실제 모델의 파라미터가 달라지는 문제가 발생할 수 있다.
+
+
+
+비슷한 방식으로 validation 을 정의할 수 있다. 단 모델 평가 단계이므로 모델을 eval 모드로 바꾸고 torch.no_grad 안에서 추론이 이루어진다.
+또한 “loss에 대해 gradient를 계산한 후 그 값을 기반으로 모델을 업데이트”하는 과정은 생략된다.
+
+test_loss = 0.0
+model.eval()
+
+with torch.no_grad():
+    for data in test_dataloader:
+        inputs, labels = data
+
+        outputs = model(inputs)
+        loss = loss_fn(outputs, labels)
+
+        test_loss += loss.item()
+
+
+전자를 train_loop, 후자를 test_loop 이라는 함수로 정의한다면 전체 학습 loop는 이렇게 정의할 수 있다.
+
+num_epochs = 100
+for epoch in range(num_epochs):
+    train_loop()
+    
+    if epoch % 10 == 0:
+        test_loop()
+
+" />
+    <meta property="og:description" content="PyTorch의 구성 요소와 동작 원리를 살펴본다.
+
+개발 환경
+
+Windows
+
+
+  파이썬과 패키지툴을 준비한다
+    
+      python 3.8 : 공식 문서에 따르면 현재2024-09-03 윈도우에서 파이토치는 파이썬 3.8-3.11 버전만 지원된다. 나는 파이썬 버전 관리를 위해 윈도우용 pyenv인 pyenv-win를 사용했다
+      pipenv : 파이썬에서 공식으로 권장하는 패키지 관리툴
+    
+  
+  프로젝트 폴더에 접근하여 pipenv 의 파이썬 버전과 가상환경을 설정한다
+    cd /path/to/project
+pipenv --python 3.8
+pipenv shell
+    
+  
+  생성된 Pipfile파일에 파이토치 설치를 위한 주소를 추가한다.
+    [[source]]
+url = "https://download.pytorch.org/whl/cu118"
+verify_ssl = true
+name = "pytorch"
+    
+  
+  파이토치를 설치한다
+    pipenv install --index=pytorch torch
+    
+    
+  
+
+
+Ubuntu (WSL)
+
+  miniconda 로 파이썬 버전을 명시한 새 환경을 생성한다
+    conda create -n my-env python==3.8.2
+    
+  
+  PyTorch 및 CUDA를 설치한다
+    conda install cudatoolkit=11.8 -c conda-forge
+conda install pytorch torchvision torchaudio pytorch-cuda=11.8 -c pytorch -c nvidia
+    
+    
+  
+
+
+테스트
+pipenv shell 혹은 conda activate my-env 으로 가상 환경에 접근한 다음, 파이썬으로 아래 요소들을 호출한다.
+import torch
+
+torch.cuda.is_available()
+torch.cuda.device_count()
+torch.cuda.current_device()
+torch.cuda.device(0)
+torch.cuda.get_device_name(0)
+
+torch.__version__ 
+torch.version.cuda
+
+
+Tensor(텐서)
+
+Tensor는 모델의 파라미터와 입출력을 인코딩할 때 사용하는, 배열 및 행렬과 매우 유사한 자료구조이다. list나 numpy array로부터 텐서를 생성할 수 있다.
+
+# 원본 데이터
+my_list = [[1, 2, 3], [4, 5, 6]]
+my_arr = np.array(my_list)
+ 
+# 방법1. tensor() 함수
+t1 = torch.tensor(my_arr)
+ 
+# 방법2. from_numpy() 함수
+t2 = torch.from_numpy(my_arr)
+ 
+# 방법3. as_tensor() 함수
+t3 = torch.as_tensor(my_arr)
+
+
+전달된 배열을 sharing 하는 from_numpy(), as_tensor() 과 다르게, tensor()은 배열을 복제(copy)한다. 따라서 원본 배열의 요소를 수정하여도 tensor()로 변환된 텐서는 영향을 받지 않는다.
+my_arr[0, 0] = 999
+ 
+print(t1)   # tensor([[1, 2, 3], [4, 5, 6]])
+print(t2)   # tensor([[999, 2, 3], [4, 5, 6]])
+print(t3)   # tensor([[999, 2, 3], [4, 5, 6]])
+
+
+별도 인자를 주어 dtype을 오버라이딩할 수 있다. t1.dtype을 출력하여 비교할 수 있다. 단, from_numpy는 이런 기능이 없다.
+t1 = torch.tensor(my_list, dtype=torch.float)
+
+
+텐서를 생성할 때 shape(size)를 지정할 수 있다.
+shape = (2,3,)
+rand_tensor = torch.rand(shape)
+ones_tensor = torch.ones(shape)
+zeros_tensor = torch.zeros(shape)
+
+
+
+✅ torch.Tensor vs. torch.tensor
+torch.Tensor 는 클래스(class)다. 따라서 모든 텐서는 torch.Tensor 클래스의 객체이다. 반면 torch.tensor() 는 텐서를 반환하는 함수다.
+각각을 인자 없이 호출할 경우, 전자는 빈 텐서 객체로 생성되지만 후자는 변환할 배열 즉 data를 인자로 받지 못해 에러가 발생한다.
+torch.Tensor() # tensor([])
+torch.tensor() # TypeError: tensor() missing 1 required positional arguments: "data"
+
+
+
+
+PyTorch의 텐서는 CPU에 생성되는 것이 디폴트지만 GPU에 올려 연산할 수 있다. GPU의 RAM에 저장된다는 의미다.
+t1 = torch.FloatTensor([0., 1., 2.])
+t1.is_cuda  #False
+
+
+텐서를 GPU에 올리는 두 가지 방법이 있다.
+
+  처음부터 GPU에서 텐서를 생성한다
+    gpu_tensor = torch.tensor([[1, 2], [3, 4]], device='cuda')
+    
+  
+  CPU에서 생성된 텐서를 GPU로 복사한다. 한번 GPU에 복사된 텐서는 계속해서 GPU에서 연산된다.
+    gpu_tensor = cpu_tensor.to(device='cuda')
+    
+    다시 CPU로 돌아가게 만드는 방법도 있다.
+    back_to_cpu = gpu_tensor.to(dvice='cpu')    # 모델을 GPU에 올릴 때에도 사용
+back_to_cpu = gpu_tensor.cpu()
+    
+    
+  
+
+
+✅ CUDA Caching Memory Allocator
+
+  파이토치는 tensor를 GPU에 올릴 때 메모리를 빠르게 할당하기 위해 caching allocator를 사용한다. allocator는 CUDA로부터 메모리 블럭들을 요청한 후, 블럭을 쪼개고 (CUDA에 반환하지 않은 채로) 재사용한다. 따라서 tensor가 지워져도 allocator는 메모리를 keep해둔다. 결국에 메모리가 실제로는 사용되고 있지 않더라도 이 allocator에 의해 차지되어 사용 중인 것으로 표기될 수 있다.
+
+
+# 파이토치에서 실제로 사용하고 있는 메모리를 확인하기 (1024로 두 번 나누어주어야 MB 단위가 됨)
+torch.cuda.memory_allocated()
+
+# 실제로는 사용하지 않는 메모리를 반환시키기
+torch.cuda.empty_cache() 
+
+
+
+✅ in-place operations
+언더스코어(_)로 끝나는 연산 함수는 텐서 변수를 in-place로 변환한다. 메모리를 아끼는 데 도움이 될 수 있지만 derivative를 계산할 때 문제가 될 수 있으므로 사용을 권장하지는 않는다.
+t1 = torch.rand(2,3,)
+t1.add_(5)
+
+
+
+Autograd (자동미분)
+
+Autograd는 역전파(back propagation)를 시행하여 체인룰(chain rule)에 따라 말단 노드(leaf)까지 변화도(=gradient)를 연산하는 기능이다.
+
+
+  Forward
+  loss function의 값을 계산하는 것. 레이어의 output이 다음 레이어의 input으로 전달됨으로써 연산된다.
+  Backward
+  학습 파라미터의 gradient를 계산하는 것. chain rule를 기반으로, 파라미터가 loss fuction에 기여한 가중치를 연산한다.
+
+
+
+자동미분은 뿌리 노드가 계산되기까지 사용된 모든 변수의 미분값, 즉 ‘history’ 를 그래프 형태로 저장함으로써 동작한다. 이때 그래프는 방향이 있는 비순환 그래프(DAG, directed acyclic graph) 이며 학습 iteration 마다 새로 구성된다. (c.f. tensorflow의 경우 Static Computational Graphs 를 사용한다)
+예를 들어 아래 연산 과정을 그래프로 나타낼 수 있다.
+
+A = torch.tensor([10.], requires_grad=True)
+B = torch.tensor([20.], requires_grad=True)
+F = A * B
+G = F * 2
+
+
+
+이렇듯 역전파는 그래프를 거꾸로 거슬러 올라가며 G가 계산되기까지 A, B의 gradient를 계산하는 과정이다.
+
+
+✅ Leaf Tensor &amp; gradient
+
+텐서는 두 가지 조건에 따라 분류할 수 있다.
+
+  그래디언트 계산이 필요한가? (requires gradient)
+  연산의 결과인가? (explicitly created by the user, 즉 사용자가 명시적으로 생성한)
+
+
+
+  “그래디언트 계산이 필요한가?” 는 결국 “상수(constant)인가 변수(variable)인가?”라는 질문과 같다
+
+
+이는 텐서의 두 가지 속성과 관련되는 것이다.
+
+  requires_grad : boolean으로 표현
+  grad_fn : 연산에 사용된 함수(ex. Add, Mul, …)
+
+
+
+  유저가 생성했거나 (=연산의 결과가 아님) 그래디언트 계산이 필요하지 않으면, grad_fn는 값이 없다(None)
+
+
+user_created_tensor = torch.tensor([10.], requires_grad=True)   # 텐서를 초기화하면서 gradient 계산이 필요하다고 설정하였습니다
+print(user_created_tensor.requires_grad)                        # True
+print(user_created_tensor.grad_fn)                              # None
+ 
+calcuated_tensor = user_created_tensor*2                        # 이 텐서는 곱셈 연산의 결과입니다
+print(calcuated_tensor.requires_grad)                           # True
+print(calcuated_tensor.grad_fn)                                 # &lt;MulBackward0 object at 0x7fc5d71a5df0&gt;
+
+
+
+이처럼 텐서는 조건에 따라 leaf tensor인지, gradient를 저장할지(populated) 결정된다.
+
+  Grad Populated : 해당 텐서에 대한 gradient 저장. backward 후 grad 속성이 존재.
+
+
+
+
+
+  
+    
+      case
+      requires_grad
+      grad_fn
+      is_leaf
+      grad
+    
+  
+  
+    
+      gradient 계산이 필요하고, 유저가 생성하였다
+      True
+      None
+      True
+      True
+    
+    
+      gradient 계산이 필요하고, 연산의 결과이다
+      True
+      not None
+      False
+      False
+    
+    
+      gradient 계산이 필요하지 않고, 유저가 생성하였다
+      False
+      None
+      True
+      False
+    
+    
+      gradient 계산이 필요하지 않고, 연산의 결과이다
+      False
+      None
+      True
+      False
+    
+  
+
+
+leaf는 그래프 상 자식이 없는 말단 노드를 말한다. 파이토치에서 gradient 계산이 필요하지 않은 텐서는 모두 leaf tensor로 여긴다. 중요한 것은 ‘gradient 계산이 필요하고 유저가 명시적으로 생성한 텐서’를 leaf tensor로 여긴다는 것이다.
+
+grad는 누적 계산된 gradient다. gradient 계산이 필요한 leaf tensor에 대해 누적 연산한 결과다. 이때 어떤 tensor가 gradient 계산이 필요하더라도 연산의 결과라면 non-leaf tensor로 여겨 grad가 저장되지 않는다.
+
+print(user_created_tensor.is_leaf)  # True
+print(calcuated_tensor.is_leaf)     # False
+ 
+# gradient 계산하여 grad 가 저장되는지 확인
+calcuated_tensor.backward()
+print(user_created_tensor.grad)     # tensor([2.])
+print(calcuated_tensor.grad)        # None (UserWarning: The .grad attribute of a Tensor that is not a leaf Tensor is being accessed)
+
+
+
+  왜 이러한 개념들을 알아야 하는가? 자동 미분은 어떤 변수가 계산되는 데 사용된 모든 변수의 미분값, 즉 history를 computational graph 형태로 저장함으로써 동작하기 때문이다. requires_grad=True 옵션으로 표시해야만 처음 연산이 시작된 곳까지 거슬러 올라가며 그 변수의 연산들을 역추적한다.
+
+
+참고 // 텐서에 저장된 gradient 관련 속성을 확인하는 코드.
+
+def check_attr(t : torch.tensor):
+    print(t.requires_grad)
+    print(t.grad_fn)
+    print(t.is_leaf)
+    print(t.grad)
+
+
+
+✅ requires_grad
+
+requires_grad를 통해 어떤 텐서에 대해 gradient 계산이 필요한지 설정할 수 있다.
+
+# 방법1. 변수 초기화할 때 인자로 표시하기
+t1 = torch.randn((3, 3), requires_grad=True)
+ 
+# 방법2. 변수를 생성한 후에 속성 바꾸기
+t2 = torch.randn((3, 3))
+t2.requires_grad = True
+t2.requires_grad_(True)
+
+
+requires_grad는 전염된다. 연산에 사용된 텐서 중 하나라도 requires_grad 가 True로 설정되어 있다면, 그 연산 결과의 requires_grad도 True이다
+
+# 두 텐서 중 하나만 requires_grad=True로 설정한다
+t1 = torch.randn((3, 3))
+t2 = torch.randn((3, 3))
+t1.requires_grad = True
+ 
+# 연산 결과가 requires_grad=True로 나타난다
+t3 = t1 @ t2
+print(t3.requires_grad)     # True
+
+이러한 특성을 활용해 layer freezing과 같은 기법을 구사할 수 있다. 이미지는 b 의 requires_grad를 false로 세팅한 경우.
+
+
+✅ torch.no_grad()
+
+모델로부터 값을 추론(inference)할 때는 그래프를 생성하고 gradient를 계산하는 과정이 필요없기 때문에 context manager를 활용해 메모리를 아낄 수 있다.
+
+with torch.no_grad():
+    ...
+
+
+eval()과는 무슨 차이?
+eval 함수는 train과 evaluation 시 다르게 동작하는 layer들 (ex. Dropout, BatchNorm) 을 eval 모드로 바꿔준다. 따라서 모델을 평가할 때는 no_grad와 eval을 모두 사용하는 것이 옳다.
+
+model.eval()
+with torch.no_grad():
+   ... 
+
+
+
+✅ backward()
+
+지금까지의 개념을 토대로 역전파 과정을 유사코드로 구현해본다. graph 를 거꾸로 거슬러 올라가며 recursive하게 반복하다가, leaf node에 다다르면 grad_fn가 None이기 때문에 중단된다.
+
+def backward(gradients):
+    '''self.Tensor : 역전파 연산의 대상이 되는 텐서(=loss)'''
+    self.Tensor.grad = gradients
+     
+    for inp in self.inputs:
+        if inp.grad_fn is not None:
+            new_gradients = gradients * local_grad(self.Tensor, inp)
+            inp.grad_fn.backward(new_gradients)
+        else:
+            pass
+
+
+한편 backward() 함수는 scalar 텐서에만 작동한다. vector 텐서에 부를 경우 이러한 에러를 마주하게 된다.
+
+  RuntimeError: grad can be implicitly created only for scalar outputs
+
+
+만약 벡터 텐서에 대해 역전파를 수행하고 싶다면 Jacobian Matix를 활용하거나, 사이즈에 맞는 1값 텐서를 입력으로 주어 처리할 수 있다.
+
+G.backward(torch.ones(G.shape))
+
+
+예제
+
+앞서 살펴본 연산식을 활용해 backward 함수를 호출하고 grad 속성을 확인해본다.
+
+a = torch.tensor([10.], requires_grad=True)
+b = torch.tensor([20.], requires_grad=True)
+F = a * b
+G = F * 2
+
+
+
+
+  
+    
+      case
+      node
+    
+  
+  
+    
+      gradient 계산이 필요하고, 유저가 생성하였다
+      A, B
+    
+    
+      gradient 계산이 필요하고, 연산의 결과이다
+      F, G
+    
+    
+      gradient 계산이 필요하지 않고, 유저가 생성하였다
+      -
+    
+    
+      gradient 계산이 필요하지 않고, 연산의 결과이다
+      -
+    
+  
+
+
+여기서 최적화하고자 하는 대상은 G이다. chain rule에 따라 backward 하여 G가 출력되기까지 a, b의 gradient를 계산한다.
+F 또한 requires_grad=True를 상속 받기 때문에 gradient를 계산하며 grad_fn을 확인할 수 있다. 하지만 leaf tensor가 아니기 때문에 grad를 저장하지 않는다.
+
+G.backward()
+ 
+# a의 gradient(가중치)가 상대적으로 높게 계산됨
+print(a.grad) # tensor([40.])
+print(b.grad) # tensor([20.])
+print(F.grad) # UserWarning: The .grad attribute of a Tensor that is not a leaf Tensor is being accessed. Its .grad attribute won't be populated during autograd.backward()
+print(F.grad_fn)    # &lt;MulBackward0 object at 0x7f0cb7703250&gt;
+
+
+만약 F.grad를 저장하고 싶다면 backward 전에 retain_grad()를 호출하여 중간 텐서 F에 대해서도 gradient를 유지하도록 할 수 있다.
+F.retain_grad()  
+G.backward()     
+
+print(F.grad)  # F의 gradient 출력
+
+
+
+
+✅ GPU 케이스
+
+앞선 예제와 동일한 연산을 수행하되, 이번에는 a와 b를 GPU에 할당하는 중간 단계를 거친다.
+
+a = torch.tensor([10.], requires_grad=True)
+b = torch.tensor([20.], requires_grad=True)
+
+# 추가
+a_cuda = a.to('cuda')
+b_cuda = b.to('cuda')
+ 
+F = a_cuda * b_cuda
+G = F * 2
+
+
+backward 결과 CPU 위의 a, b에만 gradient가 저장되고, GPU 위의 a_cuda, b_cuda는 비어 있다. 이는 CPU 위의 텐서들이 최적화 변수로 남아있고, a와 b 로부터 생성된 a_cuda, b_cuda는 leaf tensor가 아닌 중간 텐서(intermediate tensor)로 여겨지기 때문이다. 텐서를 GPU로 옮기는 intermediate한 과정으로 인한 것이다.
+
+G.backward()
+print(a.grad)       # tensor([40.])
+print(b.grad)       # tensor([20.])
+print(a_cuda.grad)  # None (UserWarning: The .grad attribute of a Tensor that is not a leaf Tensor is being accessed.)
+print(b_cuda.grad)  # None (UserWarning: The .grad attribute of a Tensor that is not a leaf Tensor is being accessed.)
+
+
+따라서 처음부터 GPU 위에서 변수를 생성한 후 역전파를 수행하자.
+
+a_cuda = torch.tensor([10.], requires_grad=True, device='cuda')
+b_cuda = torch.tensor([20.], requires_grad=True, device='cuda')
+ 
+F = a_cuda * b_cuda
+G = F * 2
+ 
+G.backward()
+ 
+print(a_cuda.grad)      # tensor([40.], device='cuda:0')
+print(b_cuda.grad)      # tensor([20.], device='cuda:0')
+
+
+학습
+
+파이토치에서의 학습 과정을 예제를 통해 살펴본다. 전체 과정은 아래 단계로 이루어진다.
+
+
+  DataLoader 클래스 정의 및 객체 생성
+  model 클래스 정의 및 객체 생성
+  loss function, optimizer 정의
+  epoch와 training loop
+
+
+
+1. DataLoader 클래스 정의 및 객체 생성
+
+커스텀 DataLoader 클래스에는 __init__, __len__, __getitem__ 함수를 정의해야 한다. 이 중 __getitem__ 함수는 인자 index를 통해 데이터 샘플을 반환하는 역할을 한다.
+학습과 평가를 위한 DataLoader 객체를 각각 생성한다: train_dataloader, test_dataloader
+
+import pandas as pd
+
+from torch.utils.data import Dataset
+from torch.utils.data import DataLoader
+
+class CustomDataset(Dataset):
+    def __init__(self):
+        self.sample = pd.read_csv('/path/to/data.csv')
+        self.x = np.array(self.sample[['feature1', 'feature2', 'feature3']])
+        self.y = np.array(self.sample[['label']])
+ 
+    def __len__(self):
+        return len(self.sample)
+     
+    def __getitem__(self, index):
+        x = torch.tensor(self.x[index].reshape(1, -1), dtype=torch.float32)
+        y = self.y[index]
+        return x, y
+ 
+training_data = CustomDataset()
+train_dataloader = DataLoader(training_data, batch_size=64, shuffle=True)
+
+
+DataLoader 객체에서 데이터 샘플을 뽑아보고 싶다면 iter, next 내장함수를 사용한다.
+
+data_iterator = iter(train_dataloader)
+features, label = next(data_iterator)
+
+
+
+2. model 클래스 정의 및 객체 생성
+
+파이토치의 nn.Module를 상속 받아 모델 클래스를 정의한다. __init__ 함수에서 레이어를 초기화하고 forward 함수에서 순전파 구조를 정의한다.
+입력 데이터와 아웃풋의 사이즈를 잘 고려해야 한다. 연속된 레이어를 쌓아주는 nn.Sequential도 쓸 수 있다.
+
+import torch.nn as nn
+import torch.nn.functional as F
+ 
+class CustomClassifier(nn.Module):
+    def __init__(self):
+        super(CustomClassifier, self).__init__()
+ 
+        self.input_size = 3
+        self.output_size = 10
+        self.hidden_dim1 = 64
+        self.hidden_dim2 = 128
+ 
+        self.fc1 = nn.Linear(self.input_size, self.hidden_dim1)
+        self.fc2 = nn.Linear(self.hidden_dim1, self.hidden_dim2)
+        self.fc3 = nn.Linear(self.hidden_dim2, self.output_size)
+
+        # 이렇게도 할 수 있다
+        # self.net = nn.Sequential(
+        #     nn.Linear(self.feature_num, self.hidden_dim1),
+        #     nn.ReLU(),
+        #     nn.Linear(self.hidden_dim1, self.hidden_dim2),
+        #     nn.ReLU(),
+        #    nn.Linear(self.hidden_dim2, self.output_size),
+        # )
+ 
+    def forward(self, x):
+        x = F.relu(self.fc1(x))
+        x = F.relu(self.fc2(x))
+        output = self.fc3(x)
+        
+        # 이것과 같다
+        # output = net(x)
+
+        return output
+
+
+모델 클래스를 생성하고 전반적인 정보를 확인한다. torchsummary를 활용하면 그냥 print하는 것보다 훨씬 보기 좋게 확인할 수 있다.
+
+from torchsummary import summary
+
+model = CustomClassifier()
+model = model.to('cuda')
+
+batch_size, feature_num = 64, 3
+summary(model, input_size=(batch_size,  feature_num))
+
+
+
+
+특정 레이어의 파라미터 값을 확인하고 싶다면 named_parameters() 혹은 parameters()를 사용한다.
+
+# for param in model.parameters():
+for name, param in model.named_parameters():
+    if param.requires_grad:
+        print(name, param.data)
+
+
+
+3. loss function, optimizer 정의
+
+라벨 수가 10인 다중분류를 상정하여 CrossEntropyLoss를 손실함수로 정의하고 임의의 입력값을 통해 loss를 연산한다.
+
+loss_fn = nn.CrossEntropyLoss()
+ 
+output_size = 10
+dummy_outputs = torch.rand(batch_size, output_size)
+dummy_labels = torch.randint(output_size, (batch_size,))
+ 
+loss = loss_fn(dummy_outputs, dummy_labels)
+
+
+옵티마이저(otpimizer)는 아주 다양한 종류가 있지만 이곳에서는 SGD를 예시로 든다.
+
+optimizer = torch.optim.SGD(model.parameters(), lr=0.001)
+
+
+
+4. epoch와 training loop
+
+한 번의 학습 epoch를 정의했다.
+
+  dataloader 객체에서 한 배치의 데이터를 꺼내며 gradient를 초기화한다(zero_grad)
+  한 배치의 데이터를 모델에 통과시키고(model) 그 값으로 loss를 계산한다(loss_fn)
+  loss에 대해 gradient를 계산한 후(loss.backward), 그 값을 기반으로 모델을 업데이트한다(optimizer.step)
+
+
+running_loss = 0.0
+model.train()
+
+for data in training_loader:
+    inputs, labels = data
+    
+    optimizer.zero_grad()
+ 
+    outputs = model(inputs)
+    loss = loss_fn(outputs, labels)
+
+    loss.backward()
+    optimizer.step()
+ 
+    running_loss += loss.item()
+
+
+ ✅ 동 떨어져 있는 optimizer.zero_grad(), loss.backward(), optimizer.step()이 각각 호출되는데 어떻게 모델이 업데이트되는가? 
+
+optimizer 를 정의할 때 모델의 파라미터를 넘겨주기 때문에 - torch.optim.SGD(model.parameters(), lr=0.001)
+내부적으로 grad를 저장하고 값을 업데이트한다. 달리 말해 optimizer가 활용하는 값은 loss도 아닌 model.parameters()의 param.grad 이다.
+
+이때 모델을 GPU로 옮기고 난 후에 optimizer를 정의하는 것이 좋다.
+만약 모델을 GPU로 옮기기 전에 optimizer를 정의하면, optimizer는 CPU 위 파라미터를 추적하게 된다. 그 결과 optimizer가 추적하는 파라미터와 실제 모델의 파라미터가 달라지는 문제가 발생할 수 있다.
+
+
+
+비슷한 방식으로 validation 을 정의할 수 있다. 단 모델 평가 단계이므로 모델을 eval 모드로 바꾸고 torch.no_grad 안에서 추론이 이루어진다.
+또한 “loss에 대해 gradient를 계산한 후 그 값을 기반으로 모델을 업데이트”하는 과정은 생략된다.
+
+test_loss = 0.0
+model.eval()
+
+with torch.no_grad():
+    for data in test_dataloader:
+        inputs, labels = data
+
+        outputs = model(inputs)
+        loss = loss_fn(outputs, labels)
+
+        test_loss += loss.item()
+
+
+전자를 train_loop, 후자를 test_loop 이라는 함수로 정의한다면 전체 학습 loop는 이렇게 정의할 수 있다.
+
+num_epochs = 100
+for epoch in range(num_epochs):
+    train_loop()
+    
+    if epoch % 10 == 0:
+        test_loop()
+
+" />
+    
+    <meta name="author" content="YunsooLog" />
+
+    
+    <meta property="og:title" content="PyTorch 파이토치 기초 모음집" />
+    <meta property="twitter:title" content="PyTorch 파이토치 기초 모음집" />
+    
+  <!-- Async font loading -->
+<script>
+  window.WebFontConfig = {
+      custom: {
+          families: ['Spoqa Han Sans:100,300,400,700'],
+          urls: ['https://spoqa.github.io/spoqa-han-sans/css/SpoqaHanSans-kr.css']
+      },
+      timeout: 60000
+  };
+  (function(d) {
+      var wf = d.createElement('script'), s = d.scripts[0];
+      wf.src = 'https://ajax.googleapis.com/ajax/libs/webfont/1.5.18/webfont.js';
+      s.parentNode.insertBefore(wf, s);
+  })(document);
+</script>
+
+  <!--[if lt IE 9]>
+    <script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+  <![endif]-->
+
+  <link rel="stylesheet" type="text/css" href="/style.css" />
+  <link rel="alternate" type="application/rss+xml" title="YunsooLog - 행간을 읽는 기계학습 이야기" href="/feed.xml" />
+  <script>
+    document.cookie = "promo_shown=1; SameSite=Lax; path=/";
+  </script>
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.13.11/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.13.11/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.13.11/dist/contrib/auto-render.min.js"
+          onload="renderMathInElement(document.body, {
+            delimiters: [
+              {left: '\\[', right: '\\]', display: true},
+              {left: '$$', right: '$$', display: true},
+              {left: '$', right: '$', display: false},
+            ]
+          });">
+  </script>
+
+  <!-- Created with Jekyll Now - http://github.com/barryclark/jekyll-now -->
+</head>
+  <body>
+    <div class="wrapper-masthead">
+  <div class="container">
+    <header class="masthead clearfix">
+      <a href="/" class="site-avatar"><img src="/images/avatar.png"/></a>
+      
+      <div class="site-info">
+        <h1 class="site-name"><a href="/">YunsooLog</a></h1>
+        <p class="site-description">행간을 읽는 기계학습 이야기</p>
+      </div>
+
+      <nav>
+        
+        
+        <a href="/about">About</a>
+        
+        
+        
+        <a href="/">Blog</a>
+        
+        
+        
+        <a href="/tags">Tags</a>
+        
+        
+        
+        <a href="/timeline">Timeline</a>
+        
+        
+        
+        <ul class="search-icon">
+          <a href="/search">
+          <svg 
+            width="24" 
+            height="24" 
+            viewBox="0 0 24 24" 
+            fill="none" 
+            xmlns="http://www.w3.org/2000/svg">
+            <path d="M10 2C5.58172 2 2 5.58172 2 10C2 14.4183 5.58172 18 10 18C11.8485 18 13.5451 17.3376 14.8458 16.2416L19.7071 21.1029C20.0976 21.4934 20.7308 21.4934 21.1213 21.1029C21.5118 20.7124 21.5118 20.0792 21.1213 19.6887L16.2416 14.809C17.3376 13.5083 18 11.8116 18 10C18 5.58172 14.4183 2 10 2ZM4 10C4 6.68629 6.68629 4 10 4C13.3137 4 16 6.68629 16 10C16 13.3137 13.3137 16 10 16C6.68629 16 4 13.3137 4 10Z" 
+            fill="currentColor"></path>
+          </svg>
+          </a>
+        </ul>
+
+      </nav>
+    </header>
+  </div>
+</div>
+
+    <div id="main" role="main" class="container">
+      <article class="post">
+  <div class="inner-wrap">
+    <h1>PyTorch 파이토치 기초 모음집</h1>
+
+    <div>
+      <span class="date">
+        2024-01-18
+      </span>
+
+      <ul class="tag">
+        
+        <li>
+          <a href="https://woocosmos.github.io/tags#PyTorch">
+            PyTorch
+          </a>
+        </li>
+        
+      </ul>
+    </div>
+
+    <section class="entry">
+      
+      <aside>
+        <nav class="nav-toc">
+          <h3> 목차 </h3>
+          <ul id="toc" class="section-nav">
+<li class="toc-entry toc-h1"><a href="#개발-환경">개발 환경</a></li>
+<li class="toc-entry toc-h1"><a href="#tensor텐서">Tensor(텐서)</a></li>
+<li class="toc-entry toc-h1"><a href="#autograd-자동미분">Autograd (자동미분)</a>
+<ul>
+<li class="toc-entry toc-h2"><a href="#예제">예제</a></li>
+</ul>
+</li>
+<li class="toc-entry toc-h1"><a href="#학습">학습</a></li>
+</ul>
+        </nav>
+      </aside>
+      <script src="/assets/scroll-spy.js" type="text/javascript"></script>
+      
+      <p>PyTorch의 구성 요소와 동작 원리를 살펴본다.</p>
+
+<h1 id="개발-환경">개발 환경</h1>
+
+<p><strong>Windows</strong></p>
+
+<ol>
+  <li>파이썬과 패키지툴을 준비한다
+    <ul>
+      <li><strong>python 3.8</strong> : <a href="https://pytorch.org/get-started/locally/#windows-python">공식 문서</a>에 따르면 현재<sub>2024-09-03</sub> 윈도우에서 파이토치는 파이썬 3.8-3.11 버전만 지원된다. <em>나는 파이썬 버전 관리를 위해 윈도우용 pyenv인 <a href="https://github.com/pyenv-win/pyenv-win">pyenv-win</a>를 사용했다</em></li>
+      <li><strong>pipenv</strong> : 파이썬에서 공식으로 권장하는 패키지 관리툴</li>
+    </ul>
+  </li>
+  <li>프로젝트 폴더에 접근하여 pipenv 의 파이썬 버전과 가상환경을 설정한다
+    <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">cd</span> /path/to/project
+pipenv <span class="nt">--python</span> 3.8
+pipenv shell
+</code></pre></div>    </div>
+  </li>
+  <li>생성된 <code class="language-plaintext highlighter-rouge">Pipfile</code>파일에 파이토치 설치를 위한 주소를 추가한다.
+    <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>[[source]]
+url = "https://download.pytorch.org/whl/cu118"
+verify_ssl = true
+name = "pytorch"
+</code></pre></div>    </div>
+  </li>
+  <li>파이토치를 설치한다
+    <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>pipenv <span class="nb">install</span> <span class="nt">--index</span><span class="o">=</span>pytorch torch
+</code></pre></div>    </div>
+    <p><br /></p>
+  </li>
+</ol>
+
+<p><strong>Ubuntu (WSL)</strong></p>
+<ol>
+  <li>miniconda 로 파이썬 버전을 명시한 새 환경을 생성한다
+    <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>conda create <span class="nt">-n</span> my-env <span class="nv">python</span><span class="o">==</span>3.8.2
+</code></pre></div>    </div>
+  </li>
+  <li>PyTorch 및 CUDA를 설치한다
+    <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>conda <span class="nb">install </span><span class="nv">cudatoolkit</span><span class="o">=</span>11.8 <span class="nt">-c</span> conda-forge
+conda <span class="nb">install </span>pytorch torchvision torchaudio pytorch-cuda<span class="o">=</span>11.8 <span class="nt">-c</span> pytorch <span class="nt">-c</span> nvidia
+</code></pre></div>    </div>
+    <p><br /></p>
+  </li>
+</ol>
+
+<p><strong>테스트</strong><br />
+pipenv shell 혹은 conda activate my-env 으로 가상 환경에 접근한 다음, 파이썬으로 아래 요소들을 호출한다.</p>
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">import</span> <span class="n">torch</span>
+
+<span class="n">torch</span><span class="p">.</span><span class="n">cuda</span><span class="p">.</span><span class="nf">is_available</span><span class="p">()</span>
+<span class="n">torch</span><span class="p">.</span><span class="n">cuda</span><span class="p">.</span><span class="nf">device_count</span><span class="p">()</span>
+<span class="n">torch</span><span class="p">.</span><span class="n">cuda</span><span class="p">.</span><span class="nf">current_device</span><span class="p">()</span>
+<span class="n">torch</span><span class="p">.</span><span class="n">cuda</span><span class="p">.</span><span class="nf">device</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+<span class="n">torch</span><span class="p">.</span><span class="n">cuda</span><span class="p">.</span><span class="nf">get_device_name</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+
+<span class="n">torch</span><span class="p">.</span><span class="n">__version__</span> 
+<span class="n">torch</span><span class="p">.</span><span class="n">version</span><span class="p">.</span><span class="n">cuda</span>
+</code></pre></div></div>
+
+<h1 id="tensor텐서">Tensor(텐서)</h1>
+
+<p>Tensor는 <strong>모델의 파라미터와 입출력을 인코딩할 때 사용하는, <mark>배열 및 행렬</mark>과 매우 유사한 자료구조</strong>이다. list나 numpy array로부터 <strong>텐서를 생성</strong>할 수 있다.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># 원본 데이터
+</span><span class="n">my_list</span> <span class="o">=</span> <span class="p">[[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">],</span> <span class="p">[</span><span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">6</span><span class="p">]]</span>
+<span class="n">my_arr</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="nf">array</span><span class="p">(</span><span class="n">my_list</span><span class="p">)</span>
+ 
+<span class="c1"># 방법1. tensor() 함수
+</span><span class="n">t1</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="nf">tensor</span><span class="p">(</span><span class="n">my_arr</span><span class="p">)</span>
+ 
+<span class="c1"># 방법2. from_numpy() 함수
+</span><span class="n">t2</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="nf">from_numpy</span><span class="p">(</span><span class="n">my_arr</span><span class="p">)</span>
+ 
+<span class="c1"># 방법3. as_tensor() 함수
+</span><span class="n">t3</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="nf">as_tensor</span><span class="p">(</span><span class="n">my_arr</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p>전달된 배열을 sharing 하는 <code class="language-plaintext highlighter-rouge">from_numpy()</code>, <code class="language-plaintext highlighter-rouge">as_tensor()</code> 과 다르게, <code class="language-plaintext highlighter-rouge">tensor()</code>은 배열을 <strong>복제(copy)</strong>한다. 따라서 원본 배열의 요소를 수정하여도 <strong><code class="language-plaintext highlighter-rouge">tensor()</code>로 변환된 텐서는 영향을 받지 않는다</strong>.</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>my_arr[0, 0] = 999
+ 
+print(t1)   # tensor([[1, 2, 3], [4, 5, 6]])
+print(t2)   # tensor([[999, 2, 3], [4, 5, 6]])
+print(t3)   # tensor([[999, 2, 3], [4, 5, 6]])
+</code></pre></div></div>
+
+<p>별도 인자를 주어 <strong>dtype을 오버라이딩</strong>할 수 있다. <code class="language-plaintext highlighter-rouge">t1.dtype</code>을 출력하여 비교할 수 있다. 단, <code class="language-plaintext highlighter-rouge">from_numpy</code>는 이런 기능이 없다.</p>
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">t1</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="nf">tensor</span><span class="p">(</span><span class="n">my_list</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="p">.</span><span class="nb">float</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p>텐서를 생성할 때 <strong>shape(size)를 지정</strong>할 수 있다.</p>
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">shape</span> <span class="o">=</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">,)</span>
+<span class="n">rand_tensor</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="nf">rand</span><span class="p">(</span><span class="n">shape</span><span class="p">)</span>
+<span class="n">ones_tensor</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="nf">ones</span><span class="p">(</span><span class="n">shape</span><span class="p">)</span>
+<span class="n">zeros_tensor</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="nf">zeros</span><span class="p">(</span><span class="n">shape</span><span class="p">)</span>
+</code></pre></div></div>
+<p><br /></p>
+
+<p>✅ <strong>torch.Tensor vs. torch.tensor</strong><br />
+torch.Tensor 는 <u>클래스(class)</u>다. 따라서 모든 텐서는 torch.Tensor 클래스의 객체이다. 반면 torch.tensor() 는 텐서를 반환하는 <u>함수</u>다.<br />
+각각을 인자 없이 호출할 경우, 전자는 빈 텐서 객체로 생성되지만 후자는 변환할 배열 즉 data를 인자로 받지 못해 에러가 발생한다.</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>torch.Tensor() # tensor([])
+torch.tensor() # TypeError: tensor() missing 1 required positional arguments: "data"
+</code></pre></div></div>
+
+<hr />
+
+<p>PyTorch의 텐서는 CPU에 생성되는 것이 디폴트지만 <strong>GPU에 올려 연산</strong>할 수 있다. GPU의 RAM에 저장된다는 의미다.</p>
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">t1</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="nc">FloatTensor</span><span class="p">([</span><span class="mf">0.</span><span class="p">,</span> <span class="mf">1.</span><span class="p">,</span> <span class="mf">2.</span><span class="p">])</span>
+<span class="n">t1</span><span class="p">.</span><span class="n">is_cuda</span>  <span class="c1">#False
+</span></code></pre></div></div>
+
+<p>텐서를 GPU에 올리는 두 가지 방법이 있다.</p>
+<ol>
+  <li>처음부터 GPU에서 텐서를 생성한다
+    <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>gpu_tensor = torch.tensor([[1, 2], [3, 4]], device='cuda')
+</code></pre></div>    </div>
+  </li>
+  <li>CPU에서 생성된 텐서를 GPU로 복사한다. 한번 GPU에 복사된 텐서는 계속해서 GPU에서 연산된다.
+    <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>gpu_tensor = cpu_tensor.to(device='cuda')
+</code></pre></div>    </div>
+    <p>다시 CPU로 돌아가게 만드는 방법도 있다.</p>
+    <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>back_to_cpu = gpu_tensor.to(dvice='cpu')    # 모델을 GPU에 올릴 때에도 사용
+back_to_cpu = gpu_tensor.cpu()
+</code></pre></div>    </div>
+    <p><br /></p>
+  </li>
+</ol>
+
+<p>✅ <strong>CUDA Caching Memory Allocator</strong></p>
+<blockquote>
+  <p>파이토치는 tensor를 GPU에 올릴 때 <u>메모리를 빠르게 할당하기 위해</u> <strong>caching allocator</strong>를 사용한다. allocator는 CUDA로부터 메모리 블럭들을 요청한 후, 블럭을 쪼개고 (CUDA에 반환하지 않은 채로) 재사용한다. 따라서 tensor가 지워져도 allocator는 메모리를 keep해둔다. 결국에 <u>메모리가 실제로는 사용되고 있지 않더라도</u> 이 allocator에 의해 차지되어 <strong>사용 중인 것으로 표기</strong>될 수 있다.</p>
+</blockquote>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code># 파이토치에서 실제로 사용하고 있는 메모리를 확인하기 (1024로 두 번 나누어주어야 MB 단위가 됨)
+torch.cuda.memory_allocated()
+
+# 실제로는 사용하지 않는 메모리를 반환시키기
+torch.cuda.empty_cache() 
+</code></pre></div></div>
+<p><br /></p>
+
+<p>✅ <strong>in-place operations</strong><br />
+언더스코어(<code class="language-plaintext highlighter-rouge">_</code>)로 끝나는 연산 함수는 텐서 변수를 in-place로 변환한다. 메모리를 아끼는 데 도움이 될 수 있지만 derivative를 계산할 때 문제가 될 수 있으므로 사용을 권장하지는 않는다.</p>
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">t1</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="nf">rand</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">,)</span>
+<span class="n">t1</span><span class="p">.</span><span class="nf">add_</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>
+</code></pre></div></div>
+<p><br /></p>
+
+<h1 id="autograd-자동미분">Autograd (자동미분)</h1>
+
+<p>Autograd는 역전파(back propagation)를 시행하여 체인룰(chain rule)에 따라 말단 노드(leaf)까지 변화도(=gradient)를 연산하는 기능이다.</p>
+
+<dl>
+  <dt>Forward</dt>
+  <dd>loss function의 값을 계산하는 것. 레이어의 output이 다음 레이어의 input으로 전달됨으로써 연산된다.</dd>
+  <dt>Backward</dt>
+  <dd>학습 파라미터의 gradient를 계산하는 것. chain rule를 기반으로, 파라미터가 loss fuction에 기여한 가중치를 연산한다.</dd>
+</dl>
+
+<p><br />
+자동미분은 뿌리 노드가 계산되기까지 사용된 모든 변수의 미분값, 즉 ‘history’ 를 그래프 형태로 저장함으로써 동작한다. 이때 그래프는 방향이 있는 비순환 그래프(DAG, directed acyclic graph) 이며 학습 iteration 마다 새로 구성된다. <em>(c.f. tensorflow의 경우 Static Computational Graphs 를 사용한다)</em><br />
+예를 들어 아래 연산 과정을 그래프로 나타낼 수 있다.</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>A = torch.tensor([10.], requires_grad=True)
+B = torch.tensor([20.], requires_grad=True)
+F = A * B
+G = F * 2
+</code></pre></div></div>
+<p><img src="https://github.com/user-attachments/assets/4d2452a0-9563-455b-b9f4-edd06de5c8b1" alt="image" class="center-image" /></p>
+
+<p>이렇듯 역전파는 그래프를 거꾸로 거슬러 올라가며 G가 계산되기까지 A, B의 gradient를 계산하는 과정이다.<br />
+<br /></p>
+
+<p>✅ <strong>Leaf Tensor &amp; gradient</strong></p>
+
+<p>텐서는 두 가지 <u>조건</u>에 따라 분류할 수 있다.</p>
+<ul>
+  <li>그래디언트 계산이 필요한가? (requires gradient)</li>
+  <li>연산의 결과인가? (explicitly created by the user, 즉 사용자가 명시적으로 생성한)</li>
+</ul>
+
+<blockquote>
+  <p>“그래디언트 계산이 필요한가?” 는 결국 “상수(constant)인가 변수(variable)인가?”라는 질문과 같다</p>
+</blockquote>
+
+<p>이는 텐서의 두 가지 <u>속성</u>과 관련되는 것이다.</p>
+<ul>
+  <li><strong><code class="language-plaintext highlighter-rouge">requires_grad</code></strong> : boolean으로 표현</li>
+  <li><strong><code class="language-plaintext highlighter-rouge">grad_fn</code></strong> : 연산에 사용된 함수(<em>ex. Add, Mul, …</em>)</li>
+</ul>
+
+<blockquote>
+  <p>유저가 생성했거나 (=연산의 결과가 아님) 그래디언트 계산이 필요하지 않으면, <code class="language-plaintext highlighter-rouge">grad_fn</code>는 값이 없다(None)</p>
+</blockquote>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>user_created_tensor = torch.tensor([10.], requires_grad=True)   # 텐서를 초기화하면서 gradient 계산이 필요하다고 설정하였습니다
+print(user_created_tensor.requires_grad)                        # True
+print(user_created_tensor.grad_fn)                              # None
+ 
+calcuated_tensor = user_created_tensor*2                        # 이 텐서는 곱셈 연산의 결과입니다
+print(calcuated_tensor.requires_grad)                           # True
+print(calcuated_tensor.grad_fn)                                 # &lt;MulBackward0 object at 0x7fc5d71a5df0&gt;
+</code></pre></div></div>
+<p><br /></p>
+
+<p>이처럼 텐서는 조건에 따라 leaf tensor인지, gradient를 저장할지(populated) 결정된다.</p>
+<blockquote>
+  <p><strong>Grad Populated</strong> : 해당 텐서에 대한 gradient 저장. backward 후 grad 속성이 존재.</p>
+</blockquote>
+
+<style>
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+th, td:first-child {
+  background-color: #f2f2f2; /* Green color for header row */
+}
+</style>
+
+<table>
+  <thead>
+    <tr>
+      <th>case</th>
+      <th><strong>requires_grad</strong></th>
+      <th><strong>grad_fn</strong></th>
+      <th><strong>is_leaf</strong></th>
+      <th><strong>grad</strong></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>gradient 계산이 필요하고, 유저가 생성하였다</td>
+      <td>True</td>
+      <td>None</td>
+      <td><mark>True</mark></td>
+      <td><mark>True</mark></td>
+    </tr>
+    <tr>
+      <td>gradient 계산이 필요하고, 연산의 결과이다</td>
+      <td>True</td>
+      <td>not None</td>
+      <td>False</td>
+      <td>False</td>
+    </tr>
+    <tr>
+      <td>gradient 계산이 필요하지 않고, 유저가 생성하였다</td>
+      <td>False</td>
+      <td>None</td>
+      <td>True</td>
+      <td>False</td>
+    </tr>
+    <tr>
+      <td>gradient 계산이 필요하지 않고, 연산의 결과이다</td>
+      <td>False</td>
+      <td>None</td>
+      <td>True</td>
+      <td>False</td>
+    </tr>
+  </tbody>
+</table>
+
+<p><strong><u>leaf</u></strong>는 그래프 상 자식이 없는 말단 노드를 말한다. 파이토치에서 gradient 계산이 필요하지 않은 텐서는 모두 leaf tensor로 여긴다. 중요한 것은 <strong>‘gradient 계산이 필요하고 유저가 명시적으로 생성한 텐서’를 leaf tensor로 여긴다</strong>는 것이다.</p>
+
+<p><strong><u>grad</u></strong>는 누적 계산된 gradient다. gradient 계산이 필요한 leaf tensor에 대해 누적 연산한 결과다. 이때 어떤 tensor가 gradient 계산이 필요하더라도 <u>연산의 결과</u>라면 non-leaf tensor로 여겨 <code class="language-plaintext highlighter-rouge">grad</code>가 저장되지 않는다.</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>print(user_created_tensor.is_leaf)  # True
+print(calcuated_tensor.is_leaf)     # False
+ 
+# gradient 계산하여 grad 가 저장되는지 확인
+calcuated_tensor.backward()
+print(user_created_tensor.grad)     # tensor([2.])
+print(calcuated_tensor.grad)        # None (UserWarning: The .grad attribute of a Tensor that is not a leaf Tensor is being accessed)
+</code></pre></div></div>
+
+<blockquote>
+  <p>왜 이러한 개념들을 알아야 하는가? 자동 미분은 어떤 변수가 계산되는 데 사용된 모든 변수의 미분값, 즉 history를 computational graph 형태로 저장함으로써 동작하기 때문이다. <code class="language-plaintext highlighter-rouge">requires_grad=True</code> 옵션으로 표시해야만 처음 연산이 시작된 곳까지 거슬러 올라가며 그 변수의 연산들을 역추적한다.</p>
+</blockquote>
+
+<p>참고 // 텐서에 저장된 gradient 관련 속성을 확인하는 코드.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="nf">check_attr</span><span class="p">(</span><span class="n">t</span> <span class="p">:</span> <span class="n">torch</span><span class="p">.</span><span class="n">tensor</span><span class="p">):</span>
+    <span class="nf">print</span><span class="p">(</span><span class="n">t</span><span class="p">.</span><span class="n">requires_grad</span><span class="p">)</span>
+    <span class="nf">print</span><span class="p">(</span><span class="n">t</span><span class="p">.</span><span class="n">grad_fn</span><span class="p">)</span>
+    <span class="nf">print</span><span class="p">(</span><span class="n">t</span><span class="p">.</span><span class="n">is_leaf</span><span class="p">)</span>
+    <span class="nf">print</span><span class="p">(</span><span class="n">t</span><span class="p">.</span><span class="n">grad</span><span class="p">)</span>
+</code></pre></div></div>
+<p><br /></p>
+
+<p>✅ <strong>requires_grad</strong></p>
+
+<p><code class="language-plaintext highlighter-rouge">requires_grad</code>를 통해 어떤 텐서에 대해 gradient 계산이 필요한지 설정할 수 있다.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># 방법1. 변수 초기화할 때 인자로 표시하기
+</span><span class="n">t1</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="nf">randn</span><span class="p">((</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span> <span class="n">requires_grad</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+ 
+<span class="c1"># 방법2. 변수를 생성한 후에 속성 바꾸기
+</span><span class="n">t2</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="nf">randn</span><span class="p">((</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span>
+<span class="n">t2</span><span class="p">.</span><span class="n">requires_grad</span> <span class="o">=</span> <span class="bp">True</span>
+<span class="n">t2</span><span class="p">.</span><span class="nf">requires_grad_</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p><code class="language-plaintext highlighter-rouge">requires_grad</code>는 <u>전염</u>된다. 연산에 사용된 텐서 중 하나라도 requires_grad 가 True로 설정되어 있다면, 그 연산 결과의 requires_grad도 True이다</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># 두 텐서 중 하나만 requires_grad=True로 설정한다
+</span><span class="n">t1</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="nf">randn</span><span class="p">((</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span>
+<span class="n">t2</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="nf">randn</span><span class="p">((</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span>
+<span class="n">t1</span><span class="p">.</span><span class="n">requires_grad</span> <span class="o">=</span> <span class="bp">True</span>
+ 
+<span class="c1"># 연산 결과가 requires_grad=True로 나타난다
+</span><span class="n">t3</span> <span class="o">=</span> <span class="n">t1</span> <span class="o">@</span> <span class="n">t2</span>
+<span class="nf">print</span><span class="p">(</span><span class="n">t3</span><span class="p">.</span><span class="n">requires_grad</span><span class="p">)</span>     <span class="c1"># True
+</span></code></pre></div></div>
+<p>이러한 특성을 활용해 layer freezing과 같은 기법을 구사할 수 있다. 이미지는 <code class="language-plaintext highlighter-rouge">b</code> 의 <code class="language-plaintext highlighter-rouge">requires_grad</code>를 false로 세팅한 경우.
+<img src="https://github.com/user-attachments/assets/8d0d81ef-61e6-488b-a0b2-1948feac4d07" alt="image" /></p>
+
+<p>✅ <strong>torch.no_grad()</strong></p>
+
+<p>모델로부터 값을 <strong>추론(inference)</strong>할 때는 그래프를 생성하고 gradient를 계산하는 과정이 필요없기 때문에 context manager를 활용해 메모리를 아낄 수 있다.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">with</span> <span class="n">torch</span><span class="p">.</span><span class="nf">no_grad</span><span class="p">():</span>
+    <span class="bp">...</span>
+</code></pre></div></div>
+
+<p><b><em>eval()과는 무슨 차이?</em></b><br />
+<code class="language-plaintext highlighter-rouge">eval</code> 함수는 train과 evaluation 시 다르게 동작하는 layer들 (ex. Dropout, BatchNorm) 을 eval 모드로 바꿔준다. 따라서 모델을 평가할 때는 no_grad와 eval을 모두 사용하는 것이 옳다.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">model</span><span class="p">.</span><span class="nf">eval</span><span class="p">()</span>
+<span class="k">with</span> <span class="n">torch</span><span class="p">.</span><span class="nf">no_grad</span><span class="p">():</span>
+   <span class="p">...</span> 
+</code></pre></div></div>
+<p><br /></p>
+
+<p>✅ <strong>backward()</strong></p>
+
+<p>지금까지의 개념을 토대로 역전파 과정을 유사코드로 구현해본다. graph 를 거꾸로 거슬러 올라가며 recursive하게 반복하다가, leaf node에 다다르면 grad_fn가 None이기 때문에 중단된다.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="nf">backward</span><span class="p">(</span><span class="n">gradients</span><span class="p">):</span>
+    <span class="sh">'''</span><span class="s">self.Tensor : 역전파 연산의 대상이 되는 텐서(=loss)</span><span class="sh">'''</span>
+    <span class="n">self</span><span class="p">.</span><span class="n">Tensor</span><span class="p">.</span><span class="n">grad</span> <span class="o">=</span> <span class="n">gradients</span>
+     
+    <span class="k">for</span> <span class="n">inp</span> <span class="ow">in</span> <span class="n">self</span><span class="p">.</span><span class="n">inputs</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">inp</span><span class="p">.</span><span class="n">grad_fn</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">new_gradients</span> <span class="o">=</span> <span class="n">gradients</span> <span class="o">*</span> <span class="nf">local_grad</span><span class="p">(</span><span class="n">self</span><span class="p">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">inp</span><span class="p">)</span>
+            <span class="n">inp</span><span class="p">.</span><span class="n">grad_fn</span><span class="p">.</span><span class="nf">backward</span><span class="p">(</span><span class="n">new_gradients</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">pass</span>
+</code></pre></div></div>
+
+<p>한편 <code class="language-plaintext highlighter-rouge">backward()</code> 함수는 <strong>scalar 텐서</strong>에만 작동한다. vector 텐서에 부를 경우 이러한 에러를 마주하게 된다.</p>
+<blockquote>
+  <p>RuntimeError: grad can be implicitly created only for scalar outputs</p>
+</blockquote>
+
+<p>만약 벡터 텐서에 대해 역전파를 수행하고 싶다면 Jacobian Matix를 활용하거나, 사이즈에 맞는 1값 텐서를 입력으로 주어 처리할 수 있다.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">G</span><span class="p">.</span><span class="nf">backward</span><span class="p">(</span><span class="n">torch</span><span class="p">.</span><span class="nf">ones</span><span class="p">(</span><span class="n">G</span><span class="p">.</span><span class="n">shape</span><span class="p">))</span>
+</code></pre></div></div>
+
+<h2 id="예제">예제</h2>
+
+<p>앞서 살펴본 연산식을 활용해 backward 함수를 호출하고 grad 속성을 확인해본다.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">a</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="nf">tensor</span><span class="p">([</span><span class="mf">10.</span><span class="p">],</span> <span class="n">requires_grad</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+<span class="n">b</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="nf">tensor</span><span class="p">([</span><span class="mf">20.</span><span class="p">],</span> <span class="n">requires_grad</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+<span class="n">F</span> <span class="o">=</span> <span class="n">a</span> <span class="o">*</span> <span class="n">b</span>
+<span class="n">G</span> <span class="o">=</span> <span class="n">F</span> <span class="o">*</span> <span class="mi">2</span>
+</code></pre></div></div>
+<p><img src="https://github.com/user-attachments/assets/4d2452a0-9563-455b-b9f4-edd06de5c8b1" alt="image" class="center-image" /></p>
+
+<table>
+  <thead>
+    <tr>
+      <th>case</th>
+      <th><strong>node</strong></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>gradient 계산이 필요하고, 유저가 생성하였다</td>
+      <td>A, B</td>
+    </tr>
+    <tr>
+      <td>gradient 계산이 필요하고, 연산의 결과이다</td>
+      <td>F, G</td>
+    </tr>
+    <tr>
+      <td>gradient 계산이 필요하지 않고, 유저가 생성하였다</td>
+      <td>-</td>
+    </tr>
+    <tr>
+      <td>gradient 계산이 필요하지 않고, 연산의 결과이다</td>
+      <td>-</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>여기서 최적화하고자 하는 대상은 <strong>G</strong>이다. chain rule에 따라 backward 하여 G가 출력되기까지 a, b의 gradient를 계산한다.<br />
+F 또한 requires_grad=True를 상속 받기 때문에 gradient를 계산하며 <code class="language-plaintext highlighter-rouge">grad_fn</code>을 확인할 수 있다. 하지만 leaf tensor가 아니기 때문에 grad를 저장하지 <u>않는다</u>.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">G</span><span class="p">.</span><span class="nf">backward</span><span class="p">()</span>
+ 
+<span class="c1"># a의 gradient(가중치)가 상대적으로 높게 계산됨
+</span><span class="nf">print</span><span class="p">(</span><span class="n">a</span><span class="p">.</span><span class="n">grad</span><span class="p">)</span> <span class="c1"># tensor([40.])
+</span><span class="nf">print</span><span class="p">(</span><span class="n">b</span><span class="p">.</span><span class="n">grad</span><span class="p">)</span> <span class="c1"># tensor([20.])
+</span><span class="nf">print</span><span class="p">(</span><span class="n">F</span><span class="p">.</span><span class="n">grad</span><span class="p">)</span> <span class="c1"># UserWarning: The .grad attribute of a Tensor that is not a leaf Tensor is being accessed. Its .grad attribute won't be populated during autograd.backward()
+</span><span class="nf">print</span><span class="p">(</span><span class="n">F</span><span class="p">.</span><span class="n">grad_fn</span><span class="p">)</span>    <span class="c1"># &lt;MulBackward0 object at 0x7f0cb7703250&gt;
+</span></code></pre></div></div>
+
+<p>만약 F.grad를 저장하고 싶다면 backward 전에 <code class="language-plaintext highlighter-rouge">retain_grad()</code>를 호출하여 중간 텐서 F에 대해서도 gradient를 유지하도록 할 수 있다.</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>F.retain_grad()  
+G.backward()     
+
+print(F.grad)  # F의 gradient 출력
+</code></pre></div></div>
+
+<p><br /></p>
+
+<p>✅ <strong>GPU 케이스</strong></p>
+
+<p>앞선 예제와 동일한 연산을 수행하되, 이번에는 a와 b를 GPU에 할당하는 중간 단계를 거친다.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">a</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="nf">tensor</span><span class="p">([</span><span class="mf">10.</span><span class="p">],</span> <span class="n">requires_grad</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+<span class="n">b</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="nf">tensor</span><span class="p">([</span><span class="mf">20.</span><span class="p">],</span> <span class="n">requires_grad</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+
+<span class="c1"># 추가
+</span><span class="n">a_cuda</span> <span class="o">=</span> <span class="n">a</span><span class="p">.</span><span class="nf">to</span><span class="p">(</span><span class="sh">'</span><span class="s">cuda</span><span class="sh">'</span><span class="p">)</span>
+<span class="n">b_cuda</span> <span class="o">=</span> <span class="n">b</span><span class="p">.</span><span class="nf">to</span><span class="p">(</span><span class="sh">'</span><span class="s">cuda</span><span class="sh">'</span><span class="p">)</span>
+ 
+<span class="n">F</span> <span class="o">=</span> <span class="n">a_cuda</span> <span class="o">*</span> <span class="n">b_cuda</span>
+<span class="n">G</span> <span class="o">=</span> <span class="n">F</span> <span class="o">*</span> <span class="mi">2</span>
+</code></pre></div></div>
+
+<p>backward 결과 CPU 위의 a, b에만 gradient가 저장되고, <strong>GPU 위의 a_cuda, b_cuda는 비어 있다</strong>. 이는 CPU 위의 텐서들이 최적화 변수로 남아있고, a와 b 로부터 생성된 a_cuda, b_cuda는 leaf tensor가 아닌 <strong>중간 텐서(intermediate tensor)</strong>로 여겨지기 때문이다. 텐서를 GPU로 옮기는 intermediate한 과정으로 인한 것이다.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">G</span><span class="p">.</span><span class="nf">backward</span><span class="p">()</span>
+<span class="nf">print</span><span class="p">(</span><span class="n">a</span><span class="p">.</span><span class="n">grad</span><span class="p">)</span>       <span class="c1"># tensor([40.])
+</span><span class="nf">print</span><span class="p">(</span><span class="n">b</span><span class="p">.</span><span class="n">grad</span><span class="p">)</span>       <span class="c1"># tensor([20.])
+</span><span class="nf">print</span><span class="p">(</span><span class="n">a_cuda</span><span class="p">.</span><span class="n">grad</span><span class="p">)</span>  <span class="c1"># None (UserWarning: The .grad attribute of a Tensor that is not a leaf Tensor is being accessed.)
+</span><span class="nf">print</span><span class="p">(</span><span class="n">b_cuda</span><span class="p">.</span><span class="n">grad</span><span class="p">)</span>  <span class="c1"># None (UserWarning: The .grad attribute of a Tensor that is not a leaf Tensor is being accessed.)
+</span></code></pre></div></div>
+
+<p>따라서 <strong><u>처음부터 GPU 위에서 변수를 생성한 후 역전파를 수행</u></strong>하자.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">a_cuda</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="nf">tensor</span><span class="p">([</span><span class="mf">10.</span><span class="p">],</span> <span class="n">requires_grad</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="sh">'</span><span class="s">cuda</span><span class="sh">'</span><span class="p">)</span>
+<span class="n">b_cuda</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="nf">tensor</span><span class="p">([</span><span class="mf">20.</span><span class="p">],</span> <span class="n">requires_grad</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="sh">'</span><span class="s">cuda</span><span class="sh">'</span><span class="p">)</span>
+ 
+<span class="n">F</span> <span class="o">=</span> <span class="n">a_cuda</span> <span class="o">*</span> <span class="n">b_cuda</span>
+<span class="n">G</span> <span class="o">=</span> <span class="n">F</span> <span class="o">*</span> <span class="mi">2</span>
+ 
+<span class="n">G</span><span class="p">.</span><span class="nf">backward</span><span class="p">()</span>
+ 
+<span class="nf">print</span><span class="p">(</span><span class="n">a_cuda</span><span class="p">.</span><span class="n">grad</span><span class="p">)</span>      <span class="c1"># tensor([40.], device='cuda:0')
+</span><span class="nf">print</span><span class="p">(</span><span class="n">b_cuda</span><span class="p">.</span><span class="n">grad</span><span class="p">)</span>      <span class="c1"># tensor([20.], device='cuda:0')
+</span></code></pre></div></div>
+
+<h1 id="학습">학습</h1>
+
+<p>파이토치에서의 학습 과정을 예제를 통해 살펴본다. 전체 과정은 아래 단계로 이루어진다.</p>
+
+<ol>
+  <li>DataLoader 클래스 정의 및 객체 생성</li>
+  <li>model 클래스 정의 및 객체 생성</li>
+  <li>loss function, optimizer 정의</li>
+  <li>epoch와 training loop</li>
+</ol>
+
+<p><br />
+<strong>1. DataLoader 클래스 정의 및 객체 생성</strong></p>
+
+<p>커스텀 DataLoader 클래스에는 <code class="language-plaintext highlighter-rouge">__init__</code>, <code class="language-plaintext highlighter-rouge">__len__</code>, <code class="language-plaintext highlighter-rouge">__getitem__</code> 함수를 정의해야 한다. 이 중 <code class="language-plaintext highlighter-rouge">__getitem__</code> 함수는 인자 <code class="language-plaintext highlighter-rouge">index</code>를 통해 데이터 샘플을 반환하는 역할을 한다.<br />
+학습과 평가를 위한 DataLoader 객체를 각각 생성한다: train_dataloader, test_dataloader</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">import</span> <span class="n">pandas</span> <span class="k">as</span> <span class="n">pd</span>
+
+<span class="kn">from</span> <span class="n">torch.utils.data</span> <span class="kn">import</span> <span class="n">Dataset</span>
+<span class="kn">from</span> <span class="n">torch.utils.data</span> <span class="kn">import</span> <span class="n">DataLoader</span>
+
+<span class="k">class</span> <span class="nc">CustomDataset</span><span class="p">(</span><span class="n">Dataset</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">sample</span> <span class="o">=</span> <span class="n">pd</span><span class="p">.</span><span class="nf">read_csv</span><span class="p">(</span><span class="sh">'</span><span class="s">/path/to/data.csv</span><span class="sh">'</span><span class="p">)</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="nf">array</span><span class="p">(</span><span class="n">self</span><span class="p">.</span><span class="n">sample</span><span class="p">[[</span><span class="sh">'</span><span class="s">feature1</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">feature2</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s">feature3</span><span class="sh">'</span><span class="p">]])</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="nf">array</span><span class="p">(</span><span class="n">self</span><span class="p">.</span><span class="n">sample</span><span class="p">[[</span><span class="sh">'</span><span class="s">label</span><span class="sh">'</span><span class="p">]])</span>
+ 
+    <span class="k">def</span> <span class="nf">__len__</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nf">len</span><span class="p">(</span><span class="n">self</span><span class="p">.</span><span class="n">sample</span><span class="p">)</span>
+     
+    <span class="k">def</span> <span class="nf">__getitem__</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">index</span><span class="p">):</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="nf">tensor</span><span class="p">(</span><span class="n">self</span><span class="p">.</span><span class="n">x</span><span class="p">[</span><span class="n">index</span><span class="p">].</span><span class="nf">reshape</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="p">.</span><span class="n">float32</span><span class="p">)</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="n">y</span><span class="p">[</span><span class="n">index</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span>
+ 
+<span class="n">training_data</span> <span class="o">=</span> <span class="nc">CustomDataset</span><span class="p">()</span>
+<span class="n">train_dataloader</span> <span class="o">=</span> <span class="nc">DataLoader</span><span class="p">(</span><span class="n">training_data</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="mi">64</span><span class="p">,</span> <span class="n">shuffle</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p>DataLoader 객체에서 데이터 샘플을 뽑아보고 싶다면 iter, next 내장함수를 사용한다.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">data_iterator</span> <span class="o">=</span> <span class="nf">iter</span><span class="p">(</span><span class="n">train_dataloader</span><span class="p">)</span>
+<span class="n">features</span><span class="p">,</span> <span class="n">label</span> <span class="o">=</span> <span class="nf">next</span><span class="p">(</span><span class="n">data_iterator</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p><br />
+<strong>2. model 클래스 정의 및 객체 생성</strong></p>
+
+<p>파이토치의 <code class="language-plaintext highlighter-rouge">nn.Module</code>를 상속 받아 모델 클래스를 정의한다. <code class="language-plaintext highlighter-rouge">__init__</code> 함수에서 레이어를 초기화하고 <code class="language-plaintext highlighter-rouge">forward</code> 함수에서 순전파 구조를 정의한다.<br />
+입력 데이터와 아웃풋의 사이즈를 잘 고려해야 한다. 연속된 레이어를 쌓아주는 <code class="language-plaintext highlighter-rouge">nn.Sequential</code>도 쓸 수 있다.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">import</span> <span class="n">torch.nn</span> <span class="k">as</span> <span class="n">nn</span>
+<span class="kn">import</span> <span class="n">torch.nn.functional</span> <span class="k">as</span> <span class="n">F</span>
+ 
+<span class="k">class</span> <span class="nc">CustomClassifier</span><span class="p">(</span><span class="n">nn</span><span class="p">.</span><span class="n">Module</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="nf">super</span><span class="p">(</span><span class="n">CustomClassifier</span><span class="p">,</span> <span class="n">self</span><span class="p">).</span><span class="nf">__init__</span><span class="p">()</span>
+ 
+        <span class="n">self</span><span class="p">.</span><span class="n">input_size</span> <span class="o">=</span> <span class="mi">3</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">output_size</span> <span class="o">=</span> <span class="mi">10</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">hidden_dim1</span> <span class="o">=</span> <span class="mi">64</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">hidden_dim2</span> <span class="o">=</span> <span class="mi">128</span>
+ 
+        <span class="n">self</span><span class="p">.</span><span class="n">fc1</span> <span class="o">=</span> <span class="n">nn</span><span class="p">.</span><span class="nc">Linear</span><span class="p">(</span><span class="n">self</span><span class="p">.</span><span class="n">input_size</span><span class="p">,</span> <span class="n">self</span><span class="p">.</span><span class="n">hidden_dim1</span><span class="p">)</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">fc2</span> <span class="o">=</span> <span class="n">nn</span><span class="p">.</span><span class="nc">Linear</span><span class="p">(</span><span class="n">self</span><span class="p">.</span><span class="n">hidden_dim1</span><span class="p">,</span> <span class="n">self</span><span class="p">.</span><span class="n">hidden_dim2</span><span class="p">)</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">fc3</span> <span class="o">=</span> <span class="n">nn</span><span class="p">.</span><span class="nc">Linear</span><span class="p">(</span><span class="n">self</span><span class="p">.</span><span class="n">hidden_dim2</span><span class="p">,</span> <span class="n">self</span><span class="p">.</span><span class="n">output_size</span><span class="p">)</span>
+
+        <span class="c1"># 이렇게도 할 수 있다
+</span>        <span class="c1"># self.net = nn.Sequential(
+</span>        <span class="c1">#     nn.Linear(self.feature_num, self.hidden_dim1),
+</span>        <span class="c1">#     nn.ReLU(),
+</span>        <span class="c1">#     nn.Linear(self.hidden_dim1, self.hidden_dim2),
+</span>        <span class="c1">#     nn.ReLU(),
+</span>        <span class="c1">#    nn.Linear(self.hidden_dim2, self.output_size),
+</span>        <span class="c1"># )
+</span> 
+    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">F</span><span class="p">.</span><span class="nf">relu</span><span class="p">(</span><span class="n">self</span><span class="p">.</span><span class="nf">fc1</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">F</span><span class="p">.</span><span class="nf">relu</span><span class="p">(</span><span class="n">self</span><span class="p">.</span><span class="nf">fc2</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>
+        <span class="n">output</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="nf">fc3</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+        
+        <span class="c1"># 이것과 같다
+</span>        <span class="c1"># output = net(x)
+</span>
+        <span class="k">return</span> <span class="n">output</span>
+</code></pre></div></div>
+
+<p>모델 클래스를 생성하고 전반적인 정보를 확인한다. <code class="language-plaintext highlighter-rouge">torchsummary</code>를 활용하면 그냥 print하는 것보다 훨씬 보기 좋게 확인할 수 있다.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="n">torchsummary</span> <span class="kn">import</span> <span class="n">summary</span>
+
+<span class="n">model</span> <span class="o">=</span> <span class="nc">CustomClassifier</span><span class="p">()</span>
+<span class="n">model</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="nf">to</span><span class="p">(</span><span class="sh">'</span><span class="s">cuda</span><span class="sh">'</span><span class="p">)</span>
+
+<span class="n">batch_size</span><span class="p">,</span> <span class="n">feature_num</span> <span class="o">=</span> <span class="mi">64</span><span class="p">,</span> <span class="mi">3</span>
+<span class="nf">summary</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">input_size</span><span class="o">=</span><span class="p">(</span><span class="n">batch_size</span><span class="p">,</span>  <span class="n">feature_num</span><span class="p">))</span>
+</code></pre></div></div>
+
+<p><img src="https://github.com/user-attachments/assets/bc05f826-bcb2-4f33-8da5-74ebd41b3012" alt="image" class="center-image" /></p>
+
+<p>특정 레이어의 파라미터 값을 확인하고 싶다면 <code class="language-plaintext highlighter-rouge">named_parameters()</code> 혹은 <code class="language-plaintext highlighter-rouge">parameters()</code>를 사용한다.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># for param in model.parameters():
+</span><span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">param</span> <span class="ow">in</span> <span class="n">model</span><span class="p">.</span><span class="nf">named_parameters</span><span class="p">():</span>
+    <span class="k">if</span> <span class="n">param</span><span class="p">.</span><span class="n">requires_grad</span><span class="p">:</span>
+        <span class="nf">print</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">param</span><span class="p">.</span><span class="n">data</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p><br />
+<strong>3. loss function, optimizer 정의</strong></p>
+
+<p>라벨 수가 10인 다중분류를 상정하여 <code class="language-plaintext highlighter-rouge">CrossEntropyLoss</code>를 손실함수로 정의하고 임의의 입력값을 통해 loss를 연산한다.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">loss_fn</span> <span class="o">=</span> <span class="n">nn</span><span class="p">.</span><span class="nc">CrossEntropyLoss</span><span class="p">()</span>
+ 
+<span class="n">output_size</span> <span class="o">=</span> <span class="mi">10</span>
+<span class="n">dummy_outputs</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="nf">rand</span><span class="p">(</span><span class="n">batch_size</span><span class="p">,</span> <span class="n">output_size</span><span class="p">)</span>
+<span class="n">dummy_labels</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="nf">randint</span><span class="p">(</span><span class="n">output_size</span><span class="p">,</span> <span class="p">(</span><span class="n">batch_size</span><span class="p">,))</span>
+ 
+<span class="n">loss</span> <span class="o">=</span> <span class="nf">loss_fn</span><span class="p">(</span><span class="n">dummy_outputs</span><span class="p">,</span> <span class="n">dummy_labels</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p>옵티마이저(otpimizer)는 아주 다양한 종류가 있지만 이곳에서는 SGD를 예시로 든다.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">optimizer</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="n">optim</span><span class="p">.</span><span class="nc">SGD</span><span class="p">(</span><span class="n">model</span><span class="p">.</span><span class="nf">parameters</span><span class="p">(),</span> <span class="n">lr</span><span class="o">=</span><span class="mf">0.001</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p><br />
+<strong>4. epoch와 training loop</strong></p>
+
+<p><u>한 번</u>의 학습 epoch를 정의했다.</p>
+<ol>
+  <li>dataloader 객체에서 한 배치의 데이터를 꺼내며 gradient를 초기화한다(<code class="language-plaintext highlighter-rouge">zero_grad</code>)</li>
+  <li>한 배치의 데이터를 모델에 통과시키고(<code class="language-plaintext highlighter-rouge">model</code>) 그 값으로 loss를 계산한다(<code class="language-plaintext highlighter-rouge">loss_fn</code>)</li>
+  <li>loss에 대해 gradient를 계산한 후(<code class="language-plaintext highlighter-rouge">loss.backward</code>), 그 값을 기반으로 모델을 업데이트한다(<code class="language-plaintext highlighter-rouge">optimizer.step</code>)</li>
+</ol>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">running_loss</span> <span class="o">=</span> <span class="mf">0.0</span>
+<span class="n">model</span><span class="p">.</span><span class="nf">train</span><span class="p">()</span>
+
+<span class="k">for</span> <span class="n">data</span> <span class="ow">in</span> <span class="n">training_loader</span><span class="p">:</span>
+    <span class="n">inputs</span><span class="p">,</span> <span class="n">labels</span> <span class="o">=</span> <span class="n">data</span>
+    
+    <span class="n">optimizer</span><span class="p">.</span><span class="nf">zero_grad</span><span class="p">()</span>
+ 
+    <span class="n">outputs</span> <span class="o">=</span> <span class="nf">model</span><span class="p">(</span><span class="n">inputs</span><span class="p">)</span>
+    <span class="n">loss</span> <span class="o">=</span> <span class="nf">loss_fn</span><span class="p">(</span><span class="n">outputs</span><span class="p">,</span> <span class="n">labels</span><span class="p">)</span>
+
+    <span class="n">loss</span><span class="p">.</span><span class="nf">backward</span><span class="p">()</span>
+    <span class="n">optimizer</span><span class="p">.</span><span class="nf">step</span><span class="p">()</span>
+ 
+    <span class="n">running_loss</span> <span class="o">+=</span> <span class="n">loss</span><span class="p">.</span><span class="nf">item</span><span class="p">()</span>
+</code></pre></div></div>
+
+<h4 class="no_toc"> ✅ 동 떨어져 있는 optimizer.zero_grad(), loss.backward(), optimizer.step()이 각각 호출되는데 어떻게 모델이 업데이트되는가? </h4>
+
+<p>optimizer 를 정의할 때 모델의 파라미터를 넘겨주기 때문에 - <code class="language-plaintext highlighter-rouge">torch.optim.SGD(model.parameters(), lr=0.001)</code><br />
+내부적으로 grad를 저장하고 값을 업데이트한다. 달리 말해 optimizer가 활용하는 값은 loss도 아닌 <code class="language-plaintext highlighter-rouge">model.parameters()</code>의 <strong><code class="language-plaintext highlighter-rouge">param.grad</code></strong> 이다.</p>
+
+<p>이때 모델을 GPU로 옮기고 난 <u>후</u>에 optimizer를 정의하는 것이 좋다.<br />
+만약 모델을 GPU로 옮기기 전에 optimizer를 정의하면, optimizer는 CPU 위 파라미터를 추적하게 된다. 그 결과 optimizer가 추적하는 파라미터와 실제 모델의 파라미터가 달라지는 문제가 발생할 수 있다.</p>
+
+<hr />
+
+<p>비슷한 방식으로 validation 을 정의할 수 있다. 단 모델 평가 단계이므로 모델을 <code class="language-plaintext highlighter-rouge">eval</code> 모드로 바꾸고 <code class="language-plaintext highlighter-rouge">torch.no_grad</code> 안에서 추론이 이루어진다.<br />
+또한 “loss에 대해 gradient를 계산한 후 그 값을 기반으로 모델을 업데이트”하는 과정은 생략된다.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">test_loss</span> <span class="o">=</span> <span class="mf">0.0</span>
+<span class="n">model</span><span class="p">.</span><span class="nf">eval</span><span class="p">()</span>
+
+<span class="k">with</span> <span class="n">torch</span><span class="p">.</span><span class="nf">no_grad</span><span class="p">():</span>
+    <span class="k">for</span> <span class="n">data</span> <span class="ow">in</span> <span class="n">test_dataloader</span><span class="p">:</span>
+        <span class="n">inputs</span><span class="p">,</span> <span class="n">labels</span> <span class="o">=</span> <span class="n">data</span>
+
+        <span class="n">outputs</span> <span class="o">=</span> <span class="nf">model</span><span class="p">(</span><span class="n">inputs</span><span class="p">)</span>
+        <span class="n">loss</span> <span class="o">=</span> <span class="nf">loss_fn</span><span class="p">(</span><span class="n">outputs</span><span class="p">,</span> <span class="n">labels</span><span class="p">)</span>
+
+        <span class="n">test_loss</span> <span class="o">+=</span> <span class="n">loss</span><span class="p">.</span><span class="nf">item</span><span class="p">()</span>
+</code></pre></div></div>
+
+<p>전자를 <code class="language-plaintext highlighter-rouge">train_loop</code>, 후자를 <code class="language-plaintext highlighter-rouge">test_loop</code> 이라는 함수로 정의한다면 전체 학습 loop는 이렇게 정의할 수 있다.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">num_epochs</span> <span class="o">=</span> <span class="mi">100</span>
+<span class="k">for</span> <span class="n">epoch</span> <span class="ow">in</span> <span class="nf">range</span><span class="p">(</span><span class="n">num_epochs</span><span class="p">):</span>
+    <span class="nf">train_loop</span><span class="p">()</span>
+    
+    <span class="k">if</span> <span class="n">epoch</span> <span class="o">%</span> <span class="mi">10</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="nf">test_loop</span><span class="p">()</span>
+</code></pre></div></div>
+
+    </section>
+  </div>
+
+  <div class="pagination">
+    
+      <span class="prev" >
+          <a href="https://woocosmos.github.io/websocket-base/">
+            &#xE000; websocket: 클라이언트-서버의 양방향 통신
+          </a>
+      </span>
+    
+    
+      <span class="next" >
+          <a href="https://woocosmos.github.io/pytorch-categorical/">
+            PyTorch의 확률분포 클래스 Categorical &#xE001;
+          </a>
+      </span>
+    
+  </div>
+
+  <div class="comments">
+	<div id="disqus_thread"></div>
+	<script type="text/javascript">
+
+	    var disqus_shortname = 'woocosmos';
+
+	    (function() {
+	        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+	        dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+			dsq.setAttribute('data-timestamp', +new Date()); //추가
+	        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+	    })();
+
+	</script>
+	<noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+  <script type="text/javascript">
+    "use strict"; 
+    function addBackToTop() 
+        { function o() 
+            { 
+                t() >= z ? R && (D.className = "", R = !1) : R || (D.className = "hidden", R = !0) 
+            } 
+          function t() 
+            { 
+                return E.scrollTop || A && document.documentElement.scrollTop || 0 
+            } 
+          function e(o) 
+            { 
+                E.scrollTop = o, A && (document.documentElement.scrollTop = o) 
+            } 
+    
+    var n, i, d, r, c = arguments.length > 0 && void 0 !== arguments[0] ? arguments[0] : {}, a = c.backgroundColor, s = void 0 === a ? "#000" : a, l = c.cornerOffset, u = void 0 === l ? 20 : l, m = c.diameter, p = void 0 === m ? 56 : m, h = c.ease, b = void 0 === h ? function (o) { return .5 * (1 - Math.cos(Math.PI * o)) } : h, v = c.id, f = void 0 === v ? "back-to-top" : v, x = c.innerHTML, g = void 0 === x ? '<svg viewBox="0 0 24 24"><path d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z"></path></svg>' : x, w = c.onClickScrollTo, y = void 0 === w ? 0 : w, k = c.scrollContainer, E = void 0 === k ? document.body : k, T = c.scrollDuration, C = void 0 === T ? 100 : T, M = c.showWhenScrollTopIs, z = void 0 === M ? 1 : M, L = c.size, B = void 0 === L ? p : L, H = c.textColor, I = void 0 === H ? "#fff" : H, N = c.zIndex, S = void 0 === N ? 1 : N, q = E === document.body, A = q && document.documentElement; n = Math.round(.35 * B), i = Math.round(.2 * B), d = "#" + f + "{background:" + s + ";-webkit-border-radius:50%;-moz-border-radius:50%;border-radius:50%;bottom:" + u + "px;-webkit-box-shadow:0 2px 5px 0 rgba(0,0,0,.26);-moz-box-shadow:0 2px 5px 0 rgba(0,0,0,.26);box-shadow:0 2px 5px 0 rgba(0,0,0,.26);color:" + I + ";cursor:pointer;display:block;height:" + B + "px;opacity:1;outline:0;position:fixed;right:" + u + "px;-webkit-tap-highlight-color:transparent;-webkit-touch-callout:none;-webkit-transition:bottom .2s,opacity .2s;-o-transition:bottom .2s,opacity .2s;-moz-transition:bottom .2s,opacity .2s;transition:bottom .2s,opacity .2s;-webkit-user-select:none;-moz-user-select:none;-ms-user-select:none;user-select:none;width:" + B + "px;z-index:" + S + "}#" + f + " svg{display:block;fill:currentColor;height:" + n + "px;margin:" + i + "px auto 0;width:" + n + "px}#" + f + ".hidden{bottom:-" + B + "px;opacity:0}", (r = document.createElement("style")).appendChild(document.createTextNode(d)), document.head.insertAdjacentElement("afterbegin", r); var D = function () { var o = document.createElement("div"); return o.id = f, o.className = "hidden", o.innerHTML = g, o.addEventListener("click", function (o) { o.preventDefault(), function () { var o = "function" == typeof y ? y() : y, n = window, i = n.performance, d = n.requestAnimationFrame; if (C <= 0 || void 0 === i || void 0 === d) return e(o); var r = i.now(), c = t(), a = c - o; d(function o(t) { var n = Math.min((t - r) / C, 1); e(c - Math.round(b(n) * a)), n < 1 && d(o) }) }() }), document.body.appendChild(o), o }(), R = !0; (q ? window : E).addEventListener("scroll", o), o() } window.addEventListener("load", function () { var o = document.getElementById("back-to-top"), t = document.querySelector(".sticky-bottom"), e = document.querySelector(".fixed-bottom"); o && window.addEventListener("scroll", function () { if (t) { var n = t.getBoundingClientRect(); window.scrollY + window.innerHeight > document.body.scrollHeight - n.height ? (o.style.position = "fixed", o.style.bottom = n.height + 15 + "px") : (o.style.position = "fixed", o.style.bottom = "15px") } if (e) { var i = e.getBoundingClientRect(); o.style.position = "fixed", o.style.bottom = i.height + 15 + "px" } }) });
+</script>
+<script>
+    addBackToTop();
+</script>
+
+
+
+
+</article>
+
+    </div>
+    
+    <div class="wrapper-footer">
+      <div class="container">
+        <footer class="footer">
+          <!-- Refer to https://codepen.io/ruandre/pen/howFi -->
+<ul class="svg-icon">
+
+  
+
+  
+
+  
+  <li><a href="mailto:woocosmos@gmail.com" class="icon-8 email" title="Email"><svg viewBox="0 0 512 512"><path d="M101.3 141.6v228.9h0.3 308.4 0.8V141.6H101.3zM375.7 167.8l-119.7 91.5 -119.6-91.5H375.7zM127.6 194.1l64.1 49.1 -64.1 64.1V194.1zM127.8 344.2l84.9-84.9 43.2 33.1 43-32.9 84.7 84.7L127.8 344.2 127.8 344.2zM384.4 307.8l-64.4-64.4 64.4-49.3V307.8z"/></svg><!--[if lt IE 9]><em>Email</em><![endif]--></a></li>
+  
+
+  
+
+  
+
+  
+  <li><a href="https://github.com/woocosmos" class="icon-13 github" title="GitHub"><svg viewBox="0 0 512 512"><path d="M256 70.7c-102.6 0-185.9 83.2-185.9 185.9 0 82.1 53.3 151.8 127.1 176.4 9.3 1.7 12.3-4 12.3-8.9V389.4c-51.7 11.3-62.5-21.9-62.5-21.9 -8.4-21.5-20.6-27.2-20.6-27.2 -16.9-11.5 1.3-11.3 1.3-11.3 18.7 1.3 28.5 19.2 28.5 19.2 16.6 28.4 43.5 20.2 54.1 15.4 1.7-12 6.5-20.2 11.8-24.9 -41.3-4.7-84.7-20.6-84.7-91.9 0-20.3 7.3-36.9 19.2-49.9 -1.9-4.7-8.3-23.6 1.8-49.2 0 0 15.6-5 51.1 19.1 14.8-4.1 30.7-6.2 46.5-6.3 15.8 0.1 31.7 2.1 46.6 6.3 35.5-24 51.1-19.1 51.1-19.1 10.1 25.6 3.8 44.5 1.8 49.2 11.9 13 19.1 29.6 19.1 49.9 0 71.4-43.5 87.1-84.9 91.7 6.7 5.8 12.8 17.1 12.8 34.4 0 24.9 0 44.9 0 51 0 4.9 3 10.7 12.4 8.9 73.8-24.6 127-94.3 127-176.4C441.9 153.9 358.6 70.7 256 70.7z"/></svg><!--[if lt IE 9]><em>GitHub</em><![endif]--></a></li>
+  
+
+  
+
+  
+
+  
+  <li><a href="https://www.linkedin.com/in/yunsoo-woo-245946213" class="icon-17 linkedin" title="LinkedIn"><svg viewBox="0 0 512 512"><path d="M186.4 142.4c0 19-15.3 34.5-34.2 34.5 -18.9 0-34.2-15.4-34.2-34.5 0-19 15.3-34.5 34.2-34.5C171.1 107.9 186.4 123.4 186.4 142.4zM181.4 201.3h-57.8V388.1h57.8V201.3zM273.8 201.3h-55.4V388.1h55.4c0 0 0-69.3 0-98 0-26.3 12.1-41.9 35.2-41.9 21.3 0 31.5 15 31.5 41.9 0 26.9 0 98 0 98h57.5c0 0 0-68.2 0-118.3 0-50-28.3-74.2-68-74.2 -39.6 0-56.3 30.9-56.3 30.9v-25.2H273.8z"/></svg><!--[if lt IE 9]><em>LinkedIn</em><![endif]--></a></li>
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</ul>
+
+
+<p>© 2026 Yunsoo Woo</p>
+
+        </footer>
+      </div>
+    </div>
+
+    <!--  -->
+
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-1YCJCQRD4F"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-1YCJCQRD4F');
+</script>
+    <script type="text/javascript">
+    "use strict"; 
+    function addBackToTop() 
+        { function o() 
+            { 
+                t() >= z ? R && (D.className = "", R = !1) : R || (D.className = "hidden", R = !0) 
+            } 
+          function t() 
+            { 
+                return E.scrollTop || A && document.documentElement.scrollTop || 0 
+            } 
+          function e(o) 
+            { 
+                E.scrollTop = o, A && (document.documentElement.scrollTop = o) 
+            } 
+    
+    var n, i, d, r, c = arguments.length > 0 && void 0 !== arguments[0] ? arguments[0] : {}, a = c.backgroundColor, s = void 0 === a ? "#000" : a, l = c.cornerOffset, u = void 0 === l ? 20 : l, m = c.diameter, p = void 0 === m ? 56 : m, h = c.ease, b = void 0 === h ? function (o) { return .5 * (1 - Math.cos(Math.PI * o)) } : h, v = c.id, f = void 0 === v ? "back-to-top" : v, x = c.innerHTML, g = void 0 === x ? '<svg viewBox="0 0 24 24"><path d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z"></path></svg>' : x, w = c.onClickScrollTo, y = void 0 === w ? 0 : w, k = c.scrollContainer, E = void 0 === k ? document.body : k, T = c.scrollDuration, C = void 0 === T ? 100 : T, M = c.showWhenScrollTopIs, z = void 0 === M ? 1 : M, L = c.size, B = void 0 === L ? p : L, H = c.textColor, I = void 0 === H ? "#fff" : H, N = c.zIndex, S = void 0 === N ? 1 : N, q = E === document.body, A = q && document.documentElement; n = Math.round(.35 * B), i = Math.round(.2 * B), d = "#" + f + "{background:" + s + ";-webkit-border-radius:50%;-moz-border-radius:50%;border-radius:50%;bottom:" + u + "px;-webkit-box-shadow:0 2px 5px 0 rgba(0,0,0,.26);-moz-box-shadow:0 2px 5px 0 rgba(0,0,0,.26);box-shadow:0 2px 5px 0 rgba(0,0,0,.26);color:" + I + ";cursor:pointer;display:block;height:" + B + "px;opacity:1;outline:0;position:fixed;right:" + u + "px;-webkit-tap-highlight-color:transparent;-webkit-touch-callout:none;-webkit-transition:bottom .2s,opacity .2s;-o-transition:bottom .2s,opacity .2s;-moz-transition:bottom .2s,opacity .2s;transition:bottom .2s,opacity .2s;-webkit-user-select:none;-moz-user-select:none;-ms-user-select:none;user-select:none;width:" + B + "px;z-index:" + S + "}#" + f + " svg{display:block;fill:currentColor;height:" + n + "px;margin:" + i + "px auto 0;width:" + n + "px}#" + f + ".hidden{bottom:-" + B + "px;opacity:0}", (r = document.createElement("style")).appendChild(document.createTextNode(d)), document.head.insertAdjacentElement("afterbegin", r); var D = function () { var o = document.createElement("div"); return o.id = f, o.className = "hidden", o.innerHTML = g, o.addEventListener("click", function (o) { o.preventDefault(), function () { var o = "function" == typeof y ? y() : y, n = window, i = n.performance, d = n.requestAnimationFrame; if (C <= 0 || void 0 === i || void 0 === d) return e(o); var r = i.now(), c = t(), a = c - o; d(function o(t) { var n = Math.min((t - r) / C, 1); e(c - Math.round(b(n) * a)), n < 1 && d(o) }) }() }), document.body.appendChild(o), o }(), R = !0; (q ? window : E).addEventListener("scroll", o), o() } window.addEventListener("load", function () { var o = document.getElementById("back-to-top"), t = document.querySelector(".sticky-bottom"), e = document.querySelector(".fixed-bottom"); o && window.addEventListener("scroll", function () { if (t) { var n = t.getBoundingClientRect(); window.scrollY + window.innerHeight > document.body.scrollHeight - n.height ? (o.style.position = "fixed", o.style.bottom = n.height + 15 + "px") : (o.style.position = "fixed", o.style.bottom = "15px") } if (e) { var i = e.getBoundingClientRect(); o.style.position = "fixed", o.style.bottom = i.height + 15 + "px" } }) });
+</script>
+<script>
+    addBackToTop();
+</script>
+
+
+
+
+
+  </body>
+</html>

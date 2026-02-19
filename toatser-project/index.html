@@ -1,0 +1,1072 @@
+<!DOCTYPE html>
+<html>
+  <head>
+  <title>포모도로 윈도우 앱 '토스터' 미니 프로젝트 – YunsooLog – 행간을 읽는 기계학습 이야기</title>
+  <link rel="icon" href="/images/favicon.ico">
+      <meta name="google-site-verification" content="NA4jg1Iffw6aA9VWjj3kqoo2jfOkPRxINJtYphd7VeI" />
+    <meta charset="utf-8" />
+    <meta content='text/html; charset=utf-8' http-equiv='Content-Type'>
+    <meta http-equiv='X-UA-Compatible' content='IE=edge'>
+    <meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1.0'>
+    <meta http-equiv="Permissions-Policy" content="interest-cohort=()">
+    
+    
+    <meta name="description" content="개요
+
+효율적이고 건강한 근무 습관을 위한 간단한 윈도우 앱을 만들어보기로 했다. 윈도우 팝업을 toast notification이라고 부르는 데서 착안하여 프로젝트명을 토스터toaster라고 지었다.
+
+포모도로 테크닉이란?
+
+  1980년대 후반 프란체스코 시릴로가 제안한 시간 관리 방법론. 타이머를 이용해서 25분간 집중해서 일을 한 다음 5분간 휴식하는 방식이다. 토마토(Pomodoro는 이탈리아어로 토마토를 뜻함) 모양의 요리용 타이머에서 이름이 유래했다.
+
+
+기획
+
+구현하고 싶은 기능은 단순하다.
+
+
+  출근해서 컴퓨터를 부팅하면 그날의 목표 퇴근시간을 기입한다.
+  52분 근무하고 15분 휴식하는 타임 테이블을 윈도우 팝업으로 운영한다.
+  45분마다 물 마시기를 팝업으로 리마인드한다.
+  목표 퇴근 시간 20분 전부터 팝업으로 퇴근 준비를 알린다.
+
+
+
+
+흐름도 형식으로 프로그램의 전체 로직을 표현했다. 크게 initializer와 main으로 나눠진다.
+
+  initializer : PC가 켜졌을 때 최초 시간 정보를 세팅한다
+  main : 주요 팝업 이벤트를 발생시킨다
+
+
+
+
+main 파트의 ‘베이스 타임 모듈’의 로직을 자세히 살펴보자.
+
+  30초마다 현재 시간을 체크한다 → PC 종료 전 마지막으로 체크된 현재 시간이 ‘종료 시간’이 된다
+  목표 퇴근 시간 전 k분은 현재 20, 10, 5분으로 설정되어 있는데, config.py 에서 before_end 리스트에 추가해주면 된다
+  목표 퇴근 시간 전 0분의 경우, 퇴근을 알리는 팝업이 발동된다
+
+
+
+
+‘타이머’는 config.py 에서 설정한 값대로 반복된다
+
+  물 : 45분마다 알림
+  근무/휴식 : 52+15분마다 알림
+    
+      근무 타이머를 먼저 시작한 후, 52분이 지나면 휴식 팝업을 임시 발동한 후 이어 휴식 타이머를 시작한다
+    
+  
+
+
+구현
+
+
+  Windows 11
+  Python 3.12
+  pipenv 로 패키지 관리
+
+
+Plyer
+
+데스크톱, 모바일 등 다양한 플랫폼에서 작동하는 GUI 앱 개발을 위한 파이썬 프레임워크다. 이것을 설치해서,
+pipenv install plyer
+
+바로 윈도우 샘플 토스트를 띄울 수 있다
+
+from plyer import notification
+ 
+notification.notify(
+    title = '제목입니다.',
+    message = '메시지 내용입니다.',
+    app_name = "앱 이름",
+    app_icon = './dao.ico', # 'C:\\icon_32x32.ico'
+    timeout = 10,  # seconds
+)
+
+
+
+모듈
+
+부팅시 실행
+
+윈도우 부팅할 때 파이썬 스크립트가 실행되어야 한다. 파이썬 스크립트(py)를 실행시키는 스크립트(bat)을 윈도우 시작프로그램 폴더에 추가해준다.
+
+python.exe /path/to/main.py
+
+
+위와 같이 정의한 run_toaster.bat 파일을 윈도우 시작프로그램 폴더에 위치시키는 것이다. 시작프로그램 폴더의 경로는 이쪽이다. C:\Users\{사용자명}\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Startup
+
+입력 팝업창
+
+tkinter 를 사용해서 아주 간단한 대화창 UI를 생성했다.
+
+import tkinter as tk
+from tkinter import simpledialog
+ 
+ROOT = tk.Tk()
+ROOT.withdraw()
+ 
+# the input dialog
+USER_INP = simpledialog.askstring(title="테스트 입력창",
+                                  prompt="몇 시에 퇴근 할 거야?:")
+# check it
+print("Hello", USER_INP)
+
+
+
+입력어 처리
+
+내가 어떤 형식으로 입력하더라도 (시간, 분) 튜플로 처리하는 모듈이 필요하다.
+예를 들어, 12시55분/열두시55분/12:55/1255 … 모두 (12, 55)로 처리할 것이다.
+
+def process_str(INPUT_STRING):
+    UHR_dict = {
+        "한": 1,
+        "두": 2,
+        "세": 3,
+        "네": 4,
+        "다섯": 5,
+        "여섯": 6,
+        "일곱": 7,
+        "여덟": 8,
+        "아홉": 9,
+        "열": 10,
+        "열한": 11,
+        "열두": 12,
+    }
+    MINT_dict = {
+        "일": 1,
+        "이": 2,
+        "삼": 3,
+        "사": 4,
+        "오": 5,
+        "육": 6,
+        "칠": 7,
+        "팔": 8,
+        "구": 9,
+        "십": 10,
+        "반": 30,
+    }
+ 
+    INPUT_STRING = INPUT_STRING.replace(" ", "")
+    INPUT_STRING = INPUT_STRING.replace(":", "시")
+    INPUT_STRING = INPUT_STRING.replace("분", "")
+ 
+ 
+    # 숫자로만 이루어진 경우
+    if INPUT_STRING.isdigit():
+ 
+        if len(INPUT_STRING) &lt;= 2:
+            UHR = int(INPUT_STRING)
+            MINT = 0
+         
+        else:
+            tmp_UHR = int(INPUT_STRING[:2])
+            if tmp_UHR &gt; 25:
+                UHR = int(INPUT_STRING[0])
+                MINT = int(INPUT_STRING[1:])
+            else:
+                UHR = tmp_UHR
+                MINT = int(INPUT_STRING[2:])
+         
+        if (UHR &gt; 24) or (MINT &gt;= 60):
+            return (0, 0)
+         
+        return (UHR, MINT)
+     
+ 
+    elif '시' in INPUT_STRING:
+        cans = INPUT_STRING.split("시")
+        UHR,  MINT = cans[0], cans[1]
+ 
+        if UHR.isdigit() and int(UHR) &lt;= 24:
+            UHR = int(UHR)
+        elif UHR in UHR_dict.keys():
+            UHR = UHR_dict[UHR]
+ 
+        if MINT.isdigit() and int(MINT) &lt; 60:
+            MINT = int(MINT)
+        elif len(MINT) == 1:
+            MINT = MINT_dict[MINT]
+        elif "십" in MINT:
+            ten = 1 if not MINT.split("십")[0] else MINT_dict[MINT.split("십")[0]]
+            one = 0 if not MINT.split("십")[1] else MINT_dict[MINT.split("십")[1]]
+            MINT = ten * 10 + one
+ 
+        if not MINT:
+            MINT = 0
+        elif isinstance(MINT, str):
+            return (0, 0)
+ 
+        return (UHR, MINT)
+ 
+    return (0, 0)
+
+
+타이머
+
+두 개의 타이머가 필요하다.
+
+  타이머1. 시작 52분 후 휴식 알림, 그로부터 15분 후 근무 알림, 반복 …
+  타이머2. 매 45분 음수 알림
+
+
+이 두 개의 타이머가 동시에 돌아가도록 스레딩(Threading)을 이용했다.
+
+…내용 추가 예정
+
+데이터
+
+data 폴더에 work_schedule.csv 파일로 시간 데이터를 업데이트 한다
+
+
+
+
+  
+    
+      날짜
+      booting
+      goal
+      actual
+    
+  
+  
+    
+      2023-10-10
+      10:11
+      19:50
+      20:51
+    
+    
+      2023-10-11
+      10:12
+      18:20
+      18:24
+    
+    
+      2023-10-12
+      10:36
+      19:00
+      18:48
+    
+  
+
+
+
+  booting : 최초 부팅 시간
+  goal : 목표 퇴근 시간
+  actual : PC 종료 시간
+
+" />
+    <meta property="og:description" content="개요
+
+효율적이고 건강한 근무 습관을 위한 간단한 윈도우 앱을 만들어보기로 했다. 윈도우 팝업을 toast notification이라고 부르는 데서 착안하여 프로젝트명을 토스터toaster라고 지었다.
+
+포모도로 테크닉이란?
+
+  1980년대 후반 프란체스코 시릴로가 제안한 시간 관리 방법론. 타이머를 이용해서 25분간 집중해서 일을 한 다음 5분간 휴식하는 방식이다. 토마토(Pomodoro는 이탈리아어로 토마토를 뜻함) 모양의 요리용 타이머에서 이름이 유래했다.
+
+
+기획
+
+구현하고 싶은 기능은 단순하다.
+
+
+  출근해서 컴퓨터를 부팅하면 그날의 목표 퇴근시간을 기입한다.
+  52분 근무하고 15분 휴식하는 타임 테이블을 윈도우 팝업으로 운영한다.
+  45분마다 물 마시기를 팝업으로 리마인드한다.
+  목표 퇴근 시간 20분 전부터 팝업으로 퇴근 준비를 알린다.
+
+
+
+
+흐름도 형식으로 프로그램의 전체 로직을 표현했다. 크게 initializer와 main으로 나눠진다.
+
+  initializer : PC가 켜졌을 때 최초 시간 정보를 세팅한다
+  main : 주요 팝업 이벤트를 발생시킨다
+
+
+
+
+main 파트의 ‘베이스 타임 모듈’의 로직을 자세히 살펴보자.
+
+  30초마다 현재 시간을 체크한다 → PC 종료 전 마지막으로 체크된 현재 시간이 ‘종료 시간’이 된다
+  목표 퇴근 시간 전 k분은 현재 20, 10, 5분으로 설정되어 있는데, config.py 에서 before_end 리스트에 추가해주면 된다
+  목표 퇴근 시간 전 0분의 경우, 퇴근을 알리는 팝업이 발동된다
+
+
+
+
+‘타이머’는 config.py 에서 설정한 값대로 반복된다
+
+  물 : 45분마다 알림
+  근무/휴식 : 52+15분마다 알림
+    
+      근무 타이머를 먼저 시작한 후, 52분이 지나면 휴식 팝업을 임시 발동한 후 이어 휴식 타이머를 시작한다
+    
+  
+
+
+구현
+
+
+  Windows 11
+  Python 3.12
+  pipenv 로 패키지 관리
+
+
+Plyer
+
+데스크톱, 모바일 등 다양한 플랫폼에서 작동하는 GUI 앱 개발을 위한 파이썬 프레임워크다. 이것을 설치해서,
+pipenv install plyer
+
+바로 윈도우 샘플 토스트를 띄울 수 있다
+
+from plyer import notification
+ 
+notification.notify(
+    title = '제목입니다.',
+    message = '메시지 내용입니다.',
+    app_name = "앱 이름",
+    app_icon = './dao.ico', # 'C:\\icon_32x32.ico'
+    timeout = 10,  # seconds
+)
+
+
+
+모듈
+
+부팅시 실행
+
+윈도우 부팅할 때 파이썬 스크립트가 실행되어야 한다. 파이썬 스크립트(py)를 실행시키는 스크립트(bat)을 윈도우 시작프로그램 폴더에 추가해준다.
+
+python.exe /path/to/main.py
+
+
+위와 같이 정의한 run_toaster.bat 파일을 윈도우 시작프로그램 폴더에 위치시키는 것이다. 시작프로그램 폴더의 경로는 이쪽이다. C:\Users\{사용자명}\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Startup
+
+입력 팝업창
+
+tkinter 를 사용해서 아주 간단한 대화창 UI를 생성했다.
+
+import tkinter as tk
+from tkinter import simpledialog
+ 
+ROOT = tk.Tk()
+ROOT.withdraw()
+ 
+# the input dialog
+USER_INP = simpledialog.askstring(title="테스트 입력창",
+                                  prompt="몇 시에 퇴근 할 거야?:")
+# check it
+print("Hello", USER_INP)
+
+
+
+입력어 처리
+
+내가 어떤 형식으로 입력하더라도 (시간, 분) 튜플로 처리하는 모듈이 필요하다.
+예를 들어, 12시55분/열두시55분/12:55/1255 … 모두 (12, 55)로 처리할 것이다.
+
+def process_str(INPUT_STRING):
+    UHR_dict = {
+        "한": 1,
+        "두": 2,
+        "세": 3,
+        "네": 4,
+        "다섯": 5,
+        "여섯": 6,
+        "일곱": 7,
+        "여덟": 8,
+        "아홉": 9,
+        "열": 10,
+        "열한": 11,
+        "열두": 12,
+    }
+    MINT_dict = {
+        "일": 1,
+        "이": 2,
+        "삼": 3,
+        "사": 4,
+        "오": 5,
+        "육": 6,
+        "칠": 7,
+        "팔": 8,
+        "구": 9,
+        "십": 10,
+        "반": 30,
+    }
+ 
+    INPUT_STRING = INPUT_STRING.replace(" ", "")
+    INPUT_STRING = INPUT_STRING.replace(":", "시")
+    INPUT_STRING = INPUT_STRING.replace("분", "")
+ 
+ 
+    # 숫자로만 이루어진 경우
+    if INPUT_STRING.isdigit():
+ 
+        if len(INPUT_STRING) &lt;= 2:
+            UHR = int(INPUT_STRING)
+            MINT = 0
+         
+        else:
+            tmp_UHR = int(INPUT_STRING[:2])
+            if tmp_UHR &gt; 25:
+                UHR = int(INPUT_STRING[0])
+                MINT = int(INPUT_STRING[1:])
+            else:
+                UHR = tmp_UHR
+                MINT = int(INPUT_STRING[2:])
+         
+        if (UHR &gt; 24) or (MINT &gt;= 60):
+            return (0, 0)
+         
+        return (UHR, MINT)
+     
+ 
+    elif '시' in INPUT_STRING:
+        cans = INPUT_STRING.split("시")
+        UHR,  MINT = cans[0], cans[1]
+ 
+        if UHR.isdigit() and int(UHR) &lt;= 24:
+            UHR = int(UHR)
+        elif UHR in UHR_dict.keys():
+            UHR = UHR_dict[UHR]
+ 
+        if MINT.isdigit() and int(MINT) &lt; 60:
+            MINT = int(MINT)
+        elif len(MINT) == 1:
+            MINT = MINT_dict[MINT]
+        elif "십" in MINT:
+            ten = 1 if not MINT.split("십")[0] else MINT_dict[MINT.split("십")[0]]
+            one = 0 if not MINT.split("십")[1] else MINT_dict[MINT.split("십")[1]]
+            MINT = ten * 10 + one
+ 
+        if not MINT:
+            MINT = 0
+        elif isinstance(MINT, str):
+            return (0, 0)
+ 
+        return (UHR, MINT)
+ 
+    return (0, 0)
+
+
+타이머
+
+두 개의 타이머가 필요하다.
+
+  타이머1. 시작 52분 후 휴식 알림, 그로부터 15분 후 근무 알림, 반복 …
+  타이머2. 매 45분 음수 알림
+
+
+이 두 개의 타이머가 동시에 돌아가도록 스레딩(Threading)을 이용했다.
+
+…내용 추가 예정
+
+데이터
+
+data 폴더에 work_schedule.csv 파일로 시간 데이터를 업데이트 한다
+
+
+
+
+  
+    
+      날짜
+      booting
+      goal
+      actual
+    
+  
+  
+    
+      2023-10-10
+      10:11
+      19:50
+      20:51
+    
+    
+      2023-10-11
+      10:12
+      18:20
+      18:24
+    
+    
+      2023-10-12
+      10:36
+      19:00
+      18:48
+    
+  
+
+
+
+  booting : 최초 부팅 시간
+  goal : 목표 퇴근 시간
+  actual : PC 종료 시간
+
+" />
+    
+    <meta name="author" content="YunsooLog" />
+
+    
+    <meta property="og:title" content="포모도로 윈도우 앱 '토스터' 미니 프로젝트" />
+    <meta property="twitter:title" content="포모도로 윈도우 앱 '토스터' 미니 프로젝트" />
+    
+  <!-- Async font loading -->
+<script>
+  window.WebFontConfig = {
+      custom: {
+          families: ['Spoqa Han Sans:100,300,400,700'],
+          urls: ['https://spoqa.github.io/spoqa-han-sans/css/SpoqaHanSans-kr.css']
+      },
+      timeout: 60000
+  };
+  (function(d) {
+      var wf = d.createElement('script'), s = d.scripts[0];
+      wf.src = 'https://ajax.googleapis.com/ajax/libs/webfont/1.5.18/webfont.js';
+      s.parentNode.insertBefore(wf, s);
+  })(document);
+</script>
+
+  <!--[if lt IE 9]>
+    <script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+  <![endif]-->
+
+  <link rel="stylesheet" type="text/css" href="/style.css" />
+  <link rel="alternate" type="application/rss+xml" title="YunsooLog - 행간을 읽는 기계학습 이야기" href="/feed.xml" />
+  <script>
+    document.cookie = "promo_shown=1; SameSite=Lax; path=/";
+  </script>
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.13.11/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.13.11/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.13.11/dist/contrib/auto-render.min.js"
+          onload="renderMathInElement(document.body, {
+            delimiters: [
+              {left: '\\[', right: '\\]', display: true},
+              {left: '$$', right: '$$', display: true},
+              {left: '$', right: '$', display: false},
+            ]
+          });">
+  </script>
+
+  <!-- Created with Jekyll Now - http://github.com/barryclark/jekyll-now -->
+</head>
+  <body>
+    <div class="wrapper-masthead">
+  <div class="container">
+    <header class="masthead clearfix">
+      <a href="/" class="site-avatar"><img src="/images/avatar.png"/></a>
+      
+      <div class="site-info">
+        <h1 class="site-name"><a href="/">YunsooLog</a></h1>
+        <p class="site-description">행간을 읽는 기계학습 이야기</p>
+      </div>
+
+      <nav>
+        
+        
+        <a href="/about">About</a>
+        
+        
+        
+        <a href="/">Blog</a>
+        
+        
+        
+        <a href="/tags">Tags</a>
+        
+        
+        
+        <a href="/timeline">Timeline</a>
+        
+        
+        
+        <ul class="search-icon">
+          <a href="/search">
+          <svg 
+            width="24" 
+            height="24" 
+            viewBox="0 0 24 24" 
+            fill="none" 
+            xmlns="http://www.w3.org/2000/svg">
+            <path d="M10 2C5.58172 2 2 5.58172 2 10C2 14.4183 5.58172 18 10 18C11.8485 18 13.5451 17.3376 14.8458 16.2416L19.7071 21.1029C20.0976 21.4934 20.7308 21.4934 21.1213 21.1029C21.5118 20.7124 21.5118 20.0792 21.1213 19.6887L16.2416 14.809C17.3376 13.5083 18 11.8116 18 10C18 5.58172 14.4183 2 10 2ZM4 10C4 6.68629 6.68629 4 10 4C13.3137 4 16 6.68629 16 10C16 13.3137 13.3137 16 10 16C6.68629 16 4 13.3137 4 10Z" 
+            fill="currentColor"></path>
+          </svg>
+          </a>
+        </ul>
+
+      </nav>
+    </header>
+  </div>
+</div>
+
+    <div id="main" role="main" class="container">
+      <article class="post">
+  <div class="inner-wrap">
+    <h1>포모도로 윈도우 앱 '토스터' 미니 프로젝트</h1>
+
+    <div>
+      <span class="date">
+        2023-10-13
+      </span>
+
+      <ul class="tag">
+        
+        <li>
+          <a href="https://woocosmos.github.io/tags#네트워크">
+            네트워크
+          </a>
+        </li>
+        
+        <li>
+          <a href="https://woocosmos.github.io/tags#python">
+            python
+          </a>
+        </li>
+        
+      </ul>
+    </div>
+
+    <section class="entry">
+      
+      <aside>
+        <nav class="nav-toc">
+          <h3> 목차 </h3>
+          <ul id="toc" class="section-nav">
+<li class="toc-entry toc-h1"><a href="#개요">개요</a></li>
+<li class="toc-entry toc-h1"><a href="#기획">기획</a></li>
+<li class="toc-entry toc-h1"><a href="#구현">구현</a>
+<ul>
+<li class="toc-entry toc-h2"><a href="#plyer">Plyer</a></li>
+<li class="toc-entry toc-h2"><a href="#모듈">모듈</a>
+<ul>
+<li class="toc-entry toc-h3"><a href="#부팅시-실행">부팅시 실행</a></li>
+<li class="toc-entry toc-h3"><a href="#입력-팝업창">입력 팝업창</a></li>
+<li class="toc-entry toc-h3"><a href="#입력어-처리">입력어 처리</a></li>
+<li class="toc-entry toc-h3"><a href="#타이머">타이머</a></li>
+</ul>
+</li>
+<li class="toc-entry toc-h2"><a href="#데이터">데이터</a></li>
+</ul>
+</li>
+</ul>
+        </nav>
+      </aside>
+      <script src="/assets/scroll-spy.js" type="text/javascript"></script>
+      
+      <h1 id="개요">개요</h1>
+
+<p>효율적이고 건강한 근무 습관을 위한 간단한 윈도우 앱을 만들어보기로 했다. 윈도우 팝업을 toast notification이라고 부르는 데서 착안하여 프로젝트명을 토스터<em>toaster</em>라고 지었다.</p>
+
+<p><strong>포모도로 테크닉이란?</strong></p>
+<blockquote>
+  <p>1980년대 후반 프란체스코 시릴로가 제안한 시간 관리 방법론. 타이머를 이용해서 25분간 집중해서 일을 한 다음 5분간 휴식하는 방식이다. 토마토(<em>Pomodoro는 이탈리아어로 토마토를 뜻함</em>) 모양의 요리용 타이머에서 이름이 유래했다.</p>
+</blockquote>
+
+<h1 id="기획">기획</h1>
+
+<p>구현하고 싶은 기능은 단순하다.</p>
+
+<ol>
+  <li>출근해서 컴퓨터를 부팅하면 그날의 목표 퇴근시간을 기입한다.</li>
+  <li>52분 근무하고 15분 휴식하는 타임 테이블을 윈도우 팝업으로 운영한다.</li>
+  <li>45분마다 물 마시기를 팝업으로 리마인드한다.</li>
+  <li>목표 퇴근 시간 20분 전부터 팝업으로 퇴근 준비를 알린다.</li>
+</ol>
+
+<hr />
+
+<p>흐름도 형식으로 프로그램의 전체 로직을 표현했다. 크게 initializer와 main으로 나눠진다.</p>
+<ul>
+  <li>initializer : PC가 켜졌을 때 최초 시간 정보를 세팅한다</li>
+  <li>main : 주요 팝업 이벤트를 발생시킨다</li>
+</ul>
+
+<p><img src="https://github.com/user-attachments/assets/43be0d2e-d87a-4817-b877-465bf2edaffa" alt="image" /></p>
+
+<p>main 파트의 ‘베이스 타임 모듈’의 로직을 자세히 살펴보자.</p>
+<ul>
+  <li>30초마다 현재 시간을 체크한다 → PC 종료 전 마지막으로 체크된 현재 시간이 ‘종료 시간’이 된다</li>
+  <li>목표 퇴근 시간 전 k분은 현재 20, 10, 5분으로 설정되어 있는데, config.py 에서 before_end 리스트에 추가해주면 된다</li>
+  <li>목표 퇴근 시간 전 0분의 경우, 퇴근을 알리는 팝업이 발동된다</li>
+</ul>
+
+<p><img src="https://github.com/user-attachments/assets/29386ca5-c04b-4f04-b588-be3acc5c85a3" alt="image" /></p>
+
+<p>‘타이머’는 config.py 에서 설정한 값대로 반복된다</p>
+<ul>
+  <li>물 : 45분마다 알림</li>
+  <li>근무/휴식 : 52+15분마다 알림
+    <ul>
+      <li>근무 타이머를 먼저 시작한 후, 52분이 지나면 휴식 팝업을 임시 발동한 후 이어 휴식 타이머를 시작한다</li>
+    </ul>
+  </li>
+</ul>
+
+<h1 id="구현">구현</h1>
+
+<ul>
+  <li>Windows 11</li>
+  <li>Python 3.12</li>
+  <li>pipenv 로 패키지 관리</li>
+</ul>
+
+<h2 id="plyer">Plyer</h2>
+
+<p>데스크톱, 모바일 등 다양한 플랫폼에서 작동하는 GUI 앱 개발을 위한 파이썬 프레임워크다. 이것을 설치해서,</p>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>pipenv <span class="nb">install </span>plyer
+</code></pre></div></div>
+<p>바로 윈도우 샘플 토스트를 띄울 수 있다</p>
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code>
+<span class="kn">from</span> <span class="n">plyer</span> <span class="kn">import</span> <span class="n">notification</span>
+ 
+<span class="n">notification</span><span class="p">.</span><span class="nf">notify</span><span class="p">(</span>
+    <span class="n">title</span> <span class="o">=</span> <span class="sh">'</span><span class="s">제목입니다.</span><span class="sh">'</span><span class="p">,</span>
+    <span class="n">message</span> <span class="o">=</span> <span class="sh">'</span><span class="s">메시지 내용입니다.</span><span class="sh">'</span><span class="p">,</span>
+    <span class="n">app_name</span> <span class="o">=</span> <span class="sh">"</span><span class="s">앱 이름</span><span class="sh">"</span><span class="p">,</span>
+    <span class="n">app_icon</span> <span class="o">=</span> <span class="sh">'</span><span class="s">./dao.ico</span><span class="sh">'</span><span class="p">,</span> <span class="c1"># 'C:\\icon_32x32.ico'
+</span>    <span class="n">timeout</span> <span class="o">=</span> <span class="mi">10</span><span class="p">,</span>  <span class="c1"># seconds
+</span><span class="p">)</span>
+</code></pre></div></div>
+<p><img src="https://github.com/user-attachments/assets/ffe5e460-7dc9-44d5-9a9c-c32601d687fe" alt="image" /></p>
+
+<h2 id="모듈">모듈</h2>
+
+<h3 id="부팅시-실행">부팅시 실행</h3>
+
+<p>윈도우 부팅할 때 파이썬 스크립트가 실행되어야 한다. 파이썬 스크립트(py)를 실행시키는 스크립트(bat)을 윈도우 시작프로그램 폴더에 추가해준다.</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>python.exe /path/to/main.py
+</code></pre></div></div>
+
+<p>위와 같이 정의한 <code class="language-plaintext highlighter-rouge">run_toaster.bat</code> 파일을 윈도우 시작프로그램 폴더에 위치시키는 것이다. 시작프로그램 폴더의 경로는 이쪽이다. <code class="language-plaintext highlighter-rouge">C:\Users\{사용자명}\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Startup</code></p>
+
+<h3 id="입력-팝업창">입력 팝업창</h3>
+
+<p><strong>tkinter</strong> 를 사용해서 아주 간단한 대화창 UI를 생성했다.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">import</span> <span class="n">tkinter</span> <span class="k">as</span> <span class="n">tk</span>
+<span class="kn">from</span> <span class="n">tkinter</span> <span class="kn">import</span> <span class="n">simpledialog</span>
+ 
+<span class="n">ROOT</span> <span class="o">=</span> <span class="n">tk</span><span class="p">.</span><span class="nc">Tk</span><span class="p">()</span>
+<span class="n">ROOT</span><span class="p">.</span><span class="nf">withdraw</span><span class="p">()</span>
+ 
+<span class="c1"># the input dialog
+</span><span class="n">USER_INP</span> <span class="o">=</span> <span class="n">simpledialog</span><span class="p">.</span><span class="nf">askstring</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="sh">"</span><span class="s">테스트 입력창</span><span class="sh">"</span><span class="p">,</span>
+                                  <span class="n">prompt</span><span class="o">=</span><span class="sh">"</span><span class="s">몇 시에 퇴근 할 거야?:</span><span class="sh">"</span><span class="p">)</span>
+<span class="c1"># check it
+</span><span class="nf">print</span><span class="p">(</span><span class="sh">"</span><span class="s">Hello</span><span class="sh">"</span><span class="p">,</span> <span class="n">USER_INP</span><span class="p">)</span>
+</code></pre></div></div>
+<p><img src="https://github.com/user-attachments/assets/69916409-f3ed-4f6f-a1bc-ae0bdb9b4676" alt="image" /></p>
+
+<h3 id="입력어-처리">입력어 처리</h3>
+
+<p>내가 어떤 형식으로 입력하더라도 (시간, 분) 튜플로 처리하는 모듈이 필요하다.<br />
+예를 들어, 12시55분/열두시55분/12:55/1255 … 모두 (12, 55)로 처리할 것이다.</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>def process_str(INPUT_STRING):
+    UHR_dict = {
+        "한": 1,
+        "두": 2,
+        "세": 3,
+        "네": 4,
+        "다섯": 5,
+        "여섯": 6,
+        "일곱": 7,
+        "여덟": 8,
+        "아홉": 9,
+        "열": 10,
+        "열한": 11,
+        "열두": 12,
+    }
+    MINT_dict = {
+        "일": 1,
+        "이": 2,
+        "삼": 3,
+        "사": 4,
+        "오": 5,
+        "육": 6,
+        "칠": 7,
+        "팔": 8,
+        "구": 9,
+        "십": 10,
+        "반": 30,
+    }
+ 
+    INPUT_STRING = INPUT_STRING.replace(" ", "")
+    INPUT_STRING = INPUT_STRING.replace(":", "시")
+    INPUT_STRING = INPUT_STRING.replace("분", "")
+ 
+ 
+    # 숫자로만 이루어진 경우
+    if INPUT_STRING.isdigit():
+ 
+        if len(INPUT_STRING) &lt;= 2:
+            UHR = int(INPUT_STRING)
+            MINT = 0
+         
+        else:
+            tmp_UHR = int(INPUT_STRING[:2])
+            if tmp_UHR &gt; 25:
+                UHR = int(INPUT_STRING[0])
+                MINT = int(INPUT_STRING[1:])
+            else:
+                UHR = tmp_UHR
+                MINT = int(INPUT_STRING[2:])
+         
+        if (UHR &gt; 24) or (MINT &gt;= 60):
+            return (0, 0)
+         
+        return (UHR, MINT)
+     
+ 
+    elif '시' in INPUT_STRING:
+        cans = INPUT_STRING.split("시")
+        UHR,  MINT = cans[0], cans[1]
+ 
+        if UHR.isdigit() and int(UHR) &lt;= 24:
+            UHR = int(UHR)
+        elif UHR in UHR_dict.keys():
+            UHR = UHR_dict[UHR]
+ 
+        if MINT.isdigit() and int(MINT) &lt; 60:
+            MINT = int(MINT)
+        elif len(MINT) == 1:
+            MINT = MINT_dict[MINT]
+        elif "십" in MINT:
+            ten = 1 if not MINT.split("십")[0] else MINT_dict[MINT.split("십")[0]]
+            one = 0 if not MINT.split("십")[1] else MINT_dict[MINT.split("십")[1]]
+            MINT = ten * 10 + one
+ 
+        if not MINT:
+            MINT = 0
+        elif isinstance(MINT, str):
+            return (0, 0)
+ 
+        return (UHR, MINT)
+ 
+    return (0, 0)
+</code></pre></div></div>
+
+<h3 id="타이머">타이머</h3>
+
+<p>두 개의 타이머가 필요하다.</p>
+<ul>
+  <li>타이머1. 시작 52분 후 휴식 알림, 그로부터 15분 후 근무 알림, 반복 …</li>
+  <li>타이머2. 매 45분 음수 알림</li>
+</ul>
+
+<p>이 두 개의 타이머가 동시에 돌아가도록 스레딩(Threading)을 이용했다.</p>
+
+<p>…내용 추가 예정</p>
+
+<h2 id="데이터">데이터</h2>
+
+<p>data 폴더에 <code class="language-plaintext highlighter-rouge">work_schedule.csv</code> 파일로 시간 데이터를 업데이트 한다</p>
+
+<style>
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+th {
+  background-color: #f2f2f2; /* Green color for header row */
+}
+</style>
+
+<table>
+  <thead>
+    <tr>
+      <th>날짜</th>
+      <th><strong>booting</strong></th>
+      <th><strong>goal</strong></th>
+      <th><strong>actual</strong></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>2023-10-10</td>
+      <td>10:11</td>
+      <td>19:50</td>
+      <td>20:51</td>
+    </tr>
+    <tr>
+      <td>2023-10-11</td>
+      <td>10:12</td>
+      <td>18:20</td>
+      <td>18:24</td>
+    </tr>
+    <tr>
+      <td>2023-10-12</td>
+      <td>10:36</td>
+      <td>19:00</td>
+      <td>18:48</td>
+    </tr>
+  </tbody>
+</table>
+
+<ul>
+  <li>booting : 최초 부팅 시간</li>
+  <li>goal : 목표 퇴근 시간</li>
+  <li>actual : PC 종료 시간</li>
+</ul>
+
+    </section>
+  </div>
+
+  <div class="pagination">
+    
+      <span class="prev" >
+          <a href="https://woocosmos.github.io/style-test-ko/">
+            &#xE000; Markdown Cheatsheet
+          </a>
+      </span>
+    
+    
+      <span class="next" >
+          <a href="https://woocosmos.github.io/websocket-base/">
+            websocket: 클라이언트-서버의 양방향 통신 &#xE001;
+          </a>
+      </span>
+    
+  </div>
+
+  <div class="comments">
+	<div id="disqus_thread"></div>
+	<script type="text/javascript">
+
+	    var disqus_shortname = 'woocosmos';
+
+	    (function() {
+	        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+	        dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+			dsq.setAttribute('data-timestamp', +new Date()); //추가
+	        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+	    })();
+
+	</script>
+	<noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+  <script type="text/javascript">
+    "use strict"; 
+    function addBackToTop() 
+        { function o() 
+            { 
+                t() >= z ? R && (D.className = "", R = !1) : R || (D.className = "hidden", R = !0) 
+            } 
+          function t() 
+            { 
+                return E.scrollTop || A && document.documentElement.scrollTop || 0 
+            } 
+          function e(o) 
+            { 
+                E.scrollTop = o, A && (document.documentElement.scrollTop = o) 
+            } 
+    
+    var n, i, d, r, c = arguments.length > 0 && void 0 !== arguments[0] ? arguments[0] : {}, a = c.backgroundColor, s = void 0 === a ? "#000" : a, l = c.cornerOffset, u = void 0 === l ? 20 : l, m = c.diameter, p = void 0 === m ? 56 : m, h = c.ease, b = void 0 === h ? function (o) { return .5 * (1 - Math.cos(Math.PI * o)) } : h, v = c.id, f = void 0 === v ? "back-to-top" : v, x = c.innerHTML, g = void 0 === x ? '<svg viewBox="0 0 24 24"><path d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z"></path></svg>' : x, w = c.onClickScrollTo, y = void 0 === w ? 0 : w, k = c.scrollContainer, E = void 0 === k ? document.body : k, T = c.scrollDuration, C = void 0 === T ? 100 : T, M = c.showWhenScrollTopIs, z = void 0 === M ? 1 : M, L = c.size, B = void 0 === L ? p : L, H = c.textColor, I = void 0 === H ? "#fff" : H, N = c.zIndex, S = void 0 === N ? 1 : N, q = E === document.body, A = q && document.documentElement; n = Math.round(.35 * B), i = Math.round(.2 * B), d = "#" + f + "{background:" + s + ";-webkit-border-radius:50%;-moz-border-radius:50%;border-radius:50%;bottom:" + u + "px;-webkit-box-shadow:0 2px 5px 0 rgba(0,0,0,.26);-moz-box-shadow:0 2px 5px 0 rgba(0,0,0,.26);box-shadow:0 2px 5px 0 rgba(0,0,0,.26);color:" + I + ";cursor:pointer;display:block;height:" + B + "px;opacity:1;outline:0;position:fixed;right:" + u + "px;-webkit-tap-highlight-color:transparent;-webkit-touch-callout:none;-webkit-transition:bottom .2s,opacity .2s;-o-transition:bottom .2s,opacity .2s;-moz-transition:bottom .2s,opacity .2s;transition:bottom .2s,opacity .2s;-webkit-user-select:none;-moz-user-select:none;-ms-user-select:none;user-select:none;width:" + B + "px;z-index:" + S + "}#" + f + " svg{display:block;fill:currentColor;height:" + n + "px;margin:" + i + "px auto 0;width:" + n + "px}#" + f + ".hidden{bottom:-" + B + "px;opacity:0}", (r = document.createElement("style")).appendChild(document.createTextNode(d)), document.head.insertAdjacentElement("afterbegin", r); var D = function () { var o = document.createElement("div"); return o.id = f, o.className = "hidden", o.innerHTML = g, o.addEventListener("click", function (o) { o.preventDefault(), function () { var o = "function" == typeof y ? y() : y, n = window, i = n.performance, d = n.requestAnimationFrame; if (C <= 0 || void 0 === i || void 0 === d) return e(o); var r = i.now(), c = t(), a = c - o; d(function o(t) { var n = Math.min((t - r) / C, 1); e(c - Math.round(b(n) * a)), n < 1 && d(o) }) }() }), document.body.appendChild(o), o }(), R = !0; (q ? window : E).addEventListener("scroll", o), o() } window.addEventListener("load", function () { var o = document.getElementById("back-to-top"), t = document.querySelector(".sticky-bottom"), e = document.querySelector(".fixed-bottom"); o && window.addEventListener("scroll", function () { if (t) { var n = t.getBoundingClientRect(); window.scrollY + window.innerHeight > document.body.scrollHeight - n.height ? (o.style.position = "fixed", o.style.bottom = n.height + 15 + "px") : (o.style.position = "fixed", o.style.bottom = "15px") } if (e) { var i = e.getBoundingClientRect(); o.style.position = "fixed", o.style.bottom = i.height + 15 + "px" } }) });
+</script>
+<script>
+    addBackToTop();
+</script>
+
+
+
+
+</article>
+
+    </div>
+    
+    <div class="wrapper-footer">
+      <div class="container">
+        <footer class="footer">
+          <!-- Refer to https://codepen.io/ruandre/pen/howFi -->
+<ul class="svg-icon">
+
+  
+
+  
+
+  
+  <li><a href="mailto:woocosmos@gmail.com" class="icon-8 email" title="Email"><svg viewBox="0 0 512 512"><path d="M101.3 141.6v228.9h0.3 308.4 0.8V141.6H101.3zM375.7 167.8l-119.7 91.5 -119.6-91.5H375.7zM127.6 194.1l64.1 49.1 -64.1 64.1V194.1zM127.8 344.2l84.9-84.9 43.2 33.1 43-32.9 84.7 84.7L127.8 344.2 127.8 344.2zM384.4 307.8l-64.4-64.4 64.4-49.3V307.8z"/></svg><!--[if lt IE 9]><em>Email</em><![endif]--></a></li>
+  
+
+  
+
+  
+
+  
+  <li><a href="https://github.com/woocosmos" class="icon-13 github" title="GitHub"><svg viewBox="0 0 512 512"><path d="M256 70.7c-102.6 0-185.9 83.2-185.9 185.9 0 82.1 53.3 151.8 127.1 176.4 9.3 1.7 12.3-4 12.3-8.9V389.4c-51.7 11.3-62.5-21.9-62.5-21.9 -8.4-21.5-20.6-27.2-20.6-27.2 -16.9-11.5 1.3-11.3 1.3-11.3 18.7 1.3 28.5 19.2 28.5 19.2 16.6 28.4 43.5 20.2 54.1 15.4 1.7-12 6.5-20.2 11.8-24.9 -41.3-4.7-84.7-20.6-84.7-91.9 0-20.3 7.3-36.9 19.2-49.9 -1.9-4.7-8.3-23.6 1.8-49.2 0 0 15.6-5 51.1 19.1 14.8-4.1 30.7-6.2 46.5-6.3 15.8 0.1 31.7 2.1 46.6 6.3 35.5-24 51.1-19.1 51.1-19.1 10.1 25.6 3.8 44.5 1.8 49.2 11.9 13 19.1 29.6 19.1 49.9 0 71.4-43.5 87.1-84.9 91.7 6.7 5.8 12.8 17.1 12.8 34.4 0 24.9 0 44.9 0 51 0 4.9 3 10.7 12.4 8.9 73.8-24.6 127-94.3 127-176.4C441.9 153.9 358.6 70.7 256 70.7z"/></svg><!--[if lt IE 9]><em>GitHub</em><![endif]--></a></li>
+  
+
+  
+
+  
+
+  
+  <li><a href="https://www.linkedin.com/in/yunsoo-woo-245946213" class="icon-17 linkedin" title="LinkedIn"><svg viewBox="0 0 512 512"><path d="M186.4 142.4c0 19-15.3 34.5-34.2 34.5 -18.9 0-34.2-15.4-34.2-34.5 0-19 15.3-34.5 34.2-34.5C171.1 107.9 186.4 123.4 186.4 142.4zM181.4 201.3h-57.8V388.1h57.8V201.3zM273.8 201.3h-55.4V388.1h55.4c0 0 0-69.3 0-98 0-26.3 12.1-41.9 35.2-41.9 21.3 0 31.5 15 31.5 41.9 0 26.9 0 98 0 98h57.5c0 0 0-68.2 0-118.3 0-50-28.3-74.2-68-74.2 -39.6 0-56.3 30.9-56.3 30.9v-25.2H273.8z"/></svg><!--[if lt IE 9]><em>LinkedIn</em><![endif]--></a></li>
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</ul>
+
+
+<p>© 2026 Yunsoo Woo</p>
+
+        </footer>
+      </div>
+    </div>
+
+    <!--  -->
+
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-1YCJCQRD4F"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-1YCJCQRD4F');
+</script>
+    <script type="text/javascript">
+    "use strict"; 
+    function addBackToTop() 
+        { function o() 
+            { 
+                t() >= z ? R && (D.className = "", R = !1) : R || (D.className = "hidden", R = !0) 
+            } 
+          function t() 
+            { 
+                return E.scrollTop || A && document.documentElement.scrollTop || 0 
+            } 
+          function e(o) 
+            { 
+                E.scrollTop = o, A && (document.documentElement.scrollTop = o) 
+            } 
+    
+    var n, i, d, r, c = arguments.length > 0 && void 0 !== arguments[0] ? arguments[0] : {}, a = c.backgroundColor, s = void 0 === a ? "#000" : a, l = c.cornerOffset, u = void 0 === l ? 20 : l, m = c.diameter, p = void 0 === m ? 56 : m, h = c.ease, b = void 0 === h ? function (o) { return .5 * (1 - Math.cos(Math.PI * o)) } : h, v = c.id, f = void 0 === v ? "back-to-top" : v, x = c.innerHTML, g = void 0 === x ? '<svg viewBox="0 0 24 24"><path d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z"></path></svg>' : x, w = c.onClickScrollTo, y = void 0 === w ? 0 : w, k = c.scrollContainer, E = void 0 === k ? document.body : k, T = c.scrollDuration, C = void 0 === T ? 100 : T, M = c.showWhenScrollTopIs, z = void 0 === M ? 1 : M, L = c.size, B = void 0 === L ? p : L, H = c.textColor, I = void 0 === H ? "#fff" : H, N = c.zIndex, S = void 0 === N ? 1 : N, q = E === document.body, A = q && document.documentElement; n = Math.round(.35 * B), i = Math.round(.2 * B), d = "#" + f + "{background:" + s + ";-webkit-border-radius:50%;-moz-border-radius:50%;border-radius:50%;bottom:" + u + "px;-webkit-box-shadow:0 2px 5px 0 rgba(0,0,0,.26);-moz-box-shadow:0 2px 5px 0 rgba(0,0,0,.26);box-shadow:0 2px 5px 0 rgba(0,0,0,.26);color:" + I + ";cursor:pointer;display:block;height:" + B + "px;opacity:1;outline:0;position:fixed;right:" + u + "px;-webkit-tap-highlight-color:transparent;-webkit-touch-callout:none;-webkit-transition:bottom .2s,opacity .2s;-o-transition:bottom .2s,opacity .2s;-moz-transition:bottom .2s,opacity .2s;transition:bottom .2s,opacity .2s;-webkit-user-select:none;-moz-user-select:none;-ms-user-select:none;user-select:none;width:" + B + "px;z-index:" + S + "}#" + f + " svg{display:block;fill:currentColor;height:" + n + "px;margin:" + i + "px auto 0;width:" + n + "px}#" + f + ".hidden{bottom:-" + B + "px;opacity:0}", (r = document.createElement("style")).appendChild(document.createTextNode(d)), document.head.insertAdjacentElement("afterbegin", r); var D = function () { var o = document.createElement("div"); return o.id = f, o.className = "hidden", o.innerHTML = g, o.addEventListener("click", function (o) { o.preventDefault(), function () { var o = "function" == typeof y ? y() : y, n = window, i = n.performance, d = n.requestAnimationFrame; if (C <= 0 || void 0 === i || void 0 === d) return e(o); var r = i.now(), c = t(), a = c - o; d(function o(t) { var n = Math.min((t - r) / C, 1); e(c - Math.round(b(n) * a)), n < 1 && d(o) }) }() }), document.body.appendChild(o), o }(), R = !0; (q ? window : E).addEventListener("scroll", o), o() } window.addEventListener("load", function () { var o = document.getElementById("back-to-top"), t = document.querySelector(".sticky-bottom"), e = document.querySelector(".fixed-bottom"); o && window.addEventListener("scroll", function () { if (t) { var n = t.getBoundingClientRect(); window.scrollY + window.innerHeight > document.body.scrollHeight - n.height ? (o.style.position = "fixed", o.style.bottom = n.height + 15 + "px") : (o.style.position = "fixed", o.style.bottom = "15px") } if (e) { var i = e.getBoundingClientRect(); o.style.position = "fixed", o.style.bottom = i.height + 15 + "px" } }) });
+</script>
+<script>
+    addBackToTop();
+</script>
+
+
+
+
+
+  </body>
+</html>

@@ -1,0 +1,1250 @@
+<!DOCTYPE html>
+<html>
+  <head>
+  <title>K-Means Clustering 군집화 알고리즘 – YunsooLog – 행간을 읽는 기계학습 이야기</title>
+  <link rel="icon" href="/images/favicon.ico">
+      <meta name="google-site-verification" content="NA4jg1Iffw6aA9VWjj3kqoo2jfOkPRxINJtYphd7VeI" />
+    <meta charset="utf-8" />
+    <meta content='text/html; charset=utf-8' http-equiv='Content-Type'>
+    <meta http-equiv='X-UA-Compatible' content='IE=edge'>
+    <meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1.0'>
+    <meta http-equiv="Permissions-Policy" content="interest-cohort=()">
+    
+    
+    <meta name="description" content="요약
+- K-Means 클러스터링 알고리즘은 클러스터 내 분산을 최소화함으로써 가까운 데이터끼리 클러스터를 형성하는 비지도 학습 모델이다
+- 분산을 전반적으로 충분히 감소시키면서 데이터 포인트를 유의미하게 그룹화하는 클러스터 개수를 찾는다
+- 중심점을 세팅하는 초기화 방법론을 적용한 후, 클러스터 할당과 중심점 업데이트를 반복하며 최적화한다
+
+
+개요
+
+데이터 분석 업무를 하다보면 유저 그룹별로 특징을 비교하고 싶을 때가 있다. 그렇다면 유저 그룹은 어떤 기준으로 나눠야 하고 각 유저를 어느 그룹으로 분류할 수 있을까? 이런 문제를 만났을 때 곧잘 사용한 것이 K-means 클러스터링 알고리즘이다.
+그런데 데이터 특성이나 하이퍼파라미터, 최적화 알고리즘 등 다양한 변수에 따라 상이한 군집화 결과가 나오기도 했고, 분석을 진행하기 앞서 군집화가 제대로 이루어지긴 한 건지 긴가민가할 때도 있었다.
+
+따라서 이번 포스팅에서는 K-means 알고리즘의 정의와 원리를 수식과 함께 이해하고 코드로 그 내용을 구현한다. 용어의 통일성을 위해 앞으로 군집(화) 는 클러스터(링) 으로 표현하겠다.
+
+정의
+
+K-means 알고리즘은 데이터를 $k$개의 클러스터로 묶는 클러스터링 알고리즘으로, 비지도 학습 방식에 속한다. 학습은 클러스터 내 분산을 최소화하는 방식으로 수행된다.
+
+따라서 클러스터는 가까운 데이터들이 모인 그룹을 뜻한다.
+
+목적
+
+클러스터 내 제곱합(within-cluster sum of squares, WCSS)을 최소화하는 $k$개 집합 $S$을 찾는 것이 목적이다. 목적함수는 아래와 같다.
+
+\[\mathop{\operatorname{arg\,min}}_{\mathbf{S}} \sum_{i=1}^{k} \sum_{\mathbf{x} \in S_{i}} \left\|\mathbf{x} - \boldsymbol{\mu}_{i}\right\|^{2}\]
+
+
+  ${\operatorname{arg\,min}}_{\mathbf{S}}$
+  주어진 식을 최소화하는 $S$
+  ${\mu}_{i}$
+  $S_i$에 속한 포인트들의 평균mean (또는 중앙값median)
+  $||…||$
+  편차를 L2 Norm (유클리드 거리) 으로 계산
+
+
+$k$개 클러스터별 ‘데이터 포인트들과 평균의 차이를 제곱하여 합산한 값(=편차제곱합)’의 합을 의미한다. 분산이 편차제곱의 평균이라는 점을 상기한다면, 이 값은 클러스터의 분산에 클러스터의 사이즈를 곱한 것과 같다는 것을 알 수 있다.
+
+\[\mathop{\operatorname{arg\,min}}_{\mathbf{S}} \sum_{i=1}^{k} |S_{i}| \operatorname{Var}(S_{i})\]
+
+
+  $|S_i|$
+  $S_i$의 크기, 즉 해당 클러스터에 속한 포인트의 개수
+  $\operatorname{Var}(S_{i})$
+  $S_i$의 분산, 즉 해당 클러스터에 속한 포인트들의 분산
+
+
+따라서 $k$개 클러스터별 ‘크기와 분산을 곱한 값(Product)’의 합으로도 표현할 수 있다. 직관적으로는 클러스터의 크기가 가중치로 작용하여 클러스터가 클수록 합산값에 기여한다고 볼 수 있으며, 클러스터들의 전반적인 분산합을 최소화해야 한다는 점에서 K-Means 알고리즘의 목적과 동일하다.
+
+계산 효율성
+
+K-Means 알고리즘의 정의로 돌아와 클러스터 내 분산이라는 키워드를 다시 생각해보자. 앞서 목적함수에서는 ‘데이터 포인트($x$)와 중심점($\mu$) 간의 거리’로 이를 계산했다. 하지만 초점을 ‘데이터 포인트들($x, y$) 간의 거리’로 옮겨보는 건 어떨까?
+
+즉 K-Means 알고리즘은 $k$개 클러스터별 ‘데이터 쌍별 편차제곱(pairwise squared deviations)의 평균’들의 합을 최소화하는 것과도 동일하다. 한 클러스터 안에서 데이터 포인트로 만들 수 있는 모든 조합에 대해 편차를 계산하고, 이 포인트들이 평균적으로 얼마나 퍼져 있는지 나타낸 식이다.
+
+\[{\operatorname{arg\,min}}_{\mathbf{S}} \sum_{i=1}^{k} \frac{1}{ |S_{i}| }\sum_{\mathbf{x,y} \in S_{i}}\left\|\mathbf{x} - \mathbf{y}\right\|^{2}\]
+
+한편 아래 항등식(identity)에 따르면 ‘데이터 쌍별 편차제곱합’은 ‘데이터 포인트들과 평균 $c_{i}$의 편차를 제곱하여 합산한 값(=편차제곱합)에 클러스터 사이즈의 $2$배를 곱한 것’과 동일하다.
+
+\[\sum_{\mathbf{x,y} \in S_{i}}\left\|\mathbf{x} - \mathbf{y}\right\|^{2}=2|S_{i}|\sum_{\mathbf{x} \in S_{i}}\left\|\mathbf{x} - {c}_{i}\right\|^{2}\]
+
+이러한 계산 구조를 활용하여 클러스터의 모든 조합에 대해 연산을 수행하지 않고도 분산을 효율적이고 간단하게 계산할 수 있다. 유도 과정은 아래와 같다.
+
+편차의 총합은 $0$이기 때문에 중간의 내적항은 사라진다.
+
+\[\begin{aligned}
+\left\|\mathbf{x} - \mathbf{y}\right\|^{2} 
+&amp; = \left\|\mathbf{x} - {c}_{i} + {c}_{i} - \mathbf{y}\right\|^2 \\
+&amp; = \left\|\mathbf{x} - {c}_{i}\right\|^{2} -2 (\mathbf{x} - {c}_{i}) \cdot (\mathbf{y} - {c}_{i}) + \left\|\mathbf{y} - {c}_{i}\right\|^{2} \\
+&amp; = \left\|\mathbf{x} - {c}_{i}\right\|^{2} + \left\|\mathbf{y} - {c}_{i}\right\|^{2}
+\end{aligned}\]
+
+이렇게 유도된 식에 원래대로 $\sum$을 적용한다면,
+
+\[\sum_{\mathbf{x,y} \in S_{i}}\left\|\mathbf{x} - \mathbf{y}\right\|^{2} 
+ = \sum_{\mathbf{x,y} \in S_{i}} (\left\|\mathbf{x} - {c}_{i}\right\|^{2} + \left\|\mathbf{y} - {c}_{i}\right\|^{2})\]
+
+모든 점 $x$, $y$에 대해서 합산하기 때문에 $x$, $y$ 각각 두 겹의 $\sum$으로 표현할 수 있으며, $c$는 상수이기 때문에 $\sum$는 $|S|$의 곱셉으로 변환할 수 있다.
+
+\[\begin{aligned}
+\sum_{\mathbf{x,y} \in S_{i}}\left\|\mathbf{x} - {c}_{i}\right\|^{2}
+&amp; = \sum_{\mathbf{x} \in S_{i}}\ \sum_{\mathbf{y} \in S_{i}}\left\|\mathbf{x} - {c}_{i}\right\|^{2} \\
+&amp; = |S_{i}| \sum_{\mathbf{x} \in S_{i}}\left\|\mathbf{x} - {c}_{i}\right\|^{2} 
+\end{aligned}\]
+
+마지막으로 $\sum_{\mathbf{x,y} \in S_{i}}\left|\mathbf{y} - {c}_{i}\right|^{2}$ 에 대해서도 동일하게 유도할 수 있으므로 $2$배가 된다.
+
+\[2|S_{i}|\sum_{\mathbf{x} \in S_{i}}\left\|\mathbf{x} - {c}_{i}\right\|^{2}\]
+
+최적화
+이제 이 목적함수를 최적화하는 방식을 알아볼 것이다. 처음 초기화된 식은 아래 두 동작을 반복하며 클러스터 내 제곱합(WCSS)을 감소시킨다.
+
+
+  Assignment : 각 데이터 포인트에 가장 가까운 클러스터를 할당하기
+  Update : 각 클러스터에 할당된 데이터 포인트들의 평균값을 계산하여 새로운 클러스터의 중심을 업데이트하기
+
+
+이 과정을 반복할 때마다(iteration) 클러스터 내 제곱합은 항상 감소한다. 업데이트를 거듭할수록 데이터 포인트들은 점점 더 클러스터의 중심에 가까워지고 클러스터의 크기는 더 작아지기 때문이다. 이러한 단조 감소(monotone decreasing)의 성질로 인해 K-Means 알고리즘은 수렴이 가능한 식이다. 다만 ‘현재 상태에서’ 가장 가까운 클러스터를 할당하는 탐욕적(greedy) 방식으로 진행되기 때문에 지역 최적해(local optimum)에 수렴하기 쉽다.
+
+초기화
+업데이트에 앞서 중심점을 지정하는 초기화 단계를 거쳐야 한다. 적절하지 않은 중심점에서 시작할 경우 지역 최적해에 빠져버릴 수 있기 때문에 알맞은 초기화 기법을 선택하는 것이 좋다.
+
+
+  무작위 분할(Random Partition) : 모든 데이터 포인터를 $k$개 클러스터 중 하나로 임의 할당한다
+  Forgy 알고리즘 : 데이터 포인터 중 $k$개를 임의로 선택하고 이들을 중심점으로 사용한다
+    
+      두 최적화 기법은 중심점을 임의로 설정하기 때문에 결과가 매번 달라질 수 있다는 단점이 있다
+    
+  
+  K-means++ : 기존 초기화 기법의 한계를 커버하기 위해, 거리가 가중치로 적용된 확률을 기반으로 중심점을 찾는다
+    
+      데이터 포인트 중 $1$개를 임의로 선택하고 이를 첫번째 클러스터의 중심점 $c_{1}$으로 사용한다
+      나머지 데이터 포인트에 대해서 첫번째 클러스터의 중심점까지의 거리 제곱합을 계산한다
+    
+
+\[d(x_{i}, c_{1})^2\]
+
+    
+      나머지 데이터 포인트에 대해서 ‘이 포인트가 다음 중심점으로 선택될 확률’을 계산한다. $c_{1}$로부터 거리가 멀수록 확률은 높아진다.
+    
+
+\[p(x_{i}) = \frac{d(x_{i}, c_{1})^2}{\text{Sum of Squares}}\]
+
+    
+      계산한 확률을 기반으로 두번째 클러스터의 중심점$c_{2}$을 추출한다.
+      나머지 데이터 포인트에 대해서 더 가까운 클러스터의 중심점까지의 거리를 계산하고, 이에 따라 확률값도 조정한다
+    
+
+\[\min{(d(x_{i}, c_{1}), d(x_{i}, c_{2}))}\]
+
+    
+      $k$개의 중심점을 선택할 때까지 반복한다
+
+    
+  
+
+
+클러스터의 수
+
+지금까지는 $k$를 특정 수로 상정한 상태에서 목적함수를 정의, 초기화, 최적화하는 과정을 살펴보았다. 그렇다면 정작 $k$는 어떻게 결정하는가? K-Means 알고리즘에서 클러스터의 개수 $k$는 사람이 직접 지정해주어야 한다. 이는 해당 알고리즘의 단점으로 항상 지적되는 지점이다.
+
+최적의 클러스터 수를 정하는 것은 매우 중요하다. 만약에 $k$가 데이터 포인트 수만큼 크다면 각 데이터 포인트가 중심점이 되어버리기 때문에 목적함수는 0에 가까워지겠지만 클러스터링으로서 의미없는 작업이 된다. 반면 $k$를 $1$로 지정한다면 모든 데이터 포인트가 커다란 하나의 클러스터에 속하기 때문에 이 또한 의미가 없다.
+
+즉 단지 WCSS를 최소화하는 것만이 목적이 아니며, 데이터 포인트를 유의미하게 클러스터링하는 것 그리고 충분히 밀도 있는 클러스터를 찾기 위해 WCSS를 최소화하는 것 - 이 둘이 적절한 밸런스를 이루는 클러스터 개수를 찾는 것이 K-Means 알고리즘의 열쇠다.
+
+클러스터 수를 결정할 때 사용하는 다양한 방법론 중 세 가지를 살펴보려고 한다.
+
+Rule of thumb
+
+특정 이론이라기보단 관습적으로 사용하는 경험적인 기준이다. 주어진 데이터의 사이즈가 $n$일 때,
+
+\[k \approx \sqrt{n/2}\]
+
+Elbow Method
+특정 범위의 $k$를 하나씩 대입하며 클러스터 내 제곱합(WSCC)을 구한다. $k$가 커질수록 WCSS는 감소하는데 이 감소율이 급격하게 떨어지는 구간, 즉 Elbow Point의 $k$로 클러스터 개수를 결정한다.
+
+
+
+ 왜 값이 급격하게 떨어진 직후를 최적의 $k$로 뽑는가? 
+
+$k=1$로 시작할 경우 WCSS는 급격하게 감소하기 마련이다. 하나의 클러스터가 모든 데이터 포인트를 포함한다면 클러스터 내 분산은 매우 클 것이며, 여기에 개수가 하나씩 추가될수록 전반적인 클러스터의 분산합은 빠르게 줄어들 것이다.
+계속해서 클러스터가 추가된다면 WCSS는 계속 감소할 테지만 감소하는 폭은 줄어들 것이다. 데이터 포인트들이 이미 중심점에 충분히 가까워져 있기 때문이다.
+
+$k$가 클수록 모델의 복잡도(Complexity)는 커지는데 그에 비해 WCSS가 크게 감소하지 않는다면, 더이상 유의미하게 클러스터가 컴팩트해지지 않고 모델 성능이 개선되지 않는다는 의미다. 결국 Elbow Point 이후로는 클러스터 개수를 늘려가면서까지 모델의 복잡도를 증가시킬 가치가 없다. 다시 말해 모델의 복잡도를 감수할 수 있을 정도로 WCSS가 ‘충분히’ 줄어드는 지점을 Elbow Point로 지정하는 것이다.
+
+한번 더 강조하자면 K-Means 알고리즘의 목적은 단지 WCSS를 최소화하는 것만이 아니라, 충분히 WCSS를 감소시키면서 데이터 포인트를 유의미하게 클러스터링하는 최적의 Trade-off 지점을 찾는 것이다.
+
+참고로 Scikit-learn과 같은 ML라이브러리에서는 Elbow Method에서 계산하는 WCSS를 inertia라고 표현한다.
+
+Silhouette Score
+Silhouette Score(실루엣 지수)은 어떤 데이터 포인트가 자신이 속한 클러스터에 얼마나 응집되어 있는지(Cohesion), 그리고 자신이 속하지 않은 인근 클러스터로부터 얼마나 떨어져 있는지(Separation) 측정하는 지표다. 주로 K-Means 클러스터링의 결과를 평가할 때 사용하지만 $k$의 개수를 지정하는 데에도 활용할 수 있다.
+
+먼저 주어진 특정 데이터 포인트 $i$에 대해서 두 개의 값을 계산한다.
+
+  Cohesion(응집도) : 소속 클러스터의 다른 데이터 포인트들까지의 평균 거리, $a(i)$ 라고 표시한다.
+  Separation(분리도) : 가장 가까운 외부 클러스터의 데이터 포인트들까지의 평균 거리, $b(i)$ 라고 표시한다.
+
+
+이를 활용하여 Silhouette Score를 계산한다. 지수는 $-1$과 $1$ 사이이며, $1$에 가까울수록 클러스터링 성능이 좋다고 평가한다.
+
+\[s(i) = \frac{b(i) - a(i)}{\max{(a(i), b(i))}}\]
+
+
+  $1$에 가까울수록, $a(i)$가 $b(i)$에 비해 훨씬 작다는 의미이므로 알맞게 클러스터링 됐다고 평가한다
+  $0$ 주변일수록, 해당 포인트가 두 클러스터의 경계 부분에 놓여 있다고 볼 수 있다
+  $-1$에 가까울수록, $a(i)$가 $b(i)$에 비해 크다는 의미이므로 해당 포인트가 다른 클러스터에 더 가까울 수 있음을 시사한다 (아예 잘못 클러스터링된 경우를 고려할 수 있다)
+
+
+ 활용 
+Silhouette Score가 각 데이터 포인트에 대해 계산하는 값이기 때문에 이를 활용할 수 있는 방법은 다양하다.
+
+
+  모든 데이터 포인트에 대해 Silhouette Score를 각각 계산한 다음, 잘 클러스터링된/경계에 있는/잘못 클러스터링된 샘플들을 가려내기
+  Silhouette Score의 평균값을 클러스터별로 집계하고 비교하여 잘못 응집된 클러스터를 다른 클러스터와 합치거나 더 쪼개기
+  Silhouette Score의 전체 평균값을 집계하여 전반적인 클러스터링 성능을 평가하기
+    
+      이때 클러스터 개수 $k$별로 평균 Silhouette Score을 비교하여 클러스터 개수를 지정할 수 있다
+
+    
+  
+
+
+코드
+
+sklearn 라이브러리 활용
+sklearn.Cluster의 KMeans 모듈과 sklearn.metrics silhouette_score를 적용할 수 있다.
+
+from sklearn.cluster import KMeans
+from sklearn.metrics import silhouette_score
+
+k = 3
+model = KMeans(n_clusters=k)
+pred = model.fit_predict(X)
+
+# k별로 해당 속성값을 시각화하면 elbow point를 찾을 수 있다
+print(model.inertia_) 
+
+# 모든 데이터 포인트의 실루엣 스코어의 평균값을 출력한다
+metric = silhouette_score(X, pred)
+print(metric)
+
+
+입력 파라미터
+
+  n_clusters : 클러스터 개수
+  init : 초기화 기법 (디폴트는 k-means++)
+
+
+속성
+
+  cluster_centers_ : 각 클러스터 중심점의 좌표
+  inertia_ : 클러스터 내 제곱합(WCSS)
+
+
+
+Python 구현 (from scratch)
+
+거리 함수 (L2 Norm)
+import numpy as np
+
+def euclidean(point, data):
+    return np.sqrt(np.sum((point - data)**2, axis=1))
+
+
+중심점 초기화 (Kmeans++)
+import random
+
+k = 3
+# 최초 클러스터 중심점 1개 추출
+centroids = [random.choice(X)]
+for _ in range(k-1):
+    # 더 가까운 클러스터의 중심점까지 거리 계산
+    dists = np.min([euclidean(centroid, X) for centroid in centroids], axis=0)
+    dists = dists**2
+    dists /= np.sum(dists)
+
+    # 거리 기반의 확률로 추출
+    new_centroid_idx = np.random.choice(range(len(X)), size=1, p=dists)
+    centroids.append(X[new_centroid_idx[0]])
+
+
+목적함수 최적화 (iteration)
+max_iter = 100
+n_iter = 0
+prev_centroids = None
+
+# 중심점이 하나라도 변경되거나 max_iter 미만일 때 반복
+while np.not_equal(centroids, prev_centroids).any() and n_iter &lt; max_iter:
+    sorted_points = [[] for _ in range(k)]
+
+    # Assignment : 포인트마다 가장 가까운 클러스터 할당
+    for point in X:
+        dists = euclidean(point, centroids)
+        centroid_idx = np.argmin(dists)
+        sorted_points[centroid_idx].append(point)
+    prev_centroids = np.copy(centroids)
+
+    # Update : 클러스터별로 평균값 업데이트하기
+    centroids = []
+    for cluster in sorted_points:
+        if len(cluster) &gt; 0:
+            centroid = np.mean(cluster, axis=0)
+        else:
+            # 클러스터가 비어 있으면 업데이트 전 기존 평균값 사용
+            centroid = prev_centroid[len(centroids)]
+        centroids.append(centroid)
+
+    n_iter += 1
+
+
+실루엣 지수 (Silhouette Score)
+# i번째 데이터 포인트에 대한 점수 계산
+
+# Cohesion (a(i))
+own_cluster = labels[i]
+own_cluster_points = X[labels == own_cluster]
+if len(own_cluster_points) &gt; 1:
+    a_i = np.mean(euclidean(point, own_cluster_points))
+else:
+    a_i = 0
+
+# Separation (b(i))
+b_i = float('inf')
+for centroid_idx, centroid in enumerate(centroids):
+    if centroid_idx != own_cluster:
+        other_cluster_points = X[labels == centroid_idx]
+        if len(other_cluster_points) &gt; 0:
+            avg_dist = np.mean(euclidean(point, other_cluster_points))
+            b_i = min(b_i, avg_dist)
+
+score = (b_i - a_i) / max(a_i, b_i) if max(a_i, b_i) &gt; 0 else 0
+
+" />
+    <meta property="og:description" content="요약
+- K-Means 클러스터링 알고리즘은 클러스터 내 분산을 최소화함으로써 가까운 데이터끼리 클러스터를 형성하는 비지도 학습 모델이다
+- 분산을 전반적으로 충분히 감소시키면서 데이터 포인트를 유의미하게 그룹화하는 클러스터 개수를 찾는다
+- 중심점을 세팅하는 초기화 방법론을 적용한 후, 클러스터 할당과 중심점 업데이트를 반복하며 최적화한다
+
+
+개요
+
+데이터 분석 업무를 하다보면 유저 그룹별로 특징을 비교하고 싶을 때가 있다. 그렇다면 유저 그룹은 어떤 기준으로 나눠야 하고 각 유저를 어느 그룹으로 분류할 수 있을까? 이런 문제를 만났을 때 곧잘 사용한 것이 K-means 클러스터링 알고리즘이다.
+그런데 데이터 특성이나 하이퍼파라미터, 최적화 알고리즘 등 다양한 변수에 따라 상이한 군집화 결과가 나오기도 했고, 분석을 진행하기 앞서 군집화가 제대로 이루어지긴 한 건지 긴가민가할 때도 있었다.
+
+따라서 이번 포스팅에서는 K-means 알고리즘의 정의와 원리를 수식과 함께 이해하고 코드로 그 내용을 구현한다. 용어의 통일성을 위해 앞으로 군집(화) 는 클러스터(링) 으로 표현하겠다.
+
+정의
+
+K-means 알고리즘은 데이터를 $k$개의 클러스터로 묶는 클러스터링 알고리즘으로, 비지도 학습 방식에 속한다. 학습은 클러스터 내 분산을 최소화하는 방식으로 수행된다.
+
+따라서 클러스터는 가까운 데이터들이 모인 그룹을 뜻한다.
+
+목적
+
+클러스터 내 제곱합(within-cluster sum of squares, WCSS)을 최소화하는 $k$개 집합 $S$을 찾는 것이 목적이다. 목적함수는 아래와 같다.
+
+\[\mathop{\operatorname{arg\,min}}_{\mathbf{S}} \sum_{i=1}^{k} \sum_{\mathbf{x} \in S_{i}} \left\|\mathbf{x} - \boldsymbol{\mu}_{i}\right\|^{2}\]
+
+
+  ${\operatorname{arg\,min}}_{\mathbf{S}}$
+  주어진 식을 최소화하는 $S$
+  ${\mu}_{i}$
+  $S_i$에 속한 포인트들의 평균mean (또는 중앙값median)
+  $||…||$
+  편차를 L2 Norm (유클리드 거리) 으로 계산
+
+
+$k$개 클러스터별 ‘데이터 포인트들과 평균의 차이를 제곱하여 합산한 값(=편차제곱합)’의 합을 의미한다. 분산이 편차제곱의 평균이라는 점을 상기한다면, 이 값은 클러스터의 분산에 클러스터의 사이즈를 곱한 것과 같다는 것을 알 수 있다.
+
+\[\mathop{\operatorname{arg\,min}}_{\mathbf{S}} \sum_{i=1}^{k} |S_{i}| \operatorname{Var}(S_{i})\]
+
+
+  $|S_i|$
+  $S_i$의 크기, 즉 해당 클러스터에 속한 포인트의 개수
+  $\operatorname{Var}(S_{i})$
+  $S_i$의 분산, 즉 해당 클러스터에 속한 포인트들의 분산
+
+
+따라서 $k$개 클러스터별 ‘크기와 분산을 곱한 값(Product)’의 합으로도 표현할 수 있다. 직관적으로는 클러스터의 크기가 가중치로 작용하여 클러스터가 클수록 합산값에 기여한다고 볼 수 있으며, 클러스터들의 전반적인 분산합을 최소화해야 한다는 점에서 K-Means 알고리즘의 목적과 동일하다.
+
+계산 효율성
+
+K-Means 알고리즘의 정의로 돌아와 클러스터 내 분산이라는 키워드를 다시 생각해보자. 앞서 목적함수에서는 ‘데이터 포인트($x$)와 중심점($\mu$) 간의 거리’로 이를 계산했다. 하지만 초점을 ‘데이터 포인트들($x, y$) 간의 거리’로 옮겨보는 건 어떨까?
+
+즉 K-Means 알고리즘은 $k$개 클러스터별 ‘데이터 쌍별 편차제곱(pairwise squared deviations)의 평균’들의 합을 최소화하는 것과도 동일하다. 한 클러스터 안에서 데이터 포인트로 만들 수 있는 모든 조합에 대해 편차를 계산하고, 이 포인트들이 평균적으로 얼마나 퍼져 있는지 나타낸 식이다.
+
+\[{\operatorname{arg\,min}}_{\mathbf{S}} \sum_{i=1}^{k} \frac{1}{ |S_{i}| }\sum_{\mathbf{x,y} \in S_{i}}\left\|\mathbf{x} - \mathbf{y}\right\|^{2}\]
+
+한편 아래 항등식(identity)에 따르면 ‘데이터 쌍별 편차제곱합’은 ‘데이터 포인트들과 평균 $c_{i}$의 편차를 제곱하여 합산한 값(=편차제곱합)에 클러스터 사이즈의 $2$배를 곱한 것’과 동일하다.
+
+\[\sum_{\mathbf{x,y} \in S_{i}}\left\|\mathbf{x} - \mathbf{y}\right\|^{2}=2|S_{i}|\sum_{\mathbf{x} \in S_{i}}\left\|\mathbf{x} - {c}_{i}\right\|^{2}\]
+
+이러한 계산 구조를 활용하여 클러스터의 모든 조합에 대해 연산을 수행하지 않고도 분산을 효율적이고 간단하게 계산할 수 있다. 유도 과정은 아래와 같다.
+
+편차의 총합은 $0$이기 때문에 중간의 내적항은 사라진다.
+
+\[\begin{aligned}
+\left\|\mathbf{x} - \mathbf{y}\right\|^{2} 
+&amp; = \left\|\mathbf{x} - {c}_{i} + {c}_{i} - \mathbf{y}\right\|^2 \\
+&amp; = \left\|\mathbf{x} - {c}_{i}\right\|^{2} -2 (\mathbf{x} - {c}_{i}) \cdot (\mathbf{y} - {c}_{i}) + \left\|\mathbf{y} - {c}_{i}\right\|^{2} \\
+&amp; = \left\|\mathbf{x} - {c}_{i}\right\|^{2} + \left\|\mathbf{y} - {c}_{i}\right\|^{2}
+\end{aligned}\]
+
+이렇게 유도된 식에 원래대로 $\sum$을 적용한다면,
+
+\[\sum_{\mathbf{x,y} \in S_{i}}\left\|\mathbf{x} - \mathbf{y}\right\|^{2} 
+ = \sum_{\mathbf{x,y} \in S_{i}} (\left\|\mathbf{x} - {c}_{i}\right\|^{2} + \left\|\mathbf{y} - {c}_{i}\right\|^{2})\]
+
+모든 점 $x$, $y$에 대해서 합산하기 때문에 $x$, $y$ 각각 두 겹의 $\sum$으로 표현할 수 있으며, $c$는 상수이기 때문에 $\sum$는 $|S|$의 곱셉으로 변환할 수 있다.
+
+\[\begin{aligned}
+\sum_{\mathbf{x,y} \in S_{i}}\left\|\mathbf{x} - {c}_{i}\right\|^{2}
+&amp; = \sum_{\mathbf{x} \in S_{i}}\ \sum_{\mathbf{y} \in S_{i}}\left\|\mathbf{x} - {c}_{i}\right\|^{2} \\
+&amp; = |S_{i}| \sum_{\mathbf{x} \in S_{i}}\left\|\mathbf{x} - {c}_{i}\right\|^{2} 
+\end{aligned}\]
+
+마지막으로 $\sum_{\mathbf{x,y} \in S_{i}}\left|\mathbf{y} - {c}_{i}\right|^{2}$ 에 대해서도 동일하게 유도할 수 있으므로 $2$배가 된다.
+
+\[2|S_{i}|\sum_{\mathbf{x} \in S_{i}}\left\|\mathbf{x} - {c}_{i}\right\|^{2}\]
+
+최적화
+이제 이 목적함수를 최적화하는 방식을 알아볼 것이다. 처음 초기화된 식은 아래 두 동작을 반복하며 클러스터 내 제곱합(WCSS)을 감소시킨다.
+
+
+  Assignment : 각 데이터 포인트에 가장 가까운 클러스터를 할당하기
+  Update : 각 클러스터에 할당된 데이터 포인트들의 평균값을 계산하여 새로운 클러스터의 중심을 업데이트하기
+
+
+이 과정을 반복할 때마다(iteration) 클러스터 내 제곱합은 항상 감소한다. 업데이트를 거듭할수록 데이터 포인트들은 점점 더 클러스터의 중심에 가까워지고 클러스터의 크기는 더 작아지기 때문이다. 이러한 단조 감소(monotone decreasing)의 성질로 인해 K-Means 알고리즘은 수렴이 가능한 식이다. 다만 ‘현재 상태에서’ 가장 가까운 클러스터를 할당하는 탐욕적(greedy) 방식으로 진행되기 때문에 지역 최적해(local optimum)에 수렴하기 쉽다.
+
+초기화
+업데이트에 앞서 중심점을 지정하는 초기화 단계를 거쳐야 한다. 적절하지 않은 중심점에서 시작할 경우 지역 최적해에 빠져버릴 수 있기 때문에 알맞은 초기화 기법을 선택하는 것이 좋다.
+
+
+  무작위 분할(Random Partition) : 모든 데이터 포인터를 $k$개 클러스터 중 하나로 임의 할당한다
+  Forgy 알고리즘 : 데이터 포인터 중 $k$개를 임의로 선택하고 이들을 중심점으로 사용한다
+    
+      두 최적화 기법은 중심점을 임의로 설정하기 때문에 결과가 매번 달라질 수 있다는 단점이 있다
+    
+  
+  K-means++ : 기존 초기화 기법의 한계를 커버하기 위해, 거리가 가중치로 적용된 확률을 기반으로 중심점을 찾는다
+    
+      데이터 포인트 중 $1$개를 임의로 선택하고 이를 첫번째 클러스터의 중심점 $c_{1}$으로 사용한다
+      나머지 데이터 포인트에 대해서 첫번째 클러스터의 중심점까지의 거리 제곱합을 계산한다
+    
+
+\[d(x_{i}, c_{1})^2\]
+
+    
+      나머지 데이터 포인트에 대해서 ‘이 포인트가 다음 중심점으로 선택될 확률’을 계산한다. $c_{1}$로부터 거리가 멀수록 확률은 높아진다.
+    
+
+\[p(x_{i}) = \frac{d(x_{i}, c_{1})^2}{\text{Sum of Squares}}\]
+
+    
+      계산한 확률을 기반으로 두번째 클러스터의 중심점$c_{2}$을 추출한다.
+      나머지 데이터 포인트에 대해서 더 가까운 클러스터의 중심점까지의 거리를 계산하고, 이에 따라 확률값도 조정한다
+    
+
+\[\min{(d(x_{i}, c_{1}), d(x_{i}, c_{2}))}\]
+
+    
+      $k$개의 중심점을 선택할 때까지 반복한다
+
+    
+  
+
+
+클러스터의 수
+
+지금까지는 $k$를 특정 수로 상정한 상태에서 목적함수를 정의, 초기화, 최적화하는 과정을 살펴보았다. 그렇다면 정작 $k$는 어떻게 결정하는가? K-Means 알고리즘에서 클러스터의 개수 $k$는 사람이 직접 지정해주어야 한다. 이는 해당 알고리즘의 단점으로 항상 지적되는 지점이다.
+
+최적의 클러스터 수를 정하는 것은 매우 중요하다. 만약에 $k$가 데이터 포인트 수만큼 크다면 각 데이터 포인트가 중심점이 되어버리기 때문에 목적함수는 0에 가까워지겠지만 클러스터링으로서 의미없는 작업이 된다. 반면 $k$를 $1$로 지정한다면 모든 데이터 포인트가 커다란 하나의 클러스터에 속하기 때문에 이 또한 의미가 없다.
+
+즉 단지 WCSS를 최소화하는 것만이 목적이 아니며, 데이터 포인트를 유의미하게 클러스터링하는 것 그리고 충분히 밀도 있는 클러스터를 찾기 위해 WCSS를 최소화하는 것 - 이 둘이 적절한 밸런스를 이루는 클러스터 개수를 찾는 것이 K-Means 알고리즘의 열쇠다.
+
+클러스터 수를 결정할 때 사용하는 다양한 방법론 중 세 가지를 살펴보려고 한다.
+
+Rule of thumb
+
+특정 이론이라기보단 관습적으로 사용하는 경험적인 기준이다. 주어진 데이터의 사이즈가 $n$일 때,
+
+\[k \approx \sqrt{n/2}\]
+
+Elbow Method
+특정 범위의 $k$를 하나씩 대입하며 클러스터 내 제곱합(WSCC)을 구한다. $k$가 커질수록 WCSS는 감소하는데 이 감소율이 급격하게 떨어지는 구간, 즉 Elbow Point의 $k$로 클러스터 개수를 결정한다.
+
+
+
+ 왜 값이 급격하게 떨어진 직후를 최적의 $k$로 뽑는가? 
+
+$k=1$로 시작할 경우 WCSS는 급격하게 감소하기 마련이다. 하나의 클러스터가 모든 데이터 포인트를 포함한다면 클러스터 내 분산은 매우 클 것이며, 여기에 개수가 하나씩 추가될수록 전반적인 클러스터의 분산합은 빠르게 줄어들 것이다.
+계속해서 클러스터가 추가된다면 WCSS는 계속 감소할 테지만 감소하는 폭은 줄어들 것이다. 데이터 포인트들이 이미 중심점에 충분히 가까워져 있기 때문이다.
+
+$k$가 클수록 모델의 복잡도(Complexity)는 커지는데 그에 비해 WCSS가 크게 감소하지 않는다면, 더이상 유의미하게 클러스터가 컴팩트해지지 않고 모델 성능이 개선되지 않는다는 의미다. 결국 Elbow Point 이후로는 클러스터 개수를 늘려가면서까지 모델의 복잡도를 증가시킬 가치가 없다. 다시 말해 모델의 복잡도를 감수할 수 있을 정도로 WCSS가 ‘충분히’ 줄어드는 지점을 Elbow Point로 지정하는 것이다.
+
+한번 더 강조하자면 K-Means 알고리즘의 목적은 단지 WCSS를 최소화하는 것만이 아니라, 충분히 WCSS를 감소시키면서 데이터 포인트를 유의미하게 클러스터링하는 최적의 Trade-off 지점을 찾는 것이다.
+
+참고로 Scikit-learn과 같은 ML라이브러리에서는 Elbow Method에서 계산하는 WCSS를 inertia라고 표현한다.
+
+Silhouette Score
+Silhouette Score(실루엣 지수)은 어떤 데이터 포인트가 자신이 속한 클러스터에 얼마나 응집되어 있는지(Cohesion), 그리고 자신이 속하지 않은 인근 클러스터로부터 얼마나 떨어져 있는지(Separation) 측정하는 지표다. 주로 K-Means 클러스터링의 결과를 평가할 때 사용하지만 $k$의 개수를 지정하는 데에도 활용할 수 있다.
+
+먼저 주어진 특정 데이터 포인트 $i$에 대해서 두 개의 값을 계산한다.
+
+  Cohesion(응집도) : 소속 클러스터의 다른 데이터 포인트들까지의 평균 거리, $a(i)$ 라고 표시한다.
+  Separation(분리도) : 가장 가까운 외부 클러스터의 데이터 포인트들까지의 평균 거리, $b(i)$ 라고 표시한다.
+
+
+이를 활용하여 Silhouette Score를 계산한다. 지수는 $-1$과 $1$ 사이이며, $1$에 가까울수록 클러스터링 성능이 좋다고 평가한다.
+
+\[s(i) = \frac{b(i) - a(i)}{\max{(a(i), b(i))}}\]
+
+
+  $1$에 가까울수록, $a(i)$가 $b(i)$에 비해 훨씬 작다는 의미이므로 알맞게 클러스터링 됐다고 평가한다
+  $0$ 주변일수록, 해당 포인트가 두 클러스터의 경계 부분에 놓여 있다고 볼 수 있다
+  $-1$에 가까울수록, $a(i)$가 $b(i)$에 비해 크다는 의미이므로 해당 포인트가 다른 클러스터에 더 가까울 수 있음을 시사한다 (아예 잘못 클러스터링된 경우를 고려할 수 있다)
+
+
+ 활용 
+Silhouette Score가 각 데이터 포인트에 대해 계산하는 값이기 때문에 이를 활용할 수 있는 방법은 다양하다.
+
+
+  모든 데이터 포인트에 대해 Silhouette Score를 각각 계산한 다음, 잘 클러스터링된/경계에 있는/잘못 클러스터링된 샘플들을 가려내기
+  Silhouette Score의 평균값을 클러스터별로 집계하고 비교하여 잘못 응집된 클러스터를 다른 클러스터와 합치거나 더 쪼개기
+  Silhouette Score의 전체 평균값을 집계하여 전반적인 클러스터링 성능을 평가하기
+    
+      이때 클러스터 개수 $k$별로 평균 Silhouette Score을 비교하여 클러스터 개수를 지정할 수 있다
+
+    
+  
+
+
+코드
+
+sklearn 라이브러리 활용
+sklearn.Cluster의 KMeans 모듈과 sklearn.metrics silhouette_score를 적용할 수 있다.
+
+from sklearn.cluster import KMeans
+from sklearn.metrics import silhouette_score
+
+k = 3
+model = KMeans(n_clusters=k)
+pred = model.fit_predict(X)
+
+# k별로 해당 속성값을 시각화하면 elbow point를 찾을 수 있다
+print(model.inertia_) 
+
+# 모든 데이터 포인트의 실루엣 스코어의 평균값을 출력한다
+metric = silhouette_score(X, pred)
+print(metric)
+
+
+입력 파라미터
+
+  n_clusters : 클러스터 개수
+  init : 초기화 기법 (디폴트는 k-means++)
+
+
+속성
+
+  cluster_centers_ : 각 클러스터 중심점의 좌표
+  inertia_ : 클러스터 내 제곱합(WCSS)
+
+
+
+Python 구현 (from scratch)
+
+거리 함수 (L2 Norm)
+import numpy as np
+
+def euclidean(point, data):
+    return np.sqrt(np.sum((point - data)**2, axis=1))
+
+
+중심점 초기화 (Kmeans++)
+import random
+
+k = 3
+# 최초 클러스터 중심점 1개 추출
+centroids = [random.choice(X)]
+for _ in range(k-1):
+    # 더 가까운 클러스터의 중심점까지 거리 계산
+    dists = np.min([euclidean(centroid, X) for centroid in centroids], axis=0)
+    dists = dists**2
+    dists /= np.sum(dists)
+
+    # 거리 기반의 확률로 추출
+    new_centroid_idx = np.random.choice(range(len(X)), size=1, p=dists)
+    centroids.append(X[new_centroid_idx[0]])
+
+
+목적함수 최적화 (iteration)
+max_iter = 100
+n_iter = 0
+prev_centroids = None
+
+# 중심점이 하나라도 변경되거나 max_iter 미만일 때 반복
+while np.not_equal(centroids, prev_centroids).any() and n_iter &lt; max_iter:
+    sorted_points = [[] for _ in range(k)]
+
+    # Assignment : 포인트마다 가장 가까운 클러스터 할당
+    for point in X:
+        dists = euclidean(point, centroids)
+        centroid_idx = np.argmin(dists)
+        sorted_points[centroid_idx].append(point)
+    prev_centroids = np.copy(centroids)
+
+    # Update : 클러스터별로 평균값 업데이트하기
+    centroids = []
+    for cluster in sorted_points:
+        if len(cluster) &gt; 0:
+            centroid = np.mean(cluster, axis=0)
+        else:
+            # 클러스터가 비어 있으면 업데이트 전 기존 평균값 사용
+            centroid = prev_centroid[len(centroids)]
+        centroids.append(centroid)
+
+    n_iter += 1
+
+
+실루엣 지수 (Silhouette Score)
+# i번째 데이터 포인트에 대한 점수 계산
+
+# Cohesion (a(i))
+own_cluster = labels[i]
+own_cluster_points = X[labels == own_cluster]
+if len(own_cluster_points) &gt; 1:
+    a_i = np.mean(euclidean(point, own_cluster_points))
+else:
+    a_i = 0
+
+# Separation (b(i))
+b_i = float('inf')
+for centroid_idx, centroid in enumerate(centroids):
+    if centroid_idx != own_cluster:
+        other_cluster_points = X[labels == centroid_idx]
+        if len(other_cluster_points) &gt; 0:
+            avg_dist = np.mean(euclidean(point, other_cluster_points))
+            b_i = min(b_i, avg_dist)
+
+score = (b_i - a_i) / max(a_i, b_i) if max(a_i, b_i) &gt; 0 else 0
+
+" />
+    
+    <meta name="author" content="YunsooLog" />
+
+    
+    <meta property="og:title" content="K-Means Clustering 군집화 알고리즘" />
+    <meta property="twitter:title" content="K-Means Clustering 군집화 알고리즘" />
+    
+  <!-- Async font loading -->
+<script>
+  window.WebFontConfig = {
+      custom: {
+          families: ['Spoqa Han Sans:100,300,400,700'],
+          urls: ['https://spoqa.github.io/spoqa-han-sans/css/SpoqaHanSans-kr.css']
+      },
+      timeout: 60000
+  };
+  (function(d) {
+      var wf = d.createElement('script'), s = d.scripts[0];
+      wf.src = 'https://ajax.googleapis.com/ajax/libs/webfont/1.5.18/webfont.js';
+      s.parentNode.insertBefore(wf, s);
+  })(document);
+</script>
+
+  <!--[if lt IE 9]>
+    <script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+  <![endif]-->
+
+  <link rel="stylesheet" type="text/css" href="/style.css" />
+  <link rel="alternate" type="application/rss+xml" title="YunsooLog - 행간을 읽는 기계학습 이야기" href="/feed.xml" />
+  <script>
+    document.cookie = "promo_shown=1; SameSite=Lax; path=/";
+  </script>
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.13.11/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.13.11/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.13.11/dist/contrib/auto-render.min.js"
+          onload="renderMathInElement(document.body, {
+            delimiters: [
+              {left: '\\[', right: '\\]', display: true},
+              {left: '$$', right: '$$', display: true},
+              {left: '$', right: '$', display: false},
+            ]
+          });">
+  </script>
+
+  <!-- Created with Jekyll Now - http://github.com/barryclark/jekyll-now -->
+</head>
+  <body>
+    <div class="wrapper-masthead">
+  <div class="container">
+    <header class="masthead clearfix">
+      <a href="/" class="site-avatar"><img src="/images/avatar.png"/></a>
+      
+      <div class="site-info">
+        <h1 class="site-name"><a href="/">YunsooLog</a></h1>
+        <p class="site-description">행간을 읽는 기계학습 이야기</p>
+      </div>
+
+      <nav>
+        
+        
+        <a href="/about">About</a>
+        
+        
+        
+        <a href="/">Blog</a>
+        
+        
+        
+        <a href="/tags">Tags</a>
+        
+        
+        
+        <a href="/timeline">Timeline</a>
+        
+        
+        
+        <ul class="search-icon">
+          <a href="/search">
+          <svg 
+            width="24" 
+            height="24" 
+            viewBox="0 0 24 24" 
+            fill="none" 
+            xmlns="http://www.w3.org/2000/svg">
+            <path d="M10 2C5.58172 2 2 5.58172 2 10C2 14.4183 5.58172 18 10 18C11.8485 18 13.5451 17.3376 14.8458 16.2416L19.7071 21.1029C20.0976 21.4934 20.7308 21.4934 21.1213 21.1029C21.5118 20.7124 21.5118 20.0792 21.1213 19.6887L16.2416 14.809C17.3376 13.5083 18 11.8116 18 10C18 5.58172 14.4183 2 10 2ZM4 10C4 6.68629 6.68629 4 10 4C13.3137 4 16 6.68629 16 10C16 13.3137 13.3137 16 10 16C6.68629 16 4 13.3137 4 10Z" 
+            fill="currentColor"></path>
+          </svg>
+          </a>
+        </ul>
+
+      </nav>
+    </header>
+  </div>
+</div>
+
+    <div id="main" role="main" class="container">
+      <article class="post">
+  <div class="inner-wrap">
+    <h1>K-Means Clustering 군집화 알고리즘</h1>
+
+    <div>
+      <span class="date">
+        2024-08-20
+      </span>
+
+      <ul class="tag">
+        
+        <li>
+          <a href="https://woocosmos.github.io/tags#머신러닝">
+            머신러닝
+          </a>
+        </li>
+        
+      </ul>
+    </div>
+
+    <section class="entry">
+      
+      <aside>
+        <nav class="nav-toc">
+          <h3> 목차 </h3>
+          <ul id="toc" class="section-nav">
+<li class="toc-entry toc-h1"><a href="#개요">개요</a></li>
+<li class="toc-entry toc-h1"><a href="#정의">정의</a></li>
+<li class="toc-entry toc-h1"><a href="#목적">목적</a>
+<ul>
+<li class="toc-entry toc-h2"><a href="#계산-효율성">계산 효율성</a></li>
+<li class="toc-entry toc-h2"><a href="#최적화">최적화</a></li>
+<li class="toc-entry toc-h2"><a href="#초기화">초기화</a></li>
+</ul>
+</li>
+<li class="toc-entry toc-h1"><a href="#클러스터의-수">클러스터의 수</a>
+<ul>
+<li class="toc-entry toc-h2"><a href="#rule-of-thumb">Rule of thumb</a></li>
+<li class="toc-entry toc-h2"><a href="#elbow-method">Elbow Method</a></li>
+<li class="toc-entry toc-h2"><a href="#silhouette-score">Silhouette Score</a></li>
+</ul>
+</li>
+<li class="toc-entry toc-h1"><a href="#코드">코드</a>
+<ul>
+<li class="toc-entry toc-h2"><a href="#sklearn-라이브러리-활용">sklearn 라이브러리 활용</a></li>
+<li class="toc-entry toc-h2"><a href="#python-구현-from-scratch">Python 구현 (from scratch)</a></li>
+</ul>
+</li>
+</ul>
+        </nav>
+      </aside>
+      <script src="/assets/scroll-spy.js" type="text/javascript"></script>
+      
+      <p><strong>요약</strong></p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>- K-Means 클러스터링 알고리즘은 클러스터 내 분산을 최소화함으로써 가까운 데이터끼리 클러스터를 형성하는 비지도 학습 모델이다
+- 분산을 전반적으로 충분히 감소시키면서 데이터 포인트를 유의미하게 그룹화하는 클러스터 개수를 찾는다
+- 중심점을 세팅하는 초기화 방법론을 적용한 후, 클러스터 할당과 중심점 업데이트를 반복하며 최적화한다
+</code></pre></div></div>
+
+<h1 id="개요">개요</h1>
+
+<p>데이터 분석 업무를 하다보면 유저 그룹별로 특징을 비교하고 싶을 때가 있다. 그렇다면 유저 그룹은 어떤 기준으로 나눠야 하고 각 유저를 어느 그룹으로 분류할 수 있을까? 이런 문제를 만났을 때 곧잘 사용한 것이 <strong>K-means 클러스터링 알고리즘</strong>이다.<br />
+그런데 데이터 특성이나 하이퍼파라미터, 최적화 알고리즘 등 다양한 변수에 따라 상이한 군집화 결과가 나오기도 했고, 분석을 진행하기 앞서 군집화가 제대로 이루어지긴 한 건지 긴가민가할 때도 있었다.</p>
+
+<p>따라서 이번 포스팅에서는 K-means 알고리즘의 정의와 원리를 수식과 함께 이해하고 코드로 그 내용을 구현한다. 용어의 통일성을 위해 앞으로 <em>군집(화)</em> 는 <em>클러스터(링)</em> 으로 표현하겠다.</p>
+
+<h1 id="정의">정의</h1>
+
+<p>K-means 알고리즘은 <strong>데이터를 $k$개의 클러스터로 묶는 클러스터링 알고리즘</strong>으로, 비지도 학습 방식에 속한다. 학습은 <strong>클러스터 내 분산을 최소화</strong>하는 방식으로 수행된다.</p>
+
+<p>따라서 클러스터는 가까운 데이터들이 모인 그룹을 뜻한다.</p>
+
+<h1 id="목적">목적</h1>
+
+<p><strong>클러스터 내 제곱합(within-cluster sum of squares, WCSS)을 최소화하는 $k$개 집합 $S$을 찾는 것</strong>이 목적이다. 목적함수는 아래와 같다.</p>
+
+\[\mathop{\operatorname{arg\,min}}_{\mathbf{S}} \sum_{i=1}^{k} \sum_{\mathbf{x} \in S_{i}} \left\|\mathbf{x} - \boldsymbol{\mu}_{i}\right\|^{2}\]
+
+<dl>
+  <dt>${\operatorname{arg\,min}}_{\mathbf{S}}$</dt>
+  <dd>주어진 식을 최소화하는 $S$</dd>
+  <dt>${\mu}_{i}$</dt>
+  <dd>$S_i$에 속한 포인트들의 평균<sub>mean</sub> (또는 중앙값<sub>median</sub>)<br /></dd>
+  <dt>$||…||$</dt>
+  <dd>편차를 L2 Norm (유클리드 거리) 으로 계산</dd>
+</dl>
+
+<p>$k$개 클러스터별 ‘데이터 포인트들과 평균의 차이를 제곱하여 합산한 값(<em>=편차제곱합</em>)’의 합을 의미한다. 분산이 편차제곱의 평균이라는 점을 상기한다면, 이 값은 클러스터의 분산에 클러스터의 사이즈를 곱한 것과 같다는 것을 알 수 있다.</p>
+
+\[\mathop{\operatorname{arg\,min}}_{\mathbf{S}} \sum_{i=1}^{k} |S_{i}| \operatorname{Var}(S_{i})\]
+
+<dl>
+  <dt>$|S_i|$</dt>
+  <dd>$S_i$의 크기, 즉 해당 클러스터에 속한 포인트의 개수</dd>
+  <dt>$\operatorname{Var}(S_{i})$</dt>
+  <dd>$S_i$의 분산, 즉 해당 클러스터에 속한 포인트들의 분산</dd>
+</dl>
+
+<p>따라서 $k$개 클러스터별 ‘크기와 분산을 곱한 값(Product)’의 합으로도 표현할 수 있다. 직관적으로는 클러스터의 크기가 가중치로 작용하여 클러스터가 클수록 합산값에 기여한다고 볼 수 있으며, 클러스터들의 전반적인 분산합을 최소화해야 한다는 점에서 K-Means 알고리즘의 목적과 동일하다.</p>
+
+<h2 id="계산-효율성">계산 효율성</h2>
+
+<p>K-Means 알고리즘의 정의로 돌아와 <strong>클러스터 내 분산</strong>이라는 키워드를 다시 생각해보자. 앞서 목적함수에서는 ‘데이터 포인트($x$)와 중심점($\mu$) 간의 거리’로 이를 계산했다. 하지만 초점을 ‘데이터 포인트들($x, y$) 간의 거리’로 옮겨보는 건 어떨까?</p>
+
+<p>즉 K-Means 알고리즘은 $k$개 클러스터별 ‘데이터 쌍별 편차제곱(pairwise squared deviations)의 평균’들의 합을 최소화하는 것과도 동일하다. 한 클러스터 안에서 데이터 포인트로 만들 수 있는 모든 조합에 대해 편차를 계산하고, 이 포인트들이 평균적으로 얼마나 퍼져 있는지 나타낸 식이다.</p>
+
+\[{\operatorname{arg\,min}}_{\mathbf{S}} \sum_{i=1}^{k} \frac{1}{ |S_{i}| }\sum_{\mathbf{x,y} \in S_{i}}\left\|\mathbf{x} - \mathbf{y}\right\|^{2}\]
+
+<p>한편 아래 항등식(identity)에 따르면 ‘데이터 쌍별 편차제곱합’은 ‘데이터 포인트들과 평균 $c_{i}$의 편차를 제곱하여 합산한 값(<em>=편차제곱합</em>)에 클러스터 사이즈의 $2$배를 곱한 것’과 동일하다.</p>
+
+\[\sum_{\mathbf{x,y} \in S_{i}}\left\|\mathbf{x} - \mathbf{y}\right\|^{2}=2|S_{i}|\sum_{\mathbf{x} \in S_{i}}\left\|\mathbf{x} - {c}_{i}\right\|^{2}\]
+
+<p>이러한 계산 구조를 활용하여 <strong>클러스터의 모든 조합에 대해 연산을 수행하지 않고도 분산을 효율적이고 간단하게 계산</strong>할 수 있다. 유도 과정은 아래와 같다.</p>
+
+<p><a href="https://woocosmos.github.io/basic-statistics/#%ED%8F%89%EA%B7%A0-%EB%B6%84%EC%82%B0-%ED%91%9C%EC%A4%80%ED%8E%B8%EC%B0%A8">편차의 총합은 $0$</a>이기 때문에 중간의 내적항은 사라진다.</p>
+
+\[\begin{aligned}
+\left\|\mathbf{x} - \mathbf{y}\right\|^{2} 
+&amp; = \left\|\mathbf{x} - {c}_{i} + {c}_{i} - \mathbf{y}\right\|^2 \\
+&amp; = \left\|\mathbf{x} - {c}_{i}\right\|^{2} -2 (\mathbf{x} - {c}_{i}) \cdot (\mathbf{y} - {c}_{i}) + \left\|\mathbf{y} - {c}_{i}\right\|^{2} \\
+&amp; = \left\|\mathbf{x} - {c}_{i}\right\|^{2} + \left\|\mathbf{y} - {c}_{i}\right\|^{2}
+\end{aligned}\]
+
+<p>이렇게 유도된 식에 원래대로 $\sum$을 적용한다면,</p>
+
+\[\sum_{\mathbf{x,y} \in S_{i}}\left\|\mathbf{x} - \mathbf{y}\right\|^{2} 
+ = \sum_{\mathbf{x,y} \in S_{i}} (\left\|\mathbf{x} - {c}_{i}\right\|^{2} + \left\|\mathbf{y} - {c}_{i}\right\|^{2})\]
+
+<p>모든 점 $x$, $y$에 대해서 합산하기 때문에 $x$, $y$ 각각 두 겹의 $\sum$으로 표현할 수 있으며, $c$는 상수이기 때문에 $\sum$는 $|S|$의 곱셉으로 변환할 수 있다.</p>
+
+\[\begin{aligned}
+\sum_{\mathbf{x,y} \in S_{i}}\left\|\mathbf{x} - {c}_{i}\right\|^{2}
+&amp; = \sum_{\mathbf{x} \in S_{i}}\ \sum_{\mathbf{y} \in S_{i}}\left\|\mathbf{x} - {c}_{i}\right\|^{2} \\
+&amp; = |S_{i}| \sum_{\mathbf{x} \in S_{i}}\left\|\mathbf{x} - {c}_{i}\right\|^{2} 
+\end{aligned}\]
+
+<p>마지막으로 $\sum_{\mathbf{x,y} \in S_{i}}\left|\mathbf{y} - {c}_{i}\right|^{2}$ 에 대해서도 동일하게 유도할 수 있으므로 $2$배가 된다.</p>
+
+\[2|S_{i}|\sum_{\mathbf{x} \in S_{i}}\left\|\mathbf{x} - {c}_{i}\right\|^{2}\]
+
+<h2 id="최적화">최적화</h2>
+<p>이제 이 목적함수를 <strong>최적화하는 방식</strong>을 알아볼 것이다. 처음 초기화된 식은 아래 두 동작을 반복하며 클러스터 내 제곱합(WCSS)을 감소시킨다.</p>
+
+<ol>
+  <li><strong>Assignment</strong> : 각 데이터 포인트에 가장 가까운 클러스터를 할당하기</li>
+  <li><strong>Update</strong> : 각 클러스터에 할당된 데이터 포인트들의 평균값을 계산하여 새로운 클러스터의 중심을 업데이트하기</li>
+</ol>
+
+<p>이 과정을 반복할 때마다(iteration) 클러스터 내 제곱합은 <strong>항상 감소</strong>한다. 업데이트를 거듭할수록 데이터 포인트들은 점점 더 클러스터의 중심에 가까워지고 클러스터의 크기는 더 작아지기 때문이다. 이러한 <a href="https://woocosmos.github.io/basic-statistics/#%EC%A7%91%ED%95%A9">단조 감소(monotone decreasing)</a>의 성질로 인해 K-Means 알고리즘은 수렴이 가능한 식이다. 다만 ‘현재 상태에서’ 가장 가까운 클러스터를 할당하는 탐욕적(greedy) 방식으로 진행되기 때문에 지역 최적해(local optimum)에 수렴하기 쉽다.</p>
+
+<h2 id="초기화">초기화</h2>
+<p>업데이트에 앞서 <strong>중심점을 지정하는 초기화 단계</strong>를 거쳐야 한다. 적절하지 않은 중심점에서 시작할 경우 지역 최적해에 빠져버릴 수 있기 때문에 알맞은 초기화 기법을 선택하는 것이 좋다.</p>
+
+<ul>
+  <li><strong>무작위 분할(Random Partition)</strong> : 모든 데이터 포인터를 $k$개 클러스터 중 하나로 임의 할당한다</li>
+  <li><strong>Forgy 알고리즘</strong> : 데이터 포인터 중 $k$개를 임의로 선택하고 이들을 중심점으로 사용한다
+    <ul>
+      <li>두 최적화 기법은 중심점을 임의로 설정하기 때문에 결과가 매번 달라질 수 있다는 단점이 있다</li>
+    </ul>
+  </li>
+  <li><strong>K-means++</strong> : 기존 초기화 기법의 한계를 커버하기 위해, 거리가 가중치로 적용된 확률을 기반으로 중심점을 찾는다
+    <ul>
+      <li>데이터 포인트 중 $1$개를 임의로 선택하고 이를 첫번째 클러스터의 중심점 $c_{1}$으로 사용한다</li>
+      <li>나머지 데이터 포인트에 대해서 첫번째 클러스터의 중심점까지의 거리 제곱합을 계산한다</li>
+    </ul>
+
+\[d(x_{i}, c_{1})^2\]
+
+    <ul>
+      <li>나머지 데이터 포인트에 대해서 ‘이 포인트가 다음 중심점으로 선택될 확률’을 계산한다. $c_{1}$로부터 거리가 멀수록 확률은 높아진다.</li>
+    </ul>
+
+\[p(x_{i}) = \frac{d(x_{i}, c_{1})^2}{\text{Sum of Squares}}\]
+
+    <ul>
+      <li>계산한 확률을 기반으로 두번째 클러스터의 중심점$c_{2}$을 추출한다.</li>
+      <li>나머지 데이터 포인트에 대해서 <em>더 가까운</em> 클러스터의 중심점까지의 거리를 계산하고, 이에 따라 확률값도 조정한다</li>
+    </ul>
+
+\[\min{(d(x_{i}, c_{1}), d(x_{i}, c_{2}))}\]
+
+    <ul>
+      <li>$k$개의 중심점을 선택할 때까지 반복한다<br />
+<br /></li>
+    </ul>
+  </li>
+</ul>
+
+<h1 id="클러스터의-수">클러스터의 수</h1>
+
+<p>지금까지는 $k$를 특정 수로 상정한 상태에서 목적함수를 정의, 초기화, 최적화하는 과정을 살펴보았다. 그렇다면 정작 $k$는 어떻게 결정하는가? K-Means 알고리즘에서 <strong>클러스터의 개수 $k$는 사람이 직접 지정해주어야 한다</strong>. 이는 해당 알고리즘의 단점으로 항상 지적되는 지점이다.</p>
+
+<p>최적의 클러스터 수를 정하는 것은 매우 중요하다. 만약에 $k$가 데이터 포인트 수만큼 크다면 각 데이터 포인트가 중심점이 되어버리기 때문에 목적함수는 0에 가까워지겠지만 클러스터링으로서 의미없는 작업이 된다. 반면 $k$를 $1$로 지정한다면 모든 데이터 포인트가 커다란 하나의 클러스터에 속하기 때문에 이 또한 의미가 없다.</p>
+
+<p>즉 단지 WCSS를 최소화하는 것만이 목적이 아니며, <strong>데이터 포인트를 유의미하게 클러스터링하는 것</strong> 그리고 <strong>충분히 밀도 있는 클러스터를 찾기 위해 WCSS를 최소화하는 것</strong> - 이 둘이 적절한 밸런스를 이루는 <mark>클러스터 개수</mark>를 찾는 것이 K-Means 알고리즘의 열쇠다.</p>
+
+<p>클러스터 수를 결정할 때 사용하는 다양한 방법론 중 세 가지를 살펴보려고 한다.</p>
+
+<h2 id="rule-of-thumb">Rule of thumb</h2>
+
+<p>특정 이론이라기보단 관습적으로 사용하는 경험적인 기준이다. 주어진 데이터의 사이즈가 $n$일 때,</p>
+
+\[k \approx \sqrt{n/2}\]
+
+<h2 id="elbow-method">Elbow Method</h2>
+<p>특정 범위의 $k$를 하나씩 대입하며 클러스터 내 제곱합(WSCC)을 구한다. $k$가 커질수록 WCSS는 감소하는데 이 감소율이 급격하게 떨어지는 구간, 즉 Elbow Point의 $k$로 클러스터 개수를 결정한다.</p>
+
+<p><img src="https://github.com/user-attachments/assets/28f30092-dc3f-4f4d-b9d1-3e4655dd57b4" alt="image" class="center-image" width="70%" /></p>
+
+<h3 class="no_toc"> 왜 값이 급격하게 떨어진 직후를 최적의 $k$로 뽑는가? </h3>
+
+<p>$k=1$로 시작할 경우 WCSS는 급격하게 감소하기 마련이다. 하나의 클러스터가 모든 데이터 포인트를 포함한다면 클러스터 내 분산은 매우 클 것이며, 여기에 개수가 하나씩 추가될수록 전반적인 클러스터의 분산합은 빠르게 줄어들 것이다.<br />
+계속해서 클러스터가 추가된다면 WCSS는 계속 감소할 테지만 감소하는 폭은 줄어들 것이다. 데이터 포인트들이 이미 중심점에 충분히 가까워져 있기 때문이다.</p>
+
+<p>$k$가 클수록 모델의 복잡도(Complexity)는 커지는데 그에 비해 WCSS가 크게 감소하지 않는다면, 더이상 유의미하게 클러스터가 컴팩트해지지 않고 모델 성능이 개선되지 않는다는 의미다. 결국 Elbow Point 이후로는 클러스터 개수를 늘려가면서까지 모델의 복잡도를 증가시킬 가치가 없다. 다시 말해 <strong>모델의 복잡도를 감수할 수 있을 정도로 WCSS가 ‘충분히’ 줄어드는 지점</strong>을 Elbow Point로 지정하는 것이다.</p>
+
+<p>한번 더 강조하자면 K-Means 알고리즘의 목적은 단지 WCSS를 최소화하는 것만이 아니라, 충분히 WCSS를 감소시키면서 데이터 포인트를 유의미하게 클러스터링하는 최적의 Trade-off 지점을 찾는 것이다.</p>
+
+<p>참고로 <code class="language-plaintext highlighter-rouge">Scikit-learn</code>과 같은 ML라이브러리에서는 Elbow Method에서 계산하는 WCSS를 <code class="language-plaintext highlighter-rouge">inertia</code>라고 표현한다.</p>
+
+<h2 id="silhouette-score">Silhouette Score</h2>
+<p>Silhouette Score(실루엣 지수)은 어떤 데이터 포인트가 자신이 속한 클러스터에 얼마나 응집되어 있는지(Cohesion), 그리고 자신이 속하지 않은 인근 클러스터로부터 얼마나 떨어져 있는지(Separation) 측정하는 지표다. 주로 K-Means 클러스터링의 결과를 평가할 때 사용하지만 $k$의 개수를 지정하는 데에도 활용할 수 있다.</p>
+
+<p>먼저 주어진 특정 데이터 포인트 $i$에 대해서 두 개의 값을 계산한다.</p>
+<ul>
+  <li><strong>Cohesion(응집도)</strong> : 소속 클러스터의 다른 데이터 포인트들까지의 평균 거리, $a(i)$ 라고 표시한다.</li>
+  <li><strong>Separation(분리도)</strong> : <em>가장 가까운</em> 외부 클러스터의 데이터 포인트들까지의 평균 거리, $b(i)$ 라고 표시한다.</li>
+</ul>
+
+<p>이를 활용하여 Silhouette Score를 계산한다. 지수는 $-1$과 $1$ 사이이며, $1$에 가까울수록 클러스터링 성능이 좋다고 평가한다.</p>
+
+\[s(i) = \frac{b(i) - a(i)}{\max{(a(i), b(i))}}\]
+
+<ul>
+  <li>$1$에 가까울수록, $a(i)$가 $b(i)$에 비해 훨씬 작다는 의미이므로 알맞게 클러스터링 됐다고 평가한다</li>
+  <li>$0$ 주변일수록, 해당 포인트가 두 클러스터의 경계 부분에 놓여 있다고 볼 수 있다</li>
+  <li>$-1$에 가까울수록, $a(i)$가 $b(i)$에 비해 크다는 의미이므로 해당 포인트가 다른 클러스터에 더 가까울 수 있음을 시사한다 (아예 잘못 클러스터링된 경우를 고려할 수 있다)</li>
+</ul>
+
+<h3 class="no_toc"> 활용 </h3>
+<p>Silhouette Score가 각 데이터 포인트에 대해 계산하는 값이기 때문에 이를 활용할 수 있는 방법은 다양하다.</p>
+
+<ul>
+  <li>모든 데이터 포인트에 대해 Silhouette Score를 각각 계산한 다음, 잘 클러스터링된/경계에 있는/잘못 클러스터링된 샘플들을 가려내기</li>
+  <li>Silhouette Score의 평균값을 클러스터별로 집계하고 비교하여 잘못 응집된 클러스터를 다른 클러스터와 합치거나 더 쪼개기</li>
+  <li>Silhouette Score의 전체 평균값을 집계하여 전반적인 클러스터링 성능을 평가하기
+    <ul>
+      <li>이때 클러스터 개수 $k$별로 평균 Silhouette Score을 비교하여 클러스터 개수를 지정할 수 있다<br />
+<br /></li>
+    </ul>
+  </li>
+</ul>
+
+<h1 id="코드">코드</h1>
+
+<h2 id="sklearn-라이브러리-활용">sklearn 라이브러리 활용</h2>
+<p>sklearn.Cluster의 <a href="https://scikit-learn.org/stable/modules/generated/sklearn.cluster.KMeans.html">KMeans 모듈</a>과 sklearn.metrics <a href="https://scikit-learn.org/stable/modules/generated/sklearn.metrics.silhouette_score.html">silhouette_score</a>를 적용할 수 있다.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="n">sklearn.cluster</span> <span class="kn">import</span> <span class="n">KMeans</span>
+<span class="kn">from</span> <span class="n">sklearn.metrics</span> <span class="kn">import</span> <span class="n">silhouette_score</span>
+
+<span class="n">k</span> <span class="o">=</span> <span class="mi">3</span>
+<span class="n">model</span> <span class="o">=</span> <span class="nc">KMeans</span><span class="p">(</span><span class="n">n_clusters</span><span class="o">=</span><span class="n">k</span><span class="p">)</span>
+<span class="n">pred</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="nf">fit_predict</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+
+<span class="c1"># k별로 해당 속성값을 시각화하면 elbow point를 찾을 수 있다
+</span><span class="nf">print</span><span class="p">(</span><span class="n">model</span><span class="p">.</span><span class="n">inertia_</span><span class="p">)</span> 
+
+<span class="c1"># 모든 데이터 포인트의 실루엣 스코어의 평균값을 출력한다
+</span><span class="n">metric</span> <span class="o">=</span> <span class="nf">silhouette_score</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">pred</span><span class="p">)</span>
+<span class="nf">print</span><span class="p">(</span><span class="n">metric</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p><strong>입력 파라미터</strong></p>
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">n_clusters</code> : 클러스터 개수</li>
+  <li><code class="language-plaintext highlighter-rouge">init</code> : 초기화 기법 (디폴트는 <code class="language-plaintext highlighter-rouge">k-means++</code>)</li>
+</ul>
+
+<p><strong>속성</strong></p>
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">cluster_centers_</code> : 각 클러스터 중심점의 좌표</li>
+  <li><code class="language-plaintext highlighter-rouge">inertia_</code> : 클러스터 내 제곱합(WCSS)<br />
+<br /></li>
+</ul>
+
+<h2 id="python-구현-from-scratch">Python 구현 (from scratch)</h2>
+
+<p><strong>거리 함수 (L2 Norm)</strong></p>
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">import</span> <span class="n">numpy</span> <span class="k">as</span> <span class="n">np</span>
+
+<span class="k">def</span> <span class="nf">euclidean</span><span class="p">(</span><span class="n">point</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">np</span><span class="p">.</span><span class="nf">sqrt</span><span class="p">(</span><span class="n">np</span><span class="p">.</span><span class="nf">sum</span><span class="p">((</span><span class="n">point</span> <span class="o">-</span> <span class="n">data</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">))</span>
+</code></pre></div></div>
+
+<p><strong>중심점 초기화 (Kmeans++)</strong></p>
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">import</span> <span class="n">random</span>
+
+<span class="n">k</span> <span class="o">=</span> <span class="mi">3</span>
+<span class="c1"># 최초 클러스터 중심점 1개 추출
+</span><span class="n">centroids</span> <span class="o">=</span> <span class="p">[</span><span class="n">random</span><span class="p">.</span><span class="nf">choice</span><span class="p">(</span><span class="n">X</span><span class="p">)]</span>
+<span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nf">range</span><span class="p">(</span><span class="n">k</span><span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+    <span class="c1"># 더 가까운 클러스터의 중심점까지 거리 계산
+</span>    <span class="n">dists</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="nf">min</span><span class="p">([</span><span class="nf">euclidean</span><span class="p">(</span><span class="n">centroid</span><span class="p">,</span> <span class="n">X</span><span class="p">)</span> <span class="k">for</span> <span class="n">centroid</span> <span class="ow">in</span> <span class="n">centroids</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="n">dists</span> <span class="o">=</span> <span class="n">dists</span><span class="o">**</span><span class="mi">2</span>
+    <span class="n">dists</span> <span class="o">/=</span> <span class="n">np</span><span class="p">.</span><span class="nf">sum</span><span class="p">(</span><span class="n">dists</span><span class="p">)</span>
+
+    <span class="c1"># 거리 기반의 확률로 추출
+</span>    <span class="n">new_centroid_idx</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="n">random</span><span class="p">.</span><span class="nf">choice</span><span class="p">(</span><span class="nf">range</span><span class="p">(</span><span class="nf">len</span><span class="p">(</span><span class="n">X</span><span class="p">)),</span> <span class="n">size</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">p</span><span class="o">=</span><span class="n">dists</span><span class="p">)</span>
+    <span class="n">centroids</span><span class="p">.</span><span class="nf">append</span><span class="p">(</span><span class="n">X</span><span class="p">[</span><span class="n">new_centroid_idx</span><span class="p">[</span><span class="mi">0</span><span class="p">]])</span>
+</code></pre></div></div>
+
+<p><strong>목적함수 최적화 (iteration)</strong></p>
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">max_iter</span> <span class="o">=</span> <span class="mi">100</span>
+<span class="n">n_iter</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="n">prev_centroids</span> <span class="o">=</span> <span class="bp">None</span>
+
+<span class="c1"># 중심점이 하나라도 변경되거나 max_iter 미만일 때 반복
+</span><span class="k">while</span> <span class="n">np</span><span class="p">.</span><span class="nf">not_equal</span><span class="p">(</span><span class="n">centroids</span><span class="p">,</span> <span class="n">prev_centroids</span><span class="p">).</span><span class="nf">any</span><span class="p">()</span> <span class="ow">and</span> <span class="n">n_iter</span> <span class="o">&lt;</span> <span class="n">max_iter</span><span class="p">:</span>
+    <span class="n">sorted_points</span> <span class="o">=</span> <span class="p">[[]</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nf">range</span><span class="p">(</span><span class="n">k</span><span class="p">)]</span>
+
+    <span class="c1"># Assignment : 포인트마다 가장 가까운 클러스터 할당
+</span>    <span class="k">for</span> <span class="n">point</span> <span class="ow">in</span> <span class="n">X</span><span class="p">:</span>
+        <span class="n">dists</span> <span class="o">=</span> <span class="nf">euclidean</span><span class="p">(</span><span class="n">point</span><span class="p">,</span> <span class="n">centroids</span><span class="p">)</span>
+        <span class="n">centroid_idx</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="nf">argmin</span><span class="p">(</span><span class="n">dists</span><span class="p">)</span>
+        <span class="n">sorted_points</span><span class="p">[</span><span class="n">centroid_idx</span><span class="p">].</span><span class="nf">append</span><span class="p">(</span><span class="n">point</span><span class="p">)</span>
+    <span class="n">prev_centroids</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="nf">copy</span><span class="p">(</span><span class="n">centroids</span><span class="p">)</span>
+
+    <span class="c1"># Update : 클러스터별로 평균값 업데이트하기
+</span>    <span class="n">centroids</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">cluster</span> <span class="ow">in</span> <span class="n">sorted_points</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nf">len</span><span class="p">(</span><span class="n">cluster</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">centroid</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="nf">mean</span><span class="p">(</span><span class="n">cluster</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># 클러스터가 비어 있으면 업데이트 전 기존 평균값 사용
+</span>            <span class="n">centroid</span> <span class="o">=</span> <span class="n">prev_centroid</span><span class="p">[</span><span class="nf">len</span><span class="p">(</span><span class="n">centroids</span><span class="p">)]</span>
+        <span class="n">centroids</span><span class="p">.</span><span class="nf">append</span><span class="p">(</span><span class="n">centroid</span><span class="p">)</span>
+
+    <span class="n">n_iter</span> <span class="o">+=</span> <span class="mi">1</span>
+</code></pre></div></div>
+
+<p><strong>실루엣 지수 (Silhouette Score)</strong></p>
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># i번째 데이터 포인트에 대한 점수 계산
+</span>
+<span class="c1"># Cohesion (a(i))
+</span><span class="n">own_cluster</span> <span class="o">=</span> <span class="n">labels</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+<span class="n">own_cluster_points</span> <span class="o">=</span> <span class="n">X</span><span class="p">[</span><span class="n">labels</span> <span class="o">==</span> <span class="n">own_cluster</span><span class="p">]</span>
+<span class="k">if</span> <span class="nf">len</span><span class="p">(</span><span class="n">own_cluster_points</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+    <span class="n">a_i</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="nf">mean</span><span class="p">(</span><span class="nf">euclidean</span><span class="p">(</span><span class="n">point</span><span class="p">,</span> <span class="n">own_cluster_points</span><span class="p">))</span>
+<span class="k">else</span><span class="p">:</span>
+    <span class="n">a_i</span> <span class="o">=</span> <span class="mi">0</span>
+
+<span class="c1"># Separation (b(i))
+</span><span class="n">b_i</span> <span class="o">=</span> <span class="nf">float</span><span class="p">(</span><span class="sh">'</span><span class="s">inf</span><span class="sh">'</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">centroid_idx</span><span class="p">,</span> <span class="n">centroid</span> <span class="ow">in</span> <span class="nf">enumerate</span><span class="p">(</span><span class="n">centroids</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">centroid_idx</span> <span class="o">!=</span> <span class="n">own_cluster</span><span class="p">:</span>
+        <span class="n">other_cluster_points</span> <span class="o">=</span> <span class="n">X</span><span class="p">[</span><span class="n">labels</span> <span class="o">==</span> <span class="n">centroid_idx</span><span class="p">]</span>
+        <span class="k">if</span> <span class="nf">len</span><span class="p">(</span><span class="n">other_cluster_points</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">avg_dist</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="nf">mean</span><span class="p">(</span><span class="nf">euclidean</span><span class="p">(</span><span class="n">point</span><span class="p">,</span> <span class="n">other_cluster_points</span><span class="p">))</span>
+            <span class="n">b_i</span> <span class="o">=</span> <span class="nf">min</span><span class="p">(</span><span class="n">b_i</span><span class="p">,</span> <span class="n">avg_dist</span><span class="p">)</span>
+
+<span class="n">score</span> <span class="o">=</span> <span class="p">(</span><span class="n">b_i</span> <span class="o">-</span> <span class="n">a_i</span><span class="p">)</span> <span class="o">/</span> <span class="nf">max</span><span class="p">(</span><span class="n">a_i</span><span class="p">,</span> <span class="n">b_i</span><span class="p">)</span> <span class="k">if</span> <span class="nf">max</span><span class="p">(</span><span class="n">a_i</span><span class="p">,</span> <span class="n">b_i</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="mi">0</span>
+</code></pre></div></div>
+
+    </section>
+  </div>
+
+  <div class="pagination">
+    
+      <span class="prev" >
+          <a href="https://woocosmos.github.io/blog-history/">
+            &#xE000; Jekyll을 사용한 github.io 블로그 개발기
+          </a>
+      </span>
+    
+    
+      <span class="next" >
+          <a href="https://woocosmos.github.io/basic-statistics/">
+            수학, 통계 개념 모음집 &#xE001;
+          </a>
+      </span>
+    
+  </div>
+
+  <div class="comments">
+	<div id="disqus_thread"></div>
+	<script type="text/javascript">
+
+	    var disqus_shortname = 'woocosmos';
+
+	    (function() {
+	        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+	        dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+			dsq.setAttribute('data-timestamp', +new Date()); //추가
+	        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+	    })();
+
+	</script>
+	<noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+  <script type="text/javascript">
+    "use strict"; 
+    function addBackToTop() 
+        { function o() 
+            { 
+                t() >= z ? R && (D.className = "", R = !1) : R || (D.className = "hidden", R = !0) 
+            } 
+          function t() 
+            { 
+                return E.scrollTop || A && document.documentElement.scrollTop || 0 
+            } 
+          function e(o) 
+            { 
+                E.scrollTop = o, A && (document.documentElement.scrollTop = o) 
+            } 
+    
+    var n, i, d, r, c = arguments.length > 0 && void 0 !== arguments[0] ? arguments[0] : {}, a = c.backgroundColor, s = void 0 === a ? "#000" : a, l = c.cornerOffset, u = void 0 === l ? 20 : l, m = c.diameter, p = void 0 === m ? 56 : m, h = c.ease, b = void 0 === h ? function (o) { return .5 * (1 - Math.cos(Math.PI * o)) } : h, v = c.id, f = void 0 === v ? "back-to-top" : v, x = c.innerHTML, g = void 0 === x ? '<svg viewBox="0 0 24 24"><path d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z"></path></svg>' : x, w = c.onClickScrollTo, y = void 0 === w ? 0 : w, k = c.scrollContainer, E = void 0 === k ? document.body : k, T = c.scrollDuration, C = void 0 === T ? 100 : T, M = c.showWhenScrollTopIs, z = void 0 === M ? 1 : M, L = c.size, B = void 0 === L ? p : L, H = c.textColor, I = void 0 === H ? "#fff" : H, N = c.zIndex, S = void 0 === N ? 1 : N, q = E === document.body, A = q && document.documentElement; n = Math.round(.35 * B), i = Math.round(.2 * B), d = "#" + f + "{background:" + s + ";-webkit-border-radius:50%;-moz-border-radius:50%;border-radius:50%;bottom:" + u + "px;-webkit-box-shadow:0 2px 5px 0 rgba(0,0,0,.26);-moz-box-shadow:0 2px 5px 0 rgba(0,0,0,.26);box-shadow:0 2px 5px 0 rgba(0,0,0,.26);color:" + I + ";cursor:pointer;display:block;height:" + B + "px;opacity:1;outline:0;position:fixed;right:" + u + "px;-webkit-tap-highlight-color:transparent;-webkit-touch-callout:none;-webkit-transition:bottom .2s,opacity .2s;-o-transition:bottom .2s,opacity .2s;-moz-transition:bottom .2s,opacity .2s;transition:bottom .2s,opacity .2s;-webkit-user-select:none;-moz-user-select:none;-ms-user-select:none;user-select:none;width:" + B + "px;z-index:" + S + "}#" + f + " svg{display:block;fill:currentColor;height:" + n + "px;margin:" + i + "px auto 0;width:" + n + "px}#" + f + ".hidden{bottom:-" + B + "px;opacity:0}", (r = document.createElement("style")).appendChild(document.createTextNode(d)), document.head.insertAdjacentElement("afterbegin", r); var D = function () { var o = document.createElement("div"); return o.id = f, o.className = "hidden", o.innerHTML = g, o.addEventListener("click", function (o) { o.preventDefault(), function () { var o = "function" == typeof y ? y() : y, n = window, i = n.performance, d = n.requestAnimationFrame; if (C <= 0 || void 0 === i || void 0 === d) return e(o); var r = i.now(), c = t(), a = c - o; d(function o(t) { var n = Math.min((t - r) / C, 1); e(c - Math.round(b(n) * a)), n < 1 && d(o) }) }() }), document.body.appendChild(o), o }(), R = !0; (q ? window : E).addEventListener("scroll", o), o() } window.addEventListener("load", function () { var o = document.getElementById("back-to-top"), t = document.querySelector(".sticky-bottom"), e = document.querySelector(".fixed-bottom"); o && window.addEventListener("scroll", function () { if (t) { var n = t.getBoundingClientRect(); window.scrollY + window.innerHeight > document.body.scrollHeight - n.height ? (o.style.position = "fixed", o.style.bottom = n.height + 15 + "px") : (o.style.position = "fixed", o.style.bottom = "15px") } if (e) { var i = e.getBoundingClientRect(); o.style.position = "fixed", o.style.bottom = i.height + 15 + "px" } }) });
+</script>
+<script>
+    addBackToTop();
+</script>
+
+
+
+
+</article>
+
+    </div>
+    
+    <div class="wrapper-footer">
+      <div class="container">
+        <footer class="footer">
+          <!-- Refer to https://codepen.io/ruandre/pen/howFi -->
+<ul class="svg-icon">
+
+  
+
+  
+
+  
+  <li><a href="mailto:woocosmos@gmail.com" class="icon-8 email" title="Email"><svg viewBox="0 0 512 512"><path d="M101.3 141.6v228.9h0.3 308.4 0.8V141.6H101.3zM375.7 167.8l-119.7 91.5 -119.6-91.5H375.7zM127.6 194.1l64.1 49.1 -64.1 64.1V194.1zM127.8 344.2l84.9-84.9 43.2 33.1 43-32.9 84.7 84.7L127.8 344.2 127.8 344.2zM384.4 307.8l-64.4-64.4 64.4-49.3V307.8z"/></svg><!--[if lt IE 9]><em>Email</em><![endif]--></a></li>
+  
+
+  
+
+  
+
+  
+  <li><a href="https://github.com/woocosmos" class="icon-13 github" title="GitHub"><svg viewBox="0 0 512 512"><path d="M256 70.7c-102.6 0-185.9 83.2-185.9 185.9 0 82.1 53.3 151.8 127.1 176.4 9.3 1.7 12.3-4 12.3-8.9V389.4c-51.7 11.3-62.5-21.9-62.5-21.9 -8.4-21.5-20.6-27.2-20.6-27.2 -16.9-11.5 1.3-11.3 1.3-11.3 18.7 1.3 28.5 19.2 28.5 19.2 16.6 28.4 43.5 20.2 54.1 15.4 1.7-12 6.5-20.2 11.8-24.9 -41.3-4.7-84.7-20.6-84.7-91.9 0-20.3 7.3-36.9 19.2-49.9 -1.9-4.7-8.3-23.6 1.8-49.2 0 0 15.6-5 51.1 19.1 14.8-4.1 30.7-6.2 46.5-6.3 15.8 0.1 31.7 2.1 46.6 6.3 35.5-24 51.1-19.1 51.1-19.1 10.1 25.6 3.8 44.5 1.8 49.2 11.9 13 19.1 29.6 19.1 49.9 0 71.4-43.5 87.1-84.9 91.7 6.7 5.8 12.8 17.1 12.8 34.4 0 24.9 0 44.9 0 51 0 4.9 3 10.7 12.4 8.9 73.8-24.6 127-94.3 127-176.4C441.9 153.9 358.6 70.7 256 70.7z"/></svg><!--[if lt IE 9]><em>GitHub</em><![endif]--></a></li>
+  
+
+  
+
+  
+
+  
+  <li><a href="https://www.linkedin.com/in/yunsoo-woo-245946213" class="icon-17 linkedin" title="LinkedIn"><svg viewBox="0 0 512 512"><path d="M186.4 142.4c0 19-15.3 34.5-34.2 34.5 -18.9 0-34.2-15.4-34.2-34.5 0-19 15.3-34.5 34.2-34.5C171.1 107.9 186.4 123.4 186.4 142.4zM181.4 201.3h-57.8V388.1h57.8V201.3zM273.8 201.3h-55.4V388.1h55.4c0 0 0-69.3 0-98 0-26.3 12.1-41.9 35.2-41.9 21.3 0 31.5 15 31.5 41.9 0 26.9 0 98 0 98h57.5c0 0 0-68.2 0-118.3 0-50-28.3-74.2-68-74.2 -39.6 0-56.3 30.9-56.3 30.9v-25.2H273.8z"/></svg><!--[if lt IE 9]><em>LinkedIn</em><![endif]--></a></li>
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</ul>
+
+
+<p>© 2026 Yunsoo Woo</p>
+
+        </footer>
+      </div>
+    </div>
+
+    <!--  -->
+
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-1YCJCQRD4F"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-1YCJCQRD4F');
+</script>
+    <script type="text/javascript">
+    "use strict"; 
+    function addBackToTop() 
+        { function o() 
+            { 
+                t() >= z ? R && (D.className = "", R = !1) : R || (D.className = "hidden", R = !0) 
+            } 
+          function t() 
+            { 
+                return E.scrollTop || A && document.documentElement.scrollTop || 0 
+            } 
+          function e(o) 
+            { 
+                E.scrollTop = o, A && (document.documentElement.scrollTop = o) 
+            } 
+    
+    var n, i, d, r, c = arguments.length > 0 && void 0 !== arguments[0] ? arguments[0] : {}, a = c.backgroundColor, s = void 0 === a ? "#000" : a, l = c.cornerOffset, u = void 0 === l ? 20 : l, m = c.diameter, p = void 0 === m ? 56 : m, h = c.ease, b = void 0 === h ? function (o) { return .5 * (1 - Math.cos(Math.PI * o)) } : h, v = c.id, f = void 0 === v ? "back-to-top" : v, x = c.innerHTML, g = void 0 === x ? '<svg viewBox="0 0 24 24"><path d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z"></path></svg>' : x, w = c.onClickScrollTo, y = void 0 === w ? 0 : w, k = c.scrollContainer, E = void 0 === k ? document.body : k, T = c.scrollDuration, C = void 0 === T ? 100 : T, M = c.showWhenScrollTopIs, z = void 0 === M ? 1 : M, L = c.size, B = void 0 === L ? p : L, H = c.textColor, I = void 0 === H ? "#fff" : H, N = c.zIndex, S = void 0 === N ? 1 : N, q = E === document.body, A = q && document.documentElement; n = Math.round(.35 * B), i = Math.round(.2 * B), d = "#" + f + "{background:" + s + ";-webkit-border-radius:50%;-moz-border-radius:50%;border-radius:50%;bottom:" + u + "px;-webkit-box-shadow:0 2px 5px 0 rgba(0,0,0,.26);-moz-box-shadow:0 2px 5px 0 rgba(0,0,0,.26);box-shadow:0 2px 5px 0 rgba(0,0,0,.26);color:" + I + ";cursor:pointer;display:block;height:" + B + "px;opacity:1;outline:0;position:fixed;right:" + u + "px;-webkit-tap-highlight-color:transparent;-webkit-touch-callout:none;-webkit-transition:bottom .2s,opacity .2s;-o-transition:bottom .2s,opacity .2s;-moz-transition:bottom .2s,opacity .2s;transition:bottom .2s,opacity .2s;-webkit-user-select:none;-moz-user-select:none;-ms-user-select:none;user-select:none;width:" + B + "px;z-index:" + S + "}#" + f + " svg{display:block;fill:currentColor;height:" + n + "px;margin:" + i + "px auto 0;width:" + n + "px}#" + f + ".hidden{bottom:-" + B + "px;opacity:0}", (r = document.createElement("style")).appendChild(document.createTextNode(d)), document.head.insertAdjacentElement("afterbegin", r); var D = function () { var o = document.createElement("div"); return o.id = f, o.className = "hidden", o.innerHTML = g, o.addEventListener("click", function (o) { o.preventDefault(), function () { var o = "function" == typeof y ? y() : y, n = window, i = n.performance, d = n.requestAnimationFrame; if (C <= 0 || void 0 === i || void 0 === d) return e(o); var r = i.now(), c = t(), a = c - o; d(function o(t) { var n = Math.min((t - r) / C, 1); e(c - Math.round(b(n) * a)), n < 1 && d(o) }) }() }), document.body.appendChild(o), o }(), R = !0; (q ? window : E).addEventListener("scroll", o), o() } window.addEventListener("load", function () { var o = document.getElementById("back-to-top"), t = document.querySelector(".sticky-bottom"), e = document.querySelector(".fixed-bottom"); o && window.addEventListener("scroll", function () { if (t) { var n = t.getBoundingClientRect(); window.scrollY + window.innerHeight > document.body.scrollHeight - n.height ? (o.style.position = "fixed", o.style.bottom = n.height + 15 + "px") : (o.style.position = "fixed", o.style.bottom = "15px") } if (e) { var i = e.getBoundingClientRect(); o.style.position = "fixed", o.style.bottom = i.height + 15 + "px" } }) });
+</script>
+<script>
+    addBackToTop();
+</script>
+
+
+
+
+
+  </body>
+</html>

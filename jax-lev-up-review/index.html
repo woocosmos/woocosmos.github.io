@@ -1,0 +1,925 @@
+<!DOCTYPE html>
+<html>
+  <head>
+  <title>📖 『JAX/Flax로 딥러닝 레벨업』(제이펍) 리뷰 – YunsooLog – 행간을 읽는 기계학습 이야기</title>
+  <link rel="icon" href="/images/favicon.ico">
+      <meta name="google-site-verification" content="NA4jg1Iffw6aA9VWjj3kqoo2jfOkPRxINJtYphd7VeI" />
+    <meta charset="utf-8" />
+    <meta content='text/html; charset=utf-8' http-equiv='Content-Type'>
+    <meta http-equiv='X-UA-Compatible' content='IE=edge'>
+    <meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1.0'>
+    <meta http-equiv="Permissions-Policy" content="interest-cohort=()">
+    
+    
+    <meta name="description" content="
+
+
+IT 실용서 전문 출판사 제이펍으로부터 책 『JAX/Flax로 딥러닝 레벨업』를 무료로 제공 받았다.
+
+개요
+
+
+  도서명
+  JAX/Flax로 딥러닝 레벨업
+  지은이
+  이영빈 , 유현아 , 김한빈 , 조영빈 , 이태호 , 장진우 , 박정현 , 김형섭 , 이승현
+  발행사
+  제이펍
+  초판 발행
+  2024년 9월 23일
+  정가
+  24,000원
+
+
+
+
+베타리더 후기에 따르면 『JAX/Flax로 딥러닝 레벨업』은 무려 국내 최초 JAX 입문서라고 한다. 최근 성장하고 있는 JAX 생태계의 활성화에 기여하는 의미가 있겠다.
+
+개인적으로 JAX는 ‘고성능 딥러닝 연산이 가능한 numpy’ 정도로 알고 있는 상태였고 직접 활용해본 적은 없었다. 이번 책 리뷰를 계기로 Numpy와의 차이점과 JAX/Flax의 주요 특징을 이해하고 실제 튜토리얼을 따라가는 경험을 쌓으려 한다.
+
+책은 크게 JAX/Flax를 소개하는 부분과 JAX/Flax를 활용하여 딥러닝 모델을 구현하는 부분으로 이뤄져 있다. 파이썬 프로그래밍과 기본적인 머신러닝 개념은 책을 읽기 위한 선수 지식으로 요구된다.
+
+Jax란?
+
+
+  한마디로 표현하면 자동 미분과 XLA를 결합해서 사용하는 고성능 머신러닝 프레임워크입니다 … JAX의 가장 큰 강점은 XLA를 적용해서 사용할 수 있다는 점입니다.
+
+
+PyTorch, Tensorflow 등 다른 딥러닝 프레임워크도 자동 미분을 지원하지만, JAX는 이에 더해 XLA(Accelerated Linear Algebra)이 가능하다는 것이 핵심이다. XLA는 GPU/TPU 위에서 numpy를 컴파일하고 실행하는 컴파일러다. JAX는 JIT(Just-In-Time) 컴파일을 통해 파이썬 코드를 XLA에 최적화된 기계어로 변환하기 때문에 PyTorch의 동적 그래프보다도 빠르고 효율적으로 연산할 수 있다는 것이다.
+
+파이썬은 기본적으로 인터프리터 방식으로 실행되기 때문에 코드를 한 줄씩 읽고 해석하는 데 시간이 소요된다. 여기서 JIT 컴파일을 사용한다면 코드를 실행하는 시점에 성능과 연관되는 일부분을 미리 기계어로 컴파일하여 속도가 빨라진다고 이해했다.
+
+Flax
+
+
+  JAX + Flexibility를 합쳐져서 만들었으며 엔지니어들이 JAX를 조금 더 쉽게 사용할 수 있는 프레임워크이며, 다른 딥러닝 프레임워크들처럼 레이어(층) 개념을 지원합니다.
+
+
+여기까지 읽었을 때 Tensorflow &amp; Keras 와 유사한 개념(관계)이 아닌가 싶었는데, JAX/Flax는 Low-level의 섬세한 컨트롤이 가능하다는 점에 방점이 찍혀 있는 것 같다. 그와 달리 Keras는 높은 수준의 추상화가 이루어져 있고 사용자 친화적이다. 똑같이 구글에서 개발한 프레임워크지만 지향하는 철학이 다르다는 점이 재밌다.
+
+책에 따르면 구글에서 개발한 모델들은 대부분 JAX로 작성되어 있고, 심지어 Hugging Face의 기존 모델들도 JAX로 변환하고 있다고 한다.
+
+함수형 프로그래밍
+
+JAX/Flax의 활용 방식을 더 잘 파악할 수 있도록 책은 함수형 프로그래밍에 대해서 별도 챕터로 설명한다. 명령어의 흐름(순서)대로 상태를 변경하고 결과를 전달하는 것이 핵심인 절차적 프로그래밍과 다르게, 함수형 프로그래밍은 외부 상태와 상관없이 주어진 입력에 동일한 출력값을 내놓는 순수 함수를 사용한다. 따라서 부수 효과가 제거되며 상태가 변화하지 않는 불변성을 강조한다. 여기서 절차적 프로그래밍과 함수형 프로그래밍을 설명할 때 간단한 파이썬 예제가 첨부되어 있어서 이해가 편했다.
+
+JAX, 나아가 딥러닝 연산에 있어서 이 개념을 이해하는 것이 중요한 이유를 세 가지로 제시하고 있다.
+
+
+  XLA 컴파일에 최적화된 처리가 가능해진다
+  병렬처리와 분산처리에 유용하다
+  코드를 모듈화함으로써 재사용성이 높아진다
+
+
+JAX 기본
+
+백문이 불여일견, 직접 JAX 를 활용해보며 책의 내용을 따라가보겠다.
+
+설치
+
+다행히도 JAX가 Mac M1을 공식 지원한다고 하여 conda로 쉽게 설치할 수 있었다.
+
+conda create -n jax-env python=3.9
+conda activate jax-env
+pip install jax jaxlib
+
+
+import 하기
+
+import jax
+import jax.numpy as jnp
+
+
+numpy와 비교
+
+x1 = jnp.array([1.0, 2.0, 3.0])
+x2 = jnp.array([4.0, 5.0, 6.0])
+y = x1 + x2
+print(y)        # [5. 7. 9.]
+print(type(y))  # &lt;class 'jaxlib.xla_extension.ArrayImpl'&gt;
+
+
+위 예제에서 보듯 jax.numpy는 기존 numpy 와 거의 똑같은 API를 제공하고 있다.
+
+grad 함수
+
+def func(x):
+    return x**2
+
+grad = jax.grad(func)
+print(grad(3.))    # Array(6., dtype=float32, weak_type=True)
+
+
+JAX에서 미분, 즉 gradient를 계산해주는 grad를 사용한 예제다.
+
+부수 효과의 방지
+
+JAX는 부수 효과를 제거하는 함수형 프로그래밍의 제약을 따르고 있다. 책에서 제공해준 아래 예제를 참고해보자.
+
+x_1 = np.array([1, 2, 3])
+x_1[0] = 999
+print(x_1)      # [999   2   3]
+
+
+numpy로 생성한 배열은 직접 접근해서 요소를 변경할 수 있다.
+
+x_2 = jnp.array([1, 2, 3])
+x_2[0] = 999
+# TypeError: '&lt;class 'jaxlib.xla_extension.ArrayImpl'&gt;' object does not support item assignment. JAX arrays are immutable.
+
+
+반면 jax.numpy로 생성한 배열은 직접적인 수정을 허용하지 않는다. 이는 ‘외부 데이터’인 배열의 상태가 변형되면서 부수 효과가 발생하는 것을 방지하기 위함이다.
+만약 배열의 일부를 수정하는 작업을 진행하고 싶다면 부수 효과가 없는 순수 함수를 사용해야 한다.
+
+x_2 = jnp.array([1, 2, 3])
+def modify(x):
+    return x.at[0].set(999)
+y = modify(x_2)
+print(y)    # Array([999,   2,   3], dtype=int32)
+
+
+여기서 modify(x)는 부수 효과가 없는 순수 함수라고 볼 수 있는 것이며, 책은 jax.grad와 jax.jit 같은 함수는 순수 함수로 작성되어야 한다고 설명하고 있다.
+
+JIT 컴파일
+
+
+  변환
+  주어진 함수를 변경하거나 수정하는 방식. 성능 최적화나 자동 미분을 가능하게 함.
+
+
+책은 JAX에서 변환(transformation)이라는 키워드가 중요하다고 말한다. JAX에서 변환은 jaxpr, 즉 JAX 표현식이라는 중간 언어(intermediate language)를 통해 이루어진다. jax.jit가 대표적인 jax 변환이라고 소개된다.
+
+def selu(x, alpha=1.67, lamdba_=1.05):
+    return lamdba_ * jnp.where(x &gt; 0, x, alpha * jnp.exp(x) - alpha)
+x = jnp.arange(1000000)
+
+# 일반
+selu(x).block_until_ready()
+
+# XLA
+selu_jit = jax.jit(selu)
+selu_jit(x).block_until_ready() # 비동기 실행
+
+
+위 내용은 활성화 함수 SELU(Scaled Exponential Linear Unit)를 구현하고 호출한 내용이다.
+
+
+
+selu(x) 대신에 jit 변환을 적용한 selu_jit(x)가 7배 빠르다고 설명하고 있다. (구글 Colab T4 기준)
+
+책을 읽으면서 흥미로웠던 부분은 jax.jit은 컴파일된 계산 그래프를 캐싱하여 재사용한다는 점이었다. 다만 jax.jit을 반복문 내부에서 호출할 경우 컴파일 과정이 불필요하게 반복될 수 있으니 지양하라고 안내하고 있다.
+
+Flax
+
+마지막으로 Flax 를 활용한 예제를 살펴보겠다.
+
+import flax.linen as nn
+from jax import random
+
+key = random.PRNGKey(42)
+
+class MLP(nn.Module):
+    out_dims: int
+    
+    @nn.compact
+    def __call__(self, x):
+        x = x.reshape((x.shape[0], -1))
+        x = nn.Dense(128)(x)
+        x = nn.relu(x)
+        x = nn.Dense(self.out_dims)(x)
+        return x
+
+model = MLP(out_dims=10)
+x = jnp.empty((4, 28, 28, 1))
+
+weights = model.init(key, x)
+y = model.apply(weights, x)
+
+
+책에 import 하는 부분은 없어서 추가했다
+nn.Module 에서 상속받아 모델을 생성한다는 점에서 PyTorch 와 유사한 방식의 API 라고 느껴졌고 금방 적응할 수 있겠다는 생각이 든다.
+
+
+
+나가며
+
+『JAX/Flax로 딥러닝 레벨업』에서 JAX 핵심 개념을 위주로 살펴보며 책을 리뷰해보았다. 요즘 시점에서 왜 굳이 새로운 딥러닝 프레임워크가 필요할까? 라고 막연히 궁금해 하며 리뷰어 신청을 했는데, 좋은 기회로 책도 제공 받고 JAX와 Flax에 대해 가볍게 배워볼 수 있는 시간이었다.
+
+JAX가 지향하는 철학과 함께 그것이 녹아든 핵심 기능을 세세하게 설명해주기 때문에 JAX 입문서로 아주 알맞은 도서라는 생각이 들었다. 특히 함수형 프로그래밍 개념만을 설명하기 위해 별도 지면을 할애했다는 점에서는 JAX의 의미를 제대로 전달하겠다는 강한 의지도 보였다.
+
+아마 JAX로 입문하기까지 가장 큰 장벽은 앞서 내가 떠올린 것과 같이 “왜 꼭 이것이어야 하는가?” 라는 의문일 텐데, 이 책을 읽는다면 그 장벽 정도는 충분히 넘을 수 있겠다. numpy 하나로 모델을 구현하는 정도로 low-level에서 모델링과 학습 과정 등을 유연하게 통제할 수 있다는 점이 JAX/Flax의 가장 강력한 정체성이라고 느꼈다. 구글 TPU를 사용하는 ML엔지니어라면 시간을 들여서라도 JAX를 적용할 가치가 있을 듯하다.
+
+그 외에 CLIP, GPT 같은 최신 모델의 fine-tuning 을 예제로 다룬 점도 인상적이었다. ML 분야에 입문한 이후로 출판서를 활용해서 공부를 하는 건 정말 오랜만인데, 역시 최신 책이니 최신 모델도 다루는구나 - 싶었다.
+
+다만 책 서문에서 이미 밝혔다시피 딥러닝 개념과 프레임워크에 대한 기본적인 지식이 있어야 책의 내용을 제대로 이해할 수 있다는 점은 염두에 둘 필요가 있겠다. 확실히 ‘초급서’라기보단 ‘입문서’로 보는 게 맞다. 또한 워낙에 고급 프레임워크다보니까 JAX/Flax 자체가 서비스(서빙)보다는 연구에 적합한 도구라는 생각이 들었다. 책 읽기 전과 비슷하게 이것이 이것이 필요할까? 라는 질문은 여전히 깔끔하게 해명되진 않았지만, 책을 읽고 나서 언젠가 JAX를 써보고 싶다는 욕심은 보다 뚜렷해졌다.
+
+리뷰어로 선정하여 도서를 제공해준 출판사 제이펍에 진심으로 감사하다는 말씀을 표하며 본 리뷰를 마무리하겠다.
+" />
+    <meta property="og:description" content="
+
+
+IT 실용서 전문 출판사 제이펍으로부터 책 『JAX/Flax로 딥러닝 레벨업』를 무료로 제공 받았다.
+
+개요
+
+
+  도서명
+  JAX/Flax로 딥러닝 레벨업
+  지은이
+  이영빈 , 유현아 , 김한빈 , 조영빈 , 이태호 , 장진우 , 박정현 , 김형섭 , 이승현
+  발행사
+  제이펍
+  초판 발행
+  2024년 9월 23일
+  정가
+  24,000원
+
+
+
+
+베타리더 후기에 따르면 『JAX/Flax로 딥러닝 레벨업』은 무려 국내 최초 JAX 입문서라고 한다. 최근 성장하고 있는 JAX 생태계의 활성화에 기여하는 의미가 있겠다.
+
+개인적으로 JAX는 ‘고성능 딥러닝 연산이 가능한 numpy’ 정도로 알고 있는 상태였고 직접 활용해본 적은 없었다. 이번 책 리뷰를 계기로 Numpy와의 차이점과 JAX/Flax의 주요 특징을 이해하고 실제 튜토리얼을 따라가는 경험을 쌓으려 한다.
+
+책은 크게 JAX/Flax를 소개하는 부분과 JAX/Flax를 활용하여 딥러닝 모델을 구현하는 부분으로 이뤄져 있다. 파이썬 프로그래밍과 기본적인 머신러닝 개념은 책을 읽기 위한 선수 지식으로 요구된다.
+
+Jax란?
+
+
+  한마디로 표현하면 자동 미분과 XLA를 결합해서 사용하는 고성능 머신러닝 프레임워크입니다 … JAX의 가장 큰 강점은 XLA를 적용해서 사용할 수 있다는 점입니다.
+
+
+PyTorch, Tensorflow 등 다른 딥러닝 프레임워크도 자동 미분을 지원하지만, JAX는 이에 더해 XLA(Accelerated Linear Algebra)이 가능하다는 것이 핵심이다. XLA는 GPU/TPU 위에서 numpy를 컴파일하고 실행하는 컴파일러다. JAX는 JIT(Just-In-Time) 컴파일을 통해 파이썬 코드를 XLA에 최적화된 기계어로 변환하기 때문에 PyTorch의 동적 그래프보다도 빠르고 효율적으로 연산할 수 있다는 것이다.
+
+파이썬은 기본적으로 인터프리터 방식으로 실행되기 때문에 코드를 한 줄씩 읽고 해석하는 데 시간이 소요된다. 여기서 JIT 컴파일을 사용한다면 코드를 실행하는 시점에 성능과 연관되는 일부분을 미리 기계어로 컴파일하여 속도가 빨라진다고 이해했다.
+
+Flax
+
+
+  JAX + Flexibility를 합쳐져서 만들었으며 엔지니어들이 JAX를 조금 더 쉽게 사용할 수 있는 프레임워크이며, 다른 딥러닝 프레임워크들처럼 레이어(층) 개념을 지원합니다.
+
+
+여기까지 읽었을 때 Tensorflow &amp; Keras 와 유사한 개념(관계)이 아닌가 싶었는데, JAX/Flax는 Low-level의 섬세한 컨트롤이 가능하다는 점에 방점이 찍혀 있는 것 같다. 그와 달리 Keras는 높은 수준의 추상화가 이루어져 있고 사용자 친화적이다. 똑같이 구글에서 개발한 프레임워크지만 지향하는 철학이 다르다는 점이 재밌다.
+
+책에 따르면 구글에서 개발한 모델들은 대부분 JAX로 작성되어 있고, 심지어 Hugging Face의 기존 모델들도 JAX로 변환하고 있다고 한다.
+
+함수형 프로그래밍
+
+JAX/Flax의 활용 방식을 더 잘 파악할 수 있도록 책은 함수형 프로그래밍에 대해서 별도 챕터로 설명한다. 명령어의 흐름(순서)대로 상태를 변경하고 결과를 전달하는 것이 핵심인 절차적 프로그래밍과 다르게, 함수형 프로그래밍은 외부 상태와 상관없이 주어진 입력에 동일한 출력값을 내놓는 순수 함수를 사용한다. 따라서 부수 효과가 제거되며 상태가 변화하지 않는 불변성을 강조한다. 여기서 절차적 프로그래밍과 함수형 프로그래밍을 설명할 때 간단한 파이썬 예제가 첨부되어 있어서 이해가 편했다.
+
+JAX, 나아가 딥러닝 연산에 있어서 이 개념을 이해하는 것이 중요한 이유를 세 가지로 제시하고 있다.
+
+
+  XLA 컴파일에 최적화된 처리가 가능해진다
+  병렬처리와 분산처리에 유용하다
+  코드를 모듈화함으로써 재사용성이 높아진다
+
+
+JAX 기본
+
+백문이 불여일견, 직접 JAX 를 활용해보며 책의 내용을 따라가보겠다.
+
+설치
+
+다행히도 JAX가 Mac M1을 공식 지원한다고 하여 conda로 쉽게 설치할 수 있었다.
+
+conda create -n jax-env python=3.9
+conda activate jax-env
+pip install jax jaxlib
+
+
+import 하기
+
+import jax
+import jax.numpy as jnp
+
+
+numpy와 비교
+
+x1 = jnp.array([1.0, 2.0, 3.0])
+x2 = jnp.array([4.0, 5.0, 6.0])
+y = x1 + x2
+print(y)        # [5. 7. 9.]
+print(type(y))  # &lt;class 'jaxlib.xla_extension.ArrayImpl'&gt;
+
+
+위 예제에서 보듯 jax.numpy는 기존 numpy 와 거의 똑같은 API를 제공하고 있다.
+
+grad 함수
+
+def func(x):
+    return x**2
+
+grad = jax.grad(func)
+print(grad(3.))    # Array(6., dtype=float32, weak_type=True)
+
+
+JAX에서 미분, 즉 gradient를 계산해주는 grad를 사용한 예제다.
+
+부수 효과의 방지
+
+JAX는 부수 효과를 제거하는 함수형 프로그래밍의 제약을 따르고 있다. 책에서 제공해준 아래 예제를 참고해보자.
+
+x_1 = np.array([1, 2, 3])
+x_1[0] = 999
+print(x_1)      # [999   2   3]
+
+
+numpy로 생성한 배열은 직접 접근해서 요소를 변경할 수 있다.
+
+x_2 = jnp.array([1, 2, 3])
+x_2[0] = 999
+# TypeError: '&lt;class 'jaxlib.xla_extension.ArrayImpl'&gt;' object does not support item assignment. JAX arrays are immutable.
+
+
+반면 jax.numpy로 생성한 배열은 직접적인 수정을 허용하지 않는다. 이는 ‘외부 데이터’인 배열의 상태가 변형되면서 부수 효과가 발생하는 것을 방지하기 위함이다.
+만약 배열의 일부를 수정하는 작업을 진행하고 싶다면 부수 효과가 없는 순수 함수를 사용해야 한다.
+
+x_2 = jnp.array([1, 2, 3])
+def modify(x):
+    return x.at[0].set(999)
+y = modify(x_2)
+print(y)    # Array([999,   2,   3], dtype=int32)
+
+
+여기서 modify(x)는 부수 효과가 없는 순수 함수라고 볼 수 있는 것이며, 책은 jax.grad와 jax.jit 같은 함수는 순수 함수로 작성되어야 한다고 설명하고 있다.
+
+JIT 컴파일
+
+
+  변환
+  주어진 함수를 변경하거나 수정하는 방식. 성능 최적화나 자동 미분을 가능하게 함.
+
+
+책은 JAX에서 변환(transformation)이라는 키워드가 중요하다고 말한다. JAX에서 변환은 jaxpr, 즉 JAX 표현식이라는 중간 언어(intermediate language)를 통해 이루어진다. jax.jit가 대표적인 jax 변환이라고 소개된다.
+
+def selu(x, alpha=1.67, lamdba_=1.05):
+    return lamdba_ * jnp.where(x &gt; 0, x, alpha * jnp.exp(x) - alpha)
+x = jnp.arange(1000000)
+
+# 일반
+selu(x).block_until_ready()
+
+# XLA
+selu_jit = jax.jit(selu)
+selu_jit(x).block_until_ready() # 비동기 실행
+
+
+위 내용은 활성화 함수 SELU(Scaled Exponential Linear Unit)를 구현하고 호출한 내용이다.
+
+
+
+selu(x) 대신에 jit 변환을 적용한 selu_jit(x)가 7배 빠르다고 설명하고 있다. (구글 Colab T4 기준)
+
+책을 읽으면서 흥미로웠던 부분은 jax.jit은 컴파일된 계산 그래프를 캐싱하여 재사용한다는 점이었다. 다만 jax.jit을 반복문 내부에서 호출할 경우 컴파일 과정이 불필요하게 반복될 수 있으니 지양하라고 안내하고 있다.
+
+Flax
+
+마지막으로 Flax 를 활용한 예제를 살펴보겠다.
+
+import flax.linen as nn
+from jax import random
+
+key = random.PRNGKey(42)
+
+class MLP(nn.Module):
+    out_dims: int
+    
+    @nn.compact
+    def __call__(self, x):
+        x = x.reshape((x.shape[0], -1))
+        x = nn.Dense(128)(x)
+        x = nn.relu(x)
+        x = nn.Dense(self.out_dims)(x)
+        return x
+
+model = MLP(out_dims=10)
+x = jnp.empty((4, 28, 28, 1))
+
+weights = model.init(key, x)
+y = model.apply(weights, x)
+
+
+책에 import 하는 부분은 없어서 추가했다
+nn.Module 에서 상속받아 모델을 생성한다는 점에서 PyTorch 와 유사한 방식의 API 라고 느껴졌고 금방 적응할 수 있겠다는 생각이 든다.
+
+
+
+나가며
+
+『JAX/Flax로 딥러닝 레벨업』에서 JAX 핵심 개념을 위주로 살펴보며 책을 리뷰해보았다. 요즘 시점에서 왜 굳이 새로운 딥러닝 프레임워크가 필요할까? 라고 막연히 궁금해 하며 리뷰어 신청을 했는데, 좋은 기회로 책도 제공 받고 JAX와 Flax에 대해 가볍게 배워볼 수 있는 시간이었다.
+
+JAX가 지향하는 철학과 함께 그것이 녹아든 핵심 기능을 세세하게 설명해주기 때문에 JAX 입문서로 아주 알맞은 도서라는 생각이 들었다. 특히 함수형 프로그래밍 개념만을 설명하기 위해 별도 지면을 할애했다는 점에서는 JAX의 의미를 제대로 전달하겠다는 강한 의지도 보였다.
+
+아마 JAX로 입문하기까지 가장 큰 장벽은 앞서 내가 떠올린 것과 같이 “왜 꼭 이것이어야 하는가?” 라는 의문일 텐데, 이 책을 읽는다면 그 장벽 정도는 충분히 넘을 수 있겠다. numpy 하나로 모델을 구현하는 정도로 low-level에서 모델링과 학습 과정 등을 유연하게 통제할 수 있다는 점이 JAX/Flax의 가장 강력한 정체성이라고 느꼈다. 구글 TPU를 사용하는 ML엔지니어라면 시간을 들여서라도 JAX를 적용할 가치가 있을 듯하다.
+
+그 외에 CLIP, GPT 같은 최신 모델의 fine-tuning 을 예제로 다룬 점도 인상적이었다. ML 분야에 입문한 이후로 출판서를 활용해서 공부를 하는 건 정말 오랜만인데, 역시 최신 책이니 최신 모델도 다루는구나 - 싶었다.
+
+다만 책 서문에서 이미 밝혔다시피 딥러닝 개념과 프레임워크에 대한 기본적인 지식이 있어야 책의 내용을 제대로 이해할 수 있다는 점은 염두에 둘 필요가 있겠다. 확실히 ‘초급서’라기보단 ‘입문서’로 보는 게 맞다. 또한 워낙에 고급 프레임워크다보니까 JAX/Flax 자체가 서비스(서빙)보다는 연구에 적합한 도구라는 생각이 들었다. 책 읽기 전과 비슷하게 이것이 이것이 필요할까? 라는 질문은 여전히 깔끔하게 해명되진 않았지만, 책을 읽고 나서 언젠가 JAX를 써보고 싶다는 욕심은 보다 뚜렷해졌다.
+
+리뷰어로 선정하여 도서를 제공해준 출판사 제이펍에 진심으로 감사하다는 말씀을 표하며 본 리뷰를 마무리하겠다.
+" />
+    
+    <meta name="author" content="YunsooLog" />
+
+    
+    <meta property="og:title" content="📖 『JAX/Flax로 딥러닝 레벨업』(제이펍) 리뷰" />
+    <meta property="twitter:title" content="📖 『JAX/Flax로 딥러닝 레벨업』(제이펍) 리뷰" />
+    
+  <!-- Async font loading -->
+<script>
+  window.WebFontConfig = {
+      custom: {
+          families: ['Spoqa Han Sans:100,300,400,700'],
+          urls: ['https://spoqa.github.io/spoqa-han-sans/css/SpoqaHanSans-kr.css']
+      },
+      timeout: 60000
+  };
+  (function(d) {
+      var wf = d.createElement('script'), s = d.scripts[0];
+      wf.src = 'https://ajax.googleapis.com/ajax/libs/webfont/1.5.18/webfont.js';
+      s.parentNode.insertBefore(wf, s);
+  })(document);
+</script>
+
+  <!--[if lt IE 9]>
+    <script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+  <![endif]-->
+
+  <link rel="stylesheet" type="text/css" href="/style.css" />
+  <link rel="alternate" type="application/rss+xml" title="YunsooLog - 행간을 읽는 기계학습 이야기" href="/feed.xml" />
+  <script>
+    document.cookie = "promo_shown=1; SameSite=Lax; path=/";
+  </script>
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.13.11/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.13.11/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.13.11/dist/contrib/auto-render.min.js"
+          onload="renderMathInElement(document.body, {
+            delimiters: [
+              {left: '\\[', right: '\\]', display: true},
+              {left: '$$', right: '$$', display: true},
+              {left: '$', right: '$', display: false},
+            ]
+          });">
+  </script>
+
+  <!-- Created with Jekyll Now - http://github.com/barryclark/jekyll-now -->
+</head>
+  <body>
+    <div class="wrapper-masthead">
+  <div class="container">
+    <header class="masthead clearfix">
+      <a href="/" class="site-avatar"><img src="/images/avatar.png"/></a>
+      
+      <div class="site-info">
+        <h1 class="site-name"><a href="/">YunsooLog</a></h1>
+        <p class="site-description">행간을 읽는 기계학습 이야기</p>
+      </div>
+
+      <nav>
+        
+        
+        <a href="/about">About</a>
+        
+        
+        
+        <a href="/">Blog</a>
+        
+        
+        
+        <a href="/tags">Tags</a>
+        
+        
+        
+        <a href="/timeline">Timeline</a>
+        
+        
+        
+        <ul class="search-icon">
+          <a href="/search">
+          <svg 
+            width="24" 
+            height="24" 
+            viewBox="0 0 24 24" 
+            fill="none" 
+            xmlns="http://www.w3.org/2000/svg">
+            <path d="M10 2C5.58172 2 2 5.58172 2 10C2 14.4183 5.58172 18 10 18C11.8485 18 13.5451 17.3376 14.8458 16.2416L19.7071 21.1029C20.0976 21.4934 20.7308 21.4934 21.1213 21.1029C21.5118 20.7124 21.5118 20.0792 21.1213 19.6887L16.2416 14.809C17.3376 13.5083 18 11.8116 18 10C18 5.58172 14.4183 2 10 2ZM4 10C4 6.68629 6.68629 4 10 4C13.3137 4 16 6.68629 16 10C16 13.3137 13.3137 16 10 16C6.68629 16 4 13.3137 4 10Z" 
+            fill="currentColor"></path>
+          </svg>
+          </a>
+        </ul>
+
+      </nav>
+    </header>
+  </div>
+</div>
+
+    <div id="main" role="main" class="container">
+      <article class="post">
+  <div class="inner-wrap">
+    <h1>📖 『JAX/Flax로 딥러닝 레벨업』(제이펍) 리뷰</h1>
+
+    <div>
+      <span class="date">
+        2024-10-13
+      </span>
+
+      <ul class="tag">
+        
+        <li>
+          <a href="https://woocosmos.github.io/tags#리뷰">
+            리뷰
+          </a>
+        </li>
+        
+      </ul>
+    </div>
+
+    <section class="entry">
+      
+      <aside>
+        <nav class="nav-toc">
+          <h3> 목차 </h3>
+          <ul id="toc" class="section-nav">
+<li class="toc-entry toc-h1"><a href="#개요">개요</a></li>
+<li class="toc-entry toc-h1"><a href="#jax란">Jax란?</a>
+<ul>
+<li class="toc-entry toc-h2"><a href="#flax">Flax</a></li>
+<li class="toc-entry toc-h2"><a href="#함수형-프로그래밍">함수형 프로그래밍</a></li>
+</ul>
+</li>
+<li class="toc-entry toc-h1"><a href="#jax-기본">JAX 기본</a>
+<ul>
+<li class="toc-entry toc-h2"><a href="#설치">설치</a></li>
+<li class="toc-entry toc-h2"><a href="#numpy와-비교">numpy와 비교</a></li>
+<li class="toc-entry toc-h2"><a href="#grad-함수">grad 함수</a></li>
+<li class="toc-entry toc-h2"><a href="#부수-효과의-방지">부수 효과의 방지</a></li>
+<li class="toc-entry toc-h2"><a href="#jit-컴파일">JIT 컴파일</a></li>
+</ul>
+</li>
+<li class="toc-entry toc-h1"><a href="#flax-1">Flax</a></li>
+<li class="toc-entry toc-h1"><a href="#나가며">나가며</a></li>
+</ul>
+        </nav>
+      </aside>
+      <script src="/assets/scroll-spy.js" type="text/javascript"></script>
+      
+      <p><img src="https://github.com/user-attachments/assets/76f397ea-6ed8-404c-99bc-e8c43ca4c04d" alt="IMG_4524" class="center-image" /></p>
+
+<p><br />
+IT 실용서 전문 출판사 제이펍으로부터 책 『<a href="https://product.kyobobook.co.kr/detail/S000214172972"><strong>JAX/Flax로 딥러닝 레벨업</strong></a>』를 무료로 제공 받았다.</p>
+
+<h1 id="개요">개요</h1>
+
+<dl>
+  <dt>도서명</dt>
+  <dd>JAX/Flax로 딥러닝 레벨업</dd>
+  <dt>지은이</dt>
+  <dd>이영빈 , 유현아 , 김한빈 , 조영빈 , 이태호 , 장진우 , 박정현 , 김형섭 , 이승현</dd>
+  <dt>발행사</dt>
+  <dd>제이펍</dd>
+  <dt>초판 발행</dt>
+  <dd>2024년 9월 23일</dd>
+  <dt>정가</dt>
+  <dd>24,000원</dd>
+</dl>
+
+<hr />
+
+<p>베타리더 후기에 따르면 『JAX/Flax로 딥러닝 레벨업』은 무려 국내 최초 JAX 입문서라고 한다. 최근 성장하고 있는 JAX 생태계의 활성화에 기여하는 의미가 있겠다.</p>
+
+<p>개인적으로 JAX는 ‘고성능 딥러닝 연산이 가능한 numpy’ 정도로 알고 있는 상태였고 직접 활용해본 적은 없었다. 이번 책 리뷰를 계기로 Numpy와의 차이점과 JAX/Flax의 주요 특징을 이해하고 실제 튜토리얼을 따라가는 경험을 쌓으려 한다.</p>
+
+<p>책은 크게 JAX/Flax를 소개하는 부분과 JAX/Flax를 활용하여 딥러닝 모델을 구현하는 부분으로 이뤄져 있다. 파이썬 프로그래밍과 기본적인 머신러닝 개념은 책을 읽기 위한 선수 지식으로 요구된다.</p>
+
+<h1 id="jax란">Jax란?</h1>
+
+<blockquote>
+  <p>한마디로 표현하면 자동 미분과 XLA를 결합해서 사용하는 고성능 머신러닝 프레임워크입니다 … JAX의 가장 큰 강점은 XLA를 적용해서 사용할 수 있다는 점입니다.</p>
+</blockquote>
+
+<p>PyTorch, Tensorflow 등 다른 딥러닝 프레임워크도 자동 미분을 지원하지만, JAX는 이에 더해 <strong>XLA(Accelerated Linear Algebra)</strong>이 가능하다는 것이 핵심이다. XLA는 GPU/TPU 위에서 numpy를 컴파일하고 실행하는 컴파일러다. JAX는 JIT(Just-In-Time) 컴파일을 통해 파이썬 코드를 XLA에 최적화된 기계어로 변환하기 때문에 <a href="https://woocosmos.github.io/pytorch-basic/#autograd-%EC%9E%90%EB%8F%99%EB%AF%B8%EB%B6%84">PyTorch의 동적 그래프</a>보다도 빠르고 효율적으로 연산할 수 있다는 것이다.</p>
+
+<p>파이썬은 기본적으로 인터프리터 방식으로 실행되기 때문에 코드를 한 줄씩 읽고 해석하는 데 시간이 소요된다. 여기서 JIT 컴파일을 사용한다면 <strong>코드를 실행하는 시점</strong>에 성능과 연관되는 일부분을 미리 기계어로 컴파일하여 속도가 빨라진다고 이해했다.</p>
+
+<h2 id="flax">Flax</h2>
+
+<blockquote>
+  <p>JAX + Flexibility를 합쳐져서 만들었으며 엔지니어들이 JAX를 조금 더 쉽게 사용할 수 있는 프레임워크이며, 다른 딥러닝 프레임워크들처럼 레이어(층) 개념을 지원합니다.</p>
+</blockquote>
+
+<p>여기까지 읽었을 때 Tensorflow &amp; Keras 와 유사한 개념(관계)이 아닌가 싶었는데, JAX/Flax는 Low-level의 섬세한 컨트롤이 가능하다는 점에 방점이 찍혀 있는 것 같다. 그와 달리 Keras는 높은 수준의 추상화가 이루어져 있고 사용자 친화적이다. 똑같이 구글에서 개발한 프레임워크지만 지향하는 철학이 다르다는 점이 재밌다.</p>
+
+<p>책에 따르면 구글에서 개발한 모델들은 대부분 JAX로 작성되어 있고, 심지어 Hugging Face의 기존 모델들도 JAX로 변환하고 있다고 한다.</p>
+
+<h2 id="함수형-프로그래밍">함수형 프로그래밍</h2>
+
+<p>JAX/Flax의 활용 방식을 더 잘 파악할 수 있도록 책은 <strong>함수형 프로그래밍</strong>에 대해서 별도 챕터로 설명한다. 명령어의 흐름(순서)대로 상태를 변경하고 결과를 전달하는 것이 핵심인 절차적 프로그래밍과 다르게, 함수형 프로그래밍은 외부 상태와 상관없이 주어진 입력에 동일한 출력값을 내놓는 <em>순수 함수</em>를 사용한다. 따라서 <em>부수 효과</em>가 제거되며 상태가 변화하지 않는 불변성을 강조한다. 여기서 절차적 프로그래밍과 함수형 프로그래밍을 설명할 때 간단한 파이썬 예제가 첨부되어 있어서 이해가 편했다.</p>
+
+<p>JAX, 나아가 딥러닝 연산에 있어서 이 개념을 이해하는 것이 중요한 이유를 세 가지로 제시하고 있다.</p>
+
+<ol>
+  <li>XLA 컴파일에 최적화된 처리가 가능해진다</li>
+  <li>병렬처리와 분산처리에 유용하다</li>
+  <li>코드를 모듈화함으로써 재사용성이 높아진다</li>
+</ol>
+
+<h1 id="jax-기본">JAX 기본</h1>
+
+<p>백문이 불여일견, 직접 JAX 를 활용해보며 책의 내용을 따라가보겠다.</p>
+
+<h2 id="설치">설치</h2>
+
+<p>다행히도 JAX가 Mac M1을 공식 지원한다고 하여 <code class="language-plaintext highlighter-rouge">conda</code>로 쉽게 설치할 수 있었다.</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>conda create <span class="nt">-n</span> jax-env <span class="nv">python</span><span class="o">=</span>3.9
+conda activate jax-env
+pip <span class="nb">install </span>jax jaxlib
+</code></pre></div></div>
+
+<p>import 하기</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">import</span> <span class="n">jax</span>
+<span class="kn">import</span> <span class="n">jax.numpy</span> <span class="k">as</span> <span class="n">jnp</span>
+</code></pre></div></div>
+
+<h2 id="numpy와-비교">numpy와 비교</h2>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">x1</span> <span class="o">=</span> <span class="n">jnp</span><span class="p">.</span><span class="nf">array</span><span class="p">([</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">2.0</span><span class="p">,</span> <span class="mf">3.0</span><span class="p">])</span>
+<span class="n">x2</span> <span class="o">=</span> <span class="n">jnp</span><span class="p">.</span><span class="nf">array</span><span class="p">([</span><span class="mf">4.0</span><span class="p">,</span> <span class="mf">5.0</span><span class="p">,</span> <span class="mf">6.0</span><span class="p">])</span>
+<span class="n">y</span> <span class="o">=</span> <span class="n">x1</span> <span class="o">+</span> <span class="n">x2</span>
+<span class="nf">print</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>        <span class="c1"># [5. 7. 9.]
+</span><span class="nf">print</span><span class="p">(</span><span class="nf">type</span><span class="p">(</span><span class="n">y</span><span class="p">))</span>  <span class="c1"># &lt;class 'jaxlib.xla_extension.ArrayImpl'&gt;
+</span></code></pre></div></div>
+
+<p>위 예제에서 보듯 jax.numpy는 기존 numpy 와 거의 똑같은 API를 제공하고 있다.</p>
+
+<h2 id="grad-함수">grad 함수</h2>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="nf">func</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">x</span><span class="o">**</span><span class="mi">2</span>
+
+<span class="n">grad</span> <span class="o">=</span> <span class="n">jax</span><span class="p">.</span><span class="nf">grad</span><span class="p">(</span><span class="n">func</span><span class="p">)</span>
+<span class="nf">print</span><span class="p">(</span><span class="nf">grad</span><span class="p">(</span><span class="mf">3.</span><span class="p">))</span>    <span class="c1"># Array(6., dtype=float32, weak_type=True)
+</span></code></pre></div></div>
+
+<p>JAX에서 미분, 즉 gradient를 계산해주는 <code class="language-plaintext highlighter-rouge">grad</code>를 사용한 예제다.</p>
+
+<h2 id="부수-효과의-방지">부수 효과의 방지</h2>
+
+<p>JAX는 부수 효과를 제거하는 함수형 프로그래밍의 제약을 따르고 있다. 책에서 제공해준 아래 예제를 참고해보자.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">x_1</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="nf">array</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">])</span>
+<span class="n">x_1</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mi">999</span>
+<span class="nf">print</span><span class="p">(</span><span class="n">x_1</span><span class="p">)</span>      <span class="c1"># [999   2   3]
+</span></code></pre></div></div>
+
+<p>numpy로 생성한 배열은 직접 접근해서 요소를 변경할 수 있다.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">x_2</span> <span class="o">=</span> <span class="n">jnp</span><span class="p">.</span><span class="nf">array</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">])</span>
+<span class="n">x_2</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mi">999</span>
+<span class="c1"># TypeError: '&lt;class 'jaxlib.xla_extension.ArrayImpl'&gt;' object does not support item assignment. JAX arrays are immutable.
+</span></code></pre></div></div>
+
+<p>반면 jax.numpy로 생성한 배열은 직접적인 수정을 허용하지 않는다. 이는 ‘외부 데이터’인 배열의 상태가 변형되면서 부수 효과가 발생하는 것을 방지하기 위함이다.<br />
+만약 배열의 일부를 수정하는 작업을 진행하고 싶다면 부수 효과가 없는 순수 함수를 사용해야 한다.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">x_2</span> <span class="o">=</span> <span class="n">jnp</span><span class="p">.</span><span class="nf">array</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">])</span>
+<span class="k">def</span> <span class="nf">modify</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">x</span><span class="p">.</span><span class="n">at</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="nf">set</span><span class="p">(</span><span class="mi">999</span><span class="p">)</span>
+<span class="n">y</span> <span class="o">=</span> <span class="nf">modify</span><span class="p">(</span><span class="n">x_2</span><span class="p">)</span>
+<span class="nf">print</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>    <span class="c1"># Array([999,   2,   3], dtype=int32)
+</span></code></pre></div></div>
+
+<p>여기서 <code class="language-plaintext highlighter-rouge">modify(x)</code>는 부수 효과가 없는 순수 함수라고 볼 수 있는 것이며, 책은 <code class="language-plaintext highlighter-rouge">jax.grad</code>와 <code class="language-plaintext highlighter-rouge">jax.jit</code> 같은 함수는 순수 함수로 작성되어야 한다고 설명하고 있다.</p>
+
+<h2 id="jit-컴파일">JIT 컴파일</h2>
+
+<dl>
+  <dt>변환</dt>
+  <dd>주어진 함수를 변경하거나 수정하는 방식. 성능 최적화나 자동 미분을 가능하게 함.</dd>
+</dl>
+
+<p>책은 JAX에서 <mark>변환</mark>(transformation)이라는 키워드가 중요하다고 말한다. JAX에서 변환은 <code class="language-plaintext highlighter-rouge">jaxpr</code>, 즉 JAX 표현식이라는 중간 언어(intermediate language)를 통해 이루어진다. <code class="language-plaintext highlighter-rouge">jax.jit</code>가 대표적인 jax 변환이라고 소개된다.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="nf">selu</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">1.67</span><span class="p">,</span> <span class="n">lamdba_</span><span class="o">=</span><span class="mf">1.05</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">lamdba_</span> <span class="o">*</span> <span class="n">jnp</span><span class="p">.</span><span class="nf">where</span><span class="p">(</span><span class="n">x</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">alpha</span> <span class="o">*</span> <span class="n">jnp</span><span class="p">.</span><span class="nf">exp</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">-</span> <span class="n">alpha</span><span class="p">)</span>
+<span class="n">x</span> <span class="o">=</span> <span class="n">jnp</span><span class="p">.</span><span class="nf">arange</span><span class="p">(</span><span class="mi">1000000</span><span class="p">)</span>
+
+<span class="c1"># 일반
+</span><span class="nf">selu</span><span class="p">(</span><span class="n">x</span><span class="p">).</span><span class="nf">block_until_ready</span><span class="p">()</span>
+
+<span class="c1"># XLA
+</span><span class="n">selu_jit</span> <span class="o">=</span> <span class="n">jax</span><span class="p">.</span><span class="nf">jit</span><span class="p">(</span><span class="n">selu</span><span class="p">)</span>
+<span class="nf">selu_jit</span><span class="p">(</span><span class="n">x</span><span class="p">).</span><span class="nf">block_until_ready</span><span class="p">()</span> <span class="c1"># 비동기 실행
+</span></code></pre></div></div>
+
+<p>위 내용은 활성화 함수 SELU(Scaled Exponential Linear Unit)를 구현하고 호출한 내용이다.</p>
+
+<p><img src="https://github.com/user-attachments/assets/859541e3-c76b-4791-a1f4-b624e2570fa8" alt="image" /></p>
+
+<p><code class="language-plaintext highlighter-rouge">selu(x)</code> 대신에 jit 변환을 적용한 <code class="language-plaintext highlighter-rouge">selu_jit(x)</code>가 7배 빠르다고 설명하고 있다. (구글 Colab T4 기준)</p>
+
+<p>책을 읽으면서 흥미로웠던 부분은 <code class="language-plaintext highlighter-rouge">jax.jit</code>은 컴파일된 계산 그래프를 캐싱하여 재사용한다는 점이었다. 다만 <code class="language-plaintext highlighter-rouge">jax.jit</code>을 반복문 내부에서 호출할 경우 컴파일 과정이 불필요하게 반복될 수 있으니 지양하라고 안내하고 있다.</p>
+
+<h1 id="flax-1">Flax</h1>
+
+<p>마지막으로 Flax 를 활용한 예제를 살펴보겠다.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">import</span> <span class="n">flax.linen</span> <span class="k">as</span> <span class="n">nn</span>
+<span class="kn">from</span> <span class="n">jax</span> <span class="kn">import</span> <span class="n">random</span>
+
+<span class="n">key</span> <span class="o">=</span> <span class="n">random</span><span class="p">.</span><span class="nc">PRNGKey</span><span class="p">(</span><span class="mi">42</span><span class="p">)</span>
+
+<span class="k">class</span> <span class="nc">MLP</span><span class="p">(</span><span class="n">nn</span><span class="p">.</span><span class="n">Module</span><span class="p">):</span>
+    <span class="n">out_dims</span><span class="p">:</span> <span class="nb">int</span>
+    
+    <span class="nd">@nn.compact</span>
+    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">x</span><span class="p">.</span><span class="nf">reshape</span><span class="p">((</span><span class="n">x</span><span class="p">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="o">-</span><span class="mi">1</span><span class="p">))</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">nn</span><span class="p">.</span><span class="nc">Dense</span><span class="p">(</span><span class="mi">128</span><span class="p">)(</span><span class="n">x</span><span class="p">)</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">nn</span><span class="p">.</span><span class="nf">relu</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">nn</span><span class="p">.</span><span class="nc">Dense</span><span class="p">(</span><span class="n">self</span><span class="p">.</span><span class="n">out_dims</span><span class="p">)(</span><span class="n">x</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">x</span>
+
+<span class="n">model</span> <span class="o">=</span> <span class="nc">MLP</span><span class="p">(</span><span class="n">out_dims</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+<span class="n">x</span> <span class="o">=</span> <span class="n">jnp</span><span class="p">.</span><span class="nf">empty</span><span class="p">((</span><span class="mi">4</span><span class="p">,</span> <span class="mi">28</span><span class="p">,</span> <span class="mi">28</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+
+<span class="n">weights</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="nf">init</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span>
+<span class="n">y</span> <span class="o">=</span> <span class="n">model</span><span class="p">.</span><span class="nf">apply</span><span class="p">(</span><span class="n">weights</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p><em>책에 import 하는 부분은 없어서 추가했다</em><br />
+<code class="language-plaintext highlighter-rouge">nn.Module</code> 에서 상속받아 모델을 생성한다는 점에서 PyTorch 와 유사한 방식의 API 라고 느껴졌고 금방 적응할 수 있겠다는 생각이 든다.</p>
+
+<hr />
+
+<h1 id="나가며">나가며</h1>
+
+<p>『JAX/Flax로 딥러닝 레벨업』에서 JAX 핵심 개념을 위주로 살펴보며 책을 리뷰해보았다. <em>요즘 시점에서 왜 굳이 새로운 딥러닝 프레임워크가 필요할까?</em> 라고 막연히 궁금해 하며 리뷰어 신청을 했는데, 좋은 기회로 책도 제공 받고 JAX와 Flax에 대해 가볍게 배워볼 수 있는 시간이었다.</p>
+
+<p>JAX가 지향하는 철학과 함께 그것이 녹아든 핵심 기능을 세세하게 설명해주기 때문에 JAX 입문서로 아주 알맞은 도서라는 생각이 들었다. 특히 함수형 프로그래밍 개념만을 설명하기 위해 별도 지면을 할애했다는 점에서는 JAX의 의미를 제대로 전달하겠다는 강한 의지도 보였다.</p>
+
+<p>아마 JAX로 입문하기까지 가장 큰 장벽은 앞서 내가 떠올린 것과 같이 “왜 꼭 이것이어야 하는가?” 라는 의문일 텐데, 이 책을 읽는다면 그 장벽 정도는 충분히 넘을 수 있겠다. numpy 하나로 모델을 구현하는 정도로 low-level에서 모델링과 학습 과정 등을 유연하게 통제할 수 있다는 점이 JAX/Flax의 가장 강력한 정체성이라고 느꼈다. 구글 TPU를 사용하는 ML엔지니어라면 시간을 들여서라도 JAX를 적용할 가치가 있을 듯하다.</p>
+
+<p>그 외에 CLIP, GPT 같은 최신 모델의 fine-tuning 을 예제로 다룬 점도 인상적이었다. ML 분야에 입문한 이후로 출판서를 활용해서 공부를 하는 건 정말 오랜만인데, 역시 최신 책이니 최신 모델도 다루는구나 - 싶었다.</p>
+
+<p>다만 책 서문에서 이미 밝혔다시피 딥러닝 개념과 프레임워크에 대한 기본적인 지식이 있어야 책의 내용을 제대로 이해할 수 있다는 점은 염두에 둘 필요가 있겠다. 확실히 ‘초급서’라기보단 ‘입문서’로 보는 게 맞다. 또한 워낙에 고급 프레임워크다보니까 JAX/Flax 자체가 서비스(서빙)보다는 <strong>연구</strong>에 적합한 도구라는 생각이 들었다. 책 읽기 전과 비슷하게 <em>이것이 이것이 필요할까?</em> 라는 질문은 여전히 깔끔하게 해명되진 않았지만, 책을 읽고 나서 <em>언젠가 JAX를 써보고 싶다</em>는 욕심은 보다 뚜렷해졌다.</p>
+
+<p>리뷰어로 선정하여 도서를 제공해준 출판사 제이펍에 진심으로 감사하다는 말씀을 표하며 본 리뷰를 마무리하겠다.</p>
+
+    </section>
+  </div>
+
+  <div class="pagination">
+    
+      <span class="prev" >
+          <a href="https://woocosmos.github.io/gilbut-ca-os/">
+            &#xE000; 📖 『컴퓨터 구조와 운영체제 핵심 노트』(길벗) 리뷰
+          </a>
+      </span>
+    
+    
+      <span class="next" >
+          <a href="https://woocosmos.github.io/decision-tree/">
+            결정트리 모델(Decision Tree)이 나의 문제를 해결해줄 수 있을까? &#xE001;
+          </a>
+      </span>
+    
+  </div>
+
+  <div class="comments">
+	<div id="disqus_thread"></div>
+	<script type="text/javascript">
+
+	    var disqus_shortname = 'woocosmos';
+
+	    (function() {
+	        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+	        dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+			dsq.setAttribute('data-timestamp', +new Date()); //추가
+	        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+	    })();
+
+	</script>
+	<noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+  <script type="text/javascript">
+    "use strict"; 
+    function addBackToTop() 
+        { function o() 
+            { 
+                t() >= z ? R && (D.className = "", R = !1) : R || (D.className = "hidden", R = !0) 
+            } 
+          function t() 
+            { 
+                return E.scrollTop || A && document.documentElement.scrollTop || 0 
+            } 
+          function e(o) 
+            { 
+                E.scrollTop = o, A && (document.documentElement.scrollTop = o) 
+            } 
+    
+    var n, i, d, r, c = arguments.length > 0 && void 0 !== arguments[0] ? arguments[0] : {}, a = c.backgroundColor, s = void 0 === a ? "#000" : a, l = c.cornerOffset, u = void 0 === l ? 20 : l, m = c.diameter, p = void 0 === m ? 56 : m, h = c.ease, b = void 0 === h ? function (o) { return .5 * (1 - Math.cos(Math.PI * o)) } : h, v = c.id, f = void 0 === v ? "back-to-top" : v, x = c.innerHTML, g = void 0 === x ? '<svg viewBox="0 0 24 24"><path d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z"></path></svg>' : x, w = c.onClickScrollTo, y = void 0 === w ? 0 : w, k = c.scrollContainer, E = void 0 === k ? document.body : k, T = c.scrollDuration, C = void 0 === T ? 100 : T, M = c.showWhenScrollTopIs, z = void 0 === M ? 1 : M, L = c.size, B = void 0 === L ? p : L, H = c.textColor, I = void 0 === H ? "#fff" : H, N = c.zIndex, S = void 0 === N ? 1 : N, q = E === document.body, A = q && document.documentElement; n = Math.round(.35 * B), i = Math.round(.2 * B), d = "#" + f + "{background:" + s + ";-webkit-border-radius:50%;-moz-border-radius:50%;border-radius:50%;bottom:" + u + "px;-webkit-box-shadow:0 2px 5px 0 rgba(0,0,0,.26);-moz-box-shadow:0 2px 5px 0 rgba(0,0,0,.26);box-shadow:0 2px 5px 0 rgba(0,0,0,.26);color:" + I + ";cursor:pointer;display:block;height:" + B + "px;opacity:1;outline:0;position:fixed;right:" + u + "px;-webkit-tap-highlight-color:transparent;-webkit-touch-callout:none;-webkit-transition:bottom .2s,opacity .2s;-o-transition:bottom .2s,opacity .2s;-moz-transition:bottom .2s,opacity .2s;transition:bottom .2s,opacity .2s;-webkit-user-select:none;-moz-user-select:none;-ms-user-select:none;user-select:none;width:" + B + "px;z-index:" + S + "}#" + f + " svg{display:block;fill:currentColor;height:" + n + "px;margin:" + i + "px auto 0;width:" + n + "px}#" + f + ".hidden{bottom:-" + B + "px;opacity:0}", (r = document.createElement("style")).appendChild(document.createTextNode(d)), document.head.insertAdjacentElement("afterbegin", r); var D = function () { var o = document.createElement("div"); return o.id = f, o.className = "hidden", o.innerHTML = g, o.addEventListener("click", function (o) { o.preventDefault(), function () { var o = "function" == typeof y ? y() : y, n = window, i = n.performance, d = n.requestAnimationFrame; if (C <= 0 || void 0 === i || void 0 === d) return e(o); var r = i.now(), c = t(), a = c - o; d(function o(t) { var n = Math.min((t - r) / C, 1); e(c - Math.round(b(n) * a)), n < 1 && d(o) }) }() }), document.body.appendChild(o), o }(), R = !0; (q ? window : E).addEventListener("scroll", o), o() } window.addEventListener("load", function () { var o = document.getElementById("back-to-top"), t = document.querySelector(".sticky-bottom"), e = document.querySelector(".fixed-bottom"); o && window.addEventListener("scroll", function () { if (t) { var n = t.getBoundingClientRect(); window.scrollY + window.innerHeight > document.body.scrollHeight - n.height ? (o.style.position = "fixed", o.style.bottom = n.height + 15 + "px") : (o.style.position = "fixed", o.style.bottom = "15px") } if (e) { var i = e.getBoundingClientRect(); o.style.position = "fixed", o.style.bottom = i.height + 15 + "px" } }) });
+</script>
+<script>
+    addBackToTop();
+</script>
+
+
+
+
+</article>
+
+    </div>
+    
+    <div class="wrapper-footer">
+      <div class="container">
+        <footer class="footer">
+          <!-- Refer to https://codepen.io/ruandre/pen/howFi -->
+<ul class="svg-icon">
+
+  
+
+  
+
+  
+  <li><a href="mailto:woocosmos@gmail.com" class="icon-8 email" title="Email"><svg viewBox="0 0 512 512"><path d="M101.3 141.6v228.9h0.3 308.4 0.8V141.6H101.3zM375.7 167.8l-119.7 91.5 -119.6-91.5H375.7zM127.6 194.1l64.1 49.1 -64.1 64.1V194.1zM127.8 344.2l84.9-84.9 43.2 33.1 43-32.9 84.7 84.7L127.8 344.2 127.8 344.2zM384.4 307.8l-64.4-64.4 64.4-49.3V307.8z"/></svg><!--[if lt IE 9]><em>Email</em><![endif]--></a></li>
+  
+
+  
+
+  
+
+  
+  <li><a href="https://github.com/woocosmos" class="icon-13 github" title="GitHub"><svg viewBox="0 0 512 512"><path d="M256 70.7c-102.6 0-185.9 83.2-185.9 185.9 0 82.1 53.3 151.8 127.1 176.4 9.3 1.7 12.3-4 12.3-8.9V389.4c-51.7 11.3-62.5-21.9-62.5-21.9 -8.4-21.5-20.6-27.2-20.6-27.2 -16.9-11.5 1.3-11.3 1.3-11.3 18.7 1.3 28.5 19.2 28.5 19.2 16.6 28.4 43.5 20.2 54.1 15.4 1.7-12 6.5-20.2 11.8-24.9 -41.3-4.7-84.7-20.6-84.7-91.9 0-20.3 7.3-36.9 19.2-49.9 -1.9-4.7-8.3-23.6 1.8-49.2 0 0 15.6-5 51.1 19.1 14.8-4.1 30.7-6.2 46.5-6.3 15.8 0.1 31.7 2.1 46.6 6.3 35.5-24 51.1-19.1 51.1-19.1 10.1 25.6 3.8 44.5 1.8 49.2 11.9 13 19.1 29.6 19.1 49.9 0 71.4-43.5 87.1-84.9 91.7 6.7 5.8 12.8 17.1 12.8 34.4 0 24.9 0 44.9 0 51 0 4.9 3 10.7 12.4 8.9 73.8-24.6 127-94.3 127-176.4C441.9 153.9 358.6 70.7 256 70.7z"/></svg><!--[if lt IE 9]><em>GitHub</em><![endif]--></a></li>
+  
+
+  
+
+  
+
+  
+  <li><a href="https://www.linkedin.com/in/yunsoo-woo-245946213" class="icon-17 linkedin" title="LinkedIn"><svg viewBox="0 0 512 512"><path d="M186.4 142.4c0 19-15.3 34.5-34.2 34.5 -18.9 0-34.2-15.4-34.2-34.5 0-19 15.3-34.5 34.2-34.5C171.1 107.9 186.4 123.4 186.4 142.4zM181.4 201.3h-57.8V388.1h57.8V201.3zM273.8 201.3h-55.4V388.1h55.4c0 0 0-69.3 0-98 0-26.3 12.1-41.9 35.2-41.9 21.3 0 31.5 15 31.5 41.9 0 26.9 0 98 0 98h57.5c0 0 0-68.2 0-118.3 0-50-28.3-74.2-68-74.2 -39.6 0-56.3 30.9-56.3 30.9v-25.2H273.8z"/></svg><!--[if lt IE 9]><em>LinkedIn</em><![endif]--></a></li>
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</ul>
+
+
+<p>© 2026 Yunsoo Woo</p>
+
+        </footer>
+      </div>
+    </div>
+
+    <!--  -->
+
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-1YCJCQRD4F"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-1YCJCQRD4F');
+</script>
+    <script type="text/javascript">
+    "use strict"; 
+    function addBackToTop() 
+        { function o() 
+            { 
+                t() >= z ? R && (D.className = "", R = !1) : R || (D.className = "hidden", R = !0) 
+            } 
+          function t() 
+            { 
+                return E.scrollTop || A && document.documentElement.scrollTop || 0 
+            } 
+          function e(o) 
+            { 
+                E.scrollTop = o, A && (document.documentElement.scrollTop = o) 
+            } 
+    
+    var n, i, d, r, c = arguments.length > 0 && void 0 !== arguments[0] ? arguments[0] : {}, a = c.backgroundColor, s = void 0 === a ? "#000" : a, l = c.cornerOffset, u = void 0 === l ? 20 : l, m = c.diameter, p = void 0 === m ? 56 : m, h = c.ease, b = void 0 === h ? function (o) { return .5 * (1 - Math.cos(Math.PI * o)) } : h, v = c.id, f = void 0 === v ? "back-to-top" : v, x = c.innerHTML, g = void 0 === x ? '<svg viewBox="0 0 24 24"><path d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z"></path></svg>' : x, w = c.onClickScrollTo, y = void 0 === w ? 0 : w, k = c.scrollContainer, E = void 0 === k ? document.body : k, T = c.scrollDuration, C = void 0 === T ? 100 : T, M = c.showWhenScrollTopIs, z = void 0 === M ? 1 : M, L = c.size, B = void 0 === L ? p : L, H = c.textColor, I = void 0 === H ? "#fff" : H, N = c.zIndex, S = void 0 === N ? 1 : N, q = E === document.body, A = q && document.documentElement; n = Math.round(.35 * B), i = Math.round(.2 * B), d = "#" + f + "{background:" + s + ";-webkit-border-radius:50%;-moz-border-radius:50%;border-radius:50%;bottom:" + u + "px;-webkit-box-shadow:0 2px 5px 0 rgba(0,0,0,.26);-moz-box-shadow:0 2px 5px 0 rgba(0,0,0,.26);box-shadow:0 2px 5px 0 rgba(0,0,0,.26);color:" + I + ";cursor:pointer;display:block;height:" + B + "px;opacity:1;outline:0;position:fixed;right:" + u + "px;-webkit-tap-highlight-color:transparent;-webkit-touch-callout:none;-webkit-transition:bottom .2s,opacity .2s;-o-transition:bottom .2s,opacity .2s;-moz-transition:bottom .2s,opacity .2s;transition:bottom .2s,opacity .2s;-webkit-user-select:none;-moz-user-select:none;-ms-user-select:none;user-select:none;width:" + B + "px;z-index:" + S + "}#" + f + " svg{display:block;fill:currentColor;height:" + n + "px;margin:" + i + "px auto 0;width:" + n + "px}#" + f + ".hidden{bottom:-" + B + "px;opacity:0}", (r = document.createElement("style")).appendChild(document.createTextNode(d)), document.head.insertAdjacentElement("afterbegin", r); var D = function () { var o = document.createElement("div"); return o.id = f, o.className = "hidden", o.innerHTML = g, o.addEventListener("click", function (o) { o.preventDefault(), function () { var o = "function" == typeof y ? y() : y, n = window, i = n.performance, d = n.requestAnimationFrame; if (C <= 0 || void 0 === i || void 0 === d) return e(o); var r = i.now(), c = t(), a = c - o; d(function o(t) { var n = Math.min((t - r) / C, 1); e(c - Math.round(b(n) * a)), n < 1 && d(o) }) }() }), document.body.appendChild(o), o }(), R = !0; (q ? window : E).addEventListener("scroll", o), o() } window.addEventListener("load", function () { var o = document.getElementById("back-to-top"), t = document.querySelector(".sticky-bottom"), e = document.querySelector(".fixed-bottom"); o && window.addEventListener("scroll", function () { if (t) { var n = t.getBoundingClientRect(); window.scrollY + window.innerHeight > document.body.scrollHeight - n.height ? (o.style.position = "fixed", o.style.bottom = n.height + 15 + "px") : (o.style.position = "fixed", o.style.bottom = "15px") } if (e) { var i = e.getBoundingClientRect(); o.style.position = "fixed", o.style.bottom = i.height + 15 + "px" } }) });
+</script>
+<script>
+    addBackToTop();
+</script>
+
+
+
+
+
+  </body>
+</html>

@@ -1,0 +1,1020 @@
+<!DOCTYPE html>
+<html>
+  <head>
+  <title>[라즈베리 파이를 활용한 홈서버 구축] 01. 킥오프 – YunsooLog – 행간을 읽는 기계학습 이야기</title>
+  <link rel="icon" href="/images/favicon.ico">
+      <meta name="google-site-verification" content="NA4jg1Iffw6aA9VWjj3kqoo2jfOkPRxINJtYphd7VeI" />
+    <meta charset="utf-8" />
+    <meta content='text/html; charset=utf-8' http-equiv='Content-Type'>
+    <meta http-equiv='X-UA-Compatible' content='IE=edge'>
+    <meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1.0'>
+    <meta http-equiv="Permissions-Policy" content="interest-cohort=()">
+    
+    
+    <meta name="description" content="개요
+
+
+
+라즈베리 파이(Raspberry Pi)를 활용한 홈서버 구축 프로젝트를 시작하려 한다. 이번 포스트에서는 프로젝트의 목적과 목표를 명확히 하고, 그에 맞춰 필요한 제품 스펙을 결정하는 과정을 기록한다.
+
+계기
+
+
+  며칠 전, 회사 워크숍에서 버킷리스트를 작성하는 시간을 가졌다. 다들 세계여행이나 내 집 마련 같은 것을 적었는데, 나는 홈서버 구축하기를 쓰고 있었다.
+그러고 보니 인생 버킷리스트까지도 아니고 그냥 당장 실행하면 되지 않을까? 라는 생각이 들었다.
+
+
+작은 자취방에서 가지고 놀 수 있는 작은 컴퓨터를 갖고 싶다는 생각에서 시작했다. 운영체제는 리눅스로 해서 CLI 개발 환경의 고수가 되고 싶었다. VSCode 대신에 Vim 으로 코드를 작성하는 지독한 컨셉의 개발자가 되고 싶었다. (이건 농담이다)
+
+지금까지 지나온 개발 환경을 순서대로 짚어보았다.
+
+
+  구글 코랩 : 밑바닥부터 시작하는 데 이만한 도구가 있을까. 버튼 클릭 하나로 구글 데이터센터의 고성능 GPU 를 사용할 수 있었다.
+  클라우드 서버 : 프로젝트가 본격화되면서 코랩의 사용량 제한이 걸림돌으로 작용했다. 이에 AWS EC2 스팟 인스턴스를 하나 구입해서 사용하기 시작했다.
+  온프레미스 서버 : 국가 사업에 선정되면서 그래픽 카드를 마련할 수 있게 되었다. 사무실 한 켠에서 열과 소음을 뿜어내던 그 녀석을 SSH 로 접근해서 마음대로 다뤄볼 수 있었다.
+  (현재) 로컬 환경 : 이직하고 보니 컴퓨터마다 좋은 그래픽 카드가 하나씩 꽂혀 있었다. (스타트업에 있다 와서 그런지 충격적이었다) 물론 서버 인스턴스만큼은 넉넉하지 않지만, 적당한 크기의 모델 학습이나 추론은 로컬 환경에서도 거뜬했다.
+
+
+특히 LLM 모델이 거대화되고 API 로 접근하는 방식이 널리 퍼지면서 오히려 로컬 환경에서 개발하기 편리해졌다고 느낀다. 그러나 반대 급부로 그만한 사이즈의 모델을 튜닝하거나 다루기 위해서는 서버 환경에서의 개발 역량 또한 놓칠 수 없다고 생각한다.
+
+아쉽지만 현재 회사에서는 프로젝트 상 로컬 환경을 활용하는 것이 최선이므로, 개인적으로 홈서버를 구축하고 스스로 연습하려는 것이다. 먼 이야기지만 나중에 회사에서 서버 인스턴스를 할당 받았을 때 실수나 사고 없이 안정적으로 해내는 모습을 보여드리고 싶기도 하고.
+
+
+
+무엇보다도 전자 회로 기판을 조립해서 만든 작은 컴퓨터는 나만의 작은 공간을 창조한다는 감동을 준달까. 기계와 로우레벨의 교감을 주고 받는 것이다…
+
+목표
+
+홈서버를 구축하고 난 뒤에 구체적으로 어떤 것들을 해볼 수 있을지 목표를 정리해보았다. 목표는 제품의 스펙을 결정하는 기준이 될 것이다. (나는 보통 목표를 질문의 형식으로 작성하는데, 그 질문들에 답변할 수 있을 때 목표를 이루었다고 여기기 때문이다)
+
+
+  리눅스 운영체제는 어떻게 동작하는 것일까?
+  파이썬과 운영체제는 어떻게 상호작용하는 것일까?
+  데이터를 최대한 효율적으로 처리하는 방법은 무엇일까?
+  머신러닝 모델을 경량화하는 방법은 무엇일까?
+  머신러닝 모델의 추론과 운영을 어떻게 컨테이너화할까?
+  왜 C/C++ 개발 역량을 지닌 머신러닝 엔지니어가 우대 받는 걸까?
+
+
+로우레벨 환경에서 운영체제와 파이썬 언어의 동작을 이해하는 것과 매우 한정된 성능 안에서 데이터 처리를 최적화하는 것으로 요약할 수 있겠다.
+
+절대적 우선순위
+
+제품 스펙을 살펴보기 앞서 현실적으로 고려해야 할 두 가지를 먼저 언급하려 한다. 바로 가격과 사이즈다.
+
+실습, 장난감 용도이기 때문에 큰 돈을 들일 생각이 없다. 가성비 전략으로 간다. 중고 물품도 적극 고려할 예정.
+
+또한 활동 공간이 3평 남짓한 자취방에서 감당할 수 있어야 하므로 사이즈는 최대한 미니미니하게 해야 한다.
+
+구성 요소
+
+
+
+오늘날 컴퓨터는 폰 노이만 구조를 뼈대로 하여 확장된 형태이다. 이번 프로젝트에서 어떤 구성품을 마련할지 고민하면서 이 폰 노이만 컴퓨터를 참고할 수 있었다.
+
+폰 노이만 구조의 구성 요소는 CPU, 메모리, 프로그램이다. 이때 프로그램은 메모리 안에 저장되고 실행되는 명령어의 집합이다.
+
+그러니까 하드웨어 관점에서 필수 요소는 처리 장치(CPU), 기억 장치(메모리), 그리고 이들을 운영하고 제어하기 위한 입출력 장치다.
+
+CPU 와 메모리
+
+싱글보드 컴퓨터는 메인보드(Motherboard)에 처리 장치인 CPU와 주기억 장치인 RAM이 탑재되어 있는 것을 말한다. 라즈베리 파이가 대표적인 싱글보드 컴퓨터 제품.
+
+사실 엔비디아에도 싱글보드 컴퓨터 라인업이 있으며 GPU 활용이 필요하다면 이쪽이 더 나을 수도 있다.
+
+
+
+야속하게도 불과 5일 전 엔비디아에서 AI용 싱글보드 컴퓨터 개발자 키트를 매우 합리적인 가격에 출시한다는 소식을 내놨다. 젯슨 오린 나노(Jetson ORIN™ Nano) 라는 제품이고 249달러(한화 약 36만원)다. LLM 등 딥러닝 모델 처리에 특화된 제품이라고 한다.
+
+
+  너무나도 갖고 싶다…
+
+
+하지만 나의 절대적인 기준은 가격이기 때문에 욕심을 내려놓으려 한다. 젯슨 시리즈는 나중에 더 큰 집으로 이사 가면 모셔보겠다 🥲
+
+
+
+라즈베리 파이도 여러 제품이 있다. 몇 세대를 살지, 램 사이즈는 어느 정도로 할지 결정해야 한다.
+
+몇 세대를 살 것인가? ➡️ 4 세대
+
+주로 4세대와 5세대를 많이 비교하는 것 같다.
+
+2019년 출시된 4세대는 성능과 가격 측면에서 경쟁력이 있어 독보적으로 인기 있는 제품이라고 한다. 5세대는 비교적 최근인 2023년에 출시되었는데, 이전 세대에 비해 가격도 오른 데다 발열이나 어댑터 등 이슈가 있어 차라리 미니 PC를 사는 편이 낫다고 보는 견해가 많다. 나도 5세대 제품 가격 보고 ‘그냥 젯슨을 살까 …‘라고 고민했는데, 그럴 바에 4세대를 선택하겠다고 판단했다.
+
+램 사이즈는? ➡️ 4GB
+
+1, 2, 4, 8GB 옵션이 있다. 모델 올리는 것을 생각하면 4GB 이상은 되어야 할 텐데, 4GB는 7만원대이고 8GB는 11만원대로 가격 차이가 난다. 성능보다 가격이 중요한 상황이므로 전자로 결정했다.
+
+상세 스펙
+
+구체적인 스펙은 아래와 같다. 공식 사이트를 참고했다.
+
+
+
+
+  
+    
+      카테고리
+      내용
+    
+  
+  
+    
+      프로세서
+      Broadcom BCM2711, 쿼드코어 Cortex-A72 (ARM v8) 64-bit SoC @ 1.8GHz
+    
+    
+      메모리(RAM)
+      8GB
+    
+    
+      무선 연결
+      2.4 GHz/5.0GHz 와이파이, Bluetooth 5.0, BLE
+    
+    
+      유선 연결(이더넷)
+      기가비트 이더넷
+    
+    
+      USB 포트
+      USB 3.0 포트 2개, USB 2.0 포트 2개
+    
+    
+      GPIO
+      라즈베리 파이 표준 40핀 GPIO 헤더
+    
+    
+      디스플레이 출력
+      micro-HDMI 포트 2개 (최대 4k60 지원)
+    
+    
+      디스플레이 인터페이스
+      2-레인 MIPI DSI 디스플레이 포트
+    
+    
+      그래픽
+      OpenGL ES 3.1, Vulkan 1.0
+    
+    
+      저장 장치
+      Micro SD 카드 슬롯
+    
+    
+      전원 공급
+      USB-C 포트/GPIO 헤더를 통한 전원 공급, 5V DC, 최소 3A
+    
+  
+
+
+보조 기억 장치
+
+라즈베리 파이4는 SD카드를 지원한다. 운영체제 설치까지 고려해서 용량이 32GB 는 되어야 할 것 같다.
+
+우선 가장 무난하게 Sandisk Ultra 32GB (6천원대) 사용할 예정이다. 호환 가능한 SD 카드 리스트도 확인해보자.
+
+라즈베리 파이 환경에서 SD카드 제품별로 성능을 비교한 훌륭한 블로그글이 있으니 참고하시라.
+
+입출력 장치
+
+
+
+이번에 선물 받은 하기비스 미니 모니터를 연결할 예정이다. 다만 전원 등 호환이 될지 모르겠다. 알리에서 5만원대에 구입했는데, 현재 7만원대로 올랐다.
+
+하기비스 모니터 설명으로 미루어봐서 micro HDMI to USB-C 어댑터가 필요할 것으로 보인다.
+
+  One Cable Connection Mode: USB3.1 Gen2 cable connects HOST port and USB-C port of the laptop, allowing for simultaneous IPS mini screen display and interface expansion. *Note: The USB-C interface of the laptop must be Thunderbolt 3/4, USB4, or a USB-C interface that supports the DisplayPort (DP) protocol in order to use this mode
+
+
+키보드는 집에 있는 키크론 키보드를 활용할 것이다.
+
+사실 입출력 장치는 큰 걱정이 없다. 어차피 맥북으로 SSH 원격 접속할 예정이기 때문이다.
+
+네트워크
+
+자취방의 와이파이를 연결할 예정이다. 다만 자취방 와이파이가 매우 불안정하여 제멋대로 끊길 때가 많은데 - 체감상 4~5시간에 한 번(…) - 이게 얼마나 큰 문제로 작용할지는 … 일단 연결해봐야 알겠다.
+
+전원 공급 장치
+
+라즈베리 파이4 부터는 전원을 USB-C 타입으로 공급 받는다. 모니터를 연결했을 때 전류가 얼마나 될지 모르겠지만, 가장 안전하게 라즈베리 파이4에 맞게 나온 5V 4A 전용 어댑터면 좋을 것 같다. 가격은 7천원.
+
+기타 장비
+
+그 외 케이스, 방열판, 쿨러 등 보조 부품들이 있다. 이것은 필수 부품들을 갖추고 나서 하나씩 모을 생각이다. 이왕이면 이쁜 것들로 고심해서 고르고 싶기도 하고.
+
+결산
+
+
+  
+    
+      필수 부품
+      가격
+    
+  
+  
+    
+      라즈베리 파이
+      78,000원 ~
+    
+    
+      SD 카드
+      6,200원 ~
+    
+    
+      micro HDMI to USB-C 어댑터
+      제품을 찾을 수 없음;;
+    
+    
+      전원 어댑터
+      7,000원
+    
+    
+      보조 장비
+      아직 모름
+    
+    
+      총합
+      83,200원 이상
+    
+  
+
+
+대충 훑어봤지만 micro HDMI to USB-C 제품이 보이지 않는 게 약간 난감하다. micro HDMI 를 HDMI 로 변환한 후에 C타입으로 연결해야 할 것 같은 불길한 느낌. 그래도 필수 부품만 해서 10만원 이하로 맞출 수 있다면 충분히 만족스러울 것 같다.
+
+나가며
+
+오늘은 홈서버 프로젝트를 위해 목표와 장비의 스펙을 정리해보았다. 필수 부품을 하나씩 마련한 후에 운영체제 설치 등 세팅 과정을 블로그에 연재할 계획이다. 실습까지 갈 길이 멀지만 즐겁게, 꾸준히 해보자!
+" />
+    <meta property="og:description" content="개요
+
+
+
+라즈베리 파이(Raspberry Pi)를 활용한 홈서버 구축 프로젝트를 시작하려 한다. 이번 포스트에서는 프로젝트의 목적과 목표를 명확히 하고, 그에 맞춰 필요한 제품 스펙을 결정하는 과정을 기록한다.
+
+계기
+
+
+  며칠 전, 회사 워크숍에서 버킷리스트를 작성하는 시간을 가졌다. 다들 세계여행이나 내 집 마련 같은 것을 적었는데, 나는 홈서버 구축하기를 쓰고 있었다.
+그러고 보니 인생 버킷리스트까지도 아니고 그냥 당장 실행하면 되지 않을까? 라는 생각이 들었다.
+
+
+작은 자취방에서 가지고 놀 수 있는 작은 컴퓨터를 갖고 싶다는 생각에서 시작했다. 운영체제는 리눅스로 해서 CLI 개발 환경의 고수가 되고 싶었다. VSCode 대신에 Vim 으로 코드를 작성하는 지독한 컨셉의 개발자가 되고 싶었다. (이건 농담이다)
+
+지금까지 지나온 개발 환경을 순서대로 짚어보았다.
+
+
+  구글 코랩 : 밑바닥부터 시작하는 데 이만한 도구가 있을까. 버튼 클릭 하나로 구글 데이터센터의 고성능 GPU 를 사용할 수 있었다.
+  클라우드 서버 : 프로젝트가 본격화되면서 코랩의 사용량 제한이 걸림돌으로 작용했다. 이에 AWS EC2 스팟 인스턴스를 하나 구입해서 사용하기 시작했다.
+  온프레미스 서버 : 국가 사업에 선정되면서 그래픽 카드를 마련할 수 있게 되었다. 사무실 한 켠에서 열과 소음을 뿜어내던 그 녀석을 SSH 로 접근해서 마음대로 다뤄볼 수 있었다.
+  (현재) 로컬 환경 : 이직하고 보니 컴퓨터마다 좋은 그래픽 카드가 하나씩 꽂혀 있었다. (스타트업에 있다 와서 그런지 충격적이었다) 물론 서버 인스턴스만큼은 넉넉하지 않지만, 적당한 크기의 모델 학습이나 추론은 로컬 환경에서도 거뜬했다.
+
+
+특히 LLM 모델이 거대화되고 API 로 접근하는 방식이 널리 퍼지면서 오히려 로컬 환경에서 개발하기 편리해졌다고 느낀다. 그러나 반대 급부로 그만한 사이즈의 모델을 튜닝하거나 다루기 위해서는 서버 환경에서의 개발 역량 또한 놓칠 수 없다고 생각한다.
+
+아쉽지만 현재 회사에서는 프로젝트 상 로컬 환경을 활용하는 것이 최선이므로, 개인적으로 홈서버를 구축하고 스스로 연습하려는 것이다. 먼 이야기지만 나중에 회사에서 서버 인스턴스를 할당 받았을 때 실수나 사고 없이 안정적으로 해내는 모습을 보여드리고 싶기도 하고.
+
+
+
+무엇보다도 전자 회로 기판을 조립해서 만든 작은 컴퓨터는 나만의 작은 공간을 창조한다는 감동을 준달까. 기계와 로우레벨의 교감을 주고 받는 것이다…
+
+목표
+
+홈서버를 구축하고 난 뒤에 구체적으로 어떤 것들을 해볼 수 있을지 목표를 정리해보았다. 목표는 제품의 스펙을 결정하는 기준이 될 것이다. (나는 보통 목표를 질문의 형식으로 작성하는데, 그 질문들에 답변할 수 있을 때 목표를 이루었다고 여기기 때문이다)
+
+
+  리눅스 운영체제는 어떻게 동작하는 것일까?
+  파이썬과 운영체제는 어떻게 상호작용하는 것일까?
+  데이터를 최대한 효율적으로 처리하는 방법은 무엇일까?
+  머신러닝 모델을 경량화하는 방법은 무엇일까?
+  머신러닝 모델의 추론과 운영을 어떻게 컨테이너화할까?
+  왜 C/C++ 개발 역량을 지닌 머신러닝 엔지니어가 우대 받는 걸까?
+
+
+로우레벨 환경에서 운영체제와 파이썬 언어의 동작을 이해하는 것과 매우 한정된 성능 안에서 데이터 처리를 최적화하는 것으로 요약할 수 있겠다.
+
+절대적 우선순위
+
+제품 스펙을 살펴보기 앞서 현실적으로 고려해야 할 두 가지를 먼저 언급하려 한다. 바로 가격과 사이즈다.
+
+실습, 장난감 용도이기 때문에 큰 돈을 들일 생각이 없다. 가성비 전략으로 간다. 중고 물품도 적극 고려할 예정.
+
+또한 활동 공간이 3평 남짓한 자취방에서 감당할 수 있어야 하므로 사이즈는 최대한 미니미니하게 해야 한다.
+
+구성 요소
+
+
+
+오늘날 컴퓨터는 폰 노이만 구조를 뼈대로 하여 확장된 형태이다. 이번 프로젝트에서 어떤 구성품을 마련할지 고민하면서 이 폰 노이만 컴퓨터를 참고할 수 있었다.
+
+폰 노이만 구조의 구성 요소는 CPU, 메모리, 프로그램이다. 이때 프로그램은 메모리 안에 저장되고 실행되는 명령어의 집합이다.
+
+그러니까 하드웨어 관점에서 필수 요소는 처리 장치(CPU), 기억 장치(메모리), 그리고 이들을 운영하고 제어하기 위한 입출력 장치다.
+
+CPU 와 메모리
+
+싱글보드 컴퓨터는 메인보드(Motherboard)에 처리 장치인 CPU와 주기억 장치인 RAM이 탑재되어 있는 것을 말한다. 라즈베리 파이가 대표적인 싱글보드 컴퓨터 제품.
+
+사실 엔비디아에도 싱글보드 컴퓨터 라인업이 있으며 GPU 활용이 필요하다면 이쪽이 더 나을 수도 있다.
+
+
+
+야속하게도 불과 5일 전 엔비디아에서 AI용 싱글보드 컴퓨터 개발자 키트를 매우 합리적인 가격에 출시한다는 소식을 내놨다. 젯슨 오린 나노(Jetson ORIN™ Nano) 라는 제품이고 249달러(한화 약 36만원)다. LLM 등 딥러닝 모델 처리에 특화된 제품이라고 한다.
+
+
+  너무나도 갖고 싶다…
+
+
+하지만 나의 절대적인 기준은 가격이기 때문에 욕심을 내려놓으려 한다. 젯슨 시리즈는 나중에 더 큰 집으로 이사 가면 모셔보겠다 🥲
+
+
+
+라즈베리 파이도 여러 제품이 있다. 몇 세대를 살지, 램 사이즈는 어느 정도로 할지 결정해야 한다.
+
+몇 세대를 살 것인가? ➡️ 4 세대
+
+주로 4세대와 5세대를 많이 비교하는 것 같다.
+
+2019년 출시된 4세대는 성능과 가격 측면에서 경쟁력이 있어 독보적으로 인기 있는 제품이라고 한다. 5세대는 비교적 최근인 2023년에 출시되었는데, 이전 세대에 비해 가격도 오른 데다 발열이나 어댑터 등 이슈가 있어 차라리 미니 PC를 사는 편이 낫다고 보는 견해가 많다. 나도 5세대 제품 가격 보고 ‘그냥 젯슨을 살까 …‘라고 고민했는데, 그럴 바에 4세대를 선택하겠다고 판단했다.
+
+램 사이즈는? ➡️ 4GB
+
+1, 2, 4, 8GB 옵션이 있다. 모델 올리는 것을 생각하면 4GB 이상은 되어야 할 텐데, 4GB는 7만원대이고 8GB는 11만원대로 가격 차이가 난다. 성능보다 가격이 중요한 상황이므로 전자로 결정했다.
+
+상세 스펙
+
+구체적인 스펙은 아래와 같다. 공식 사이트를 참고했다.
+
+
+
+
+  
+    
+      카테고리
+      내용
+    
+  
+  
+    
+      프로세서
+      Broadcom BCM2711, 쿼드코어 Cortex-A72 (ARM v8) 64-bit SoC @ 1.8GHz
+    
+    
+      메모리(RAM)
+      8GB
+    
+    
+      무선 연결
+      2.4 GHz/5.0GHz 와이파이, Bluetooth 5.0, BLE
+    
+    
+      유선 연결(이더넷)
+      기가비트 이더넷
+    
+    
+      USB 포트
+      USB 3.0 포트 2개, USB 2.0 포트 2개
+    
+    
+      GPIO
+      라즈베리 파이 표준 40핀 GPIO 헤더
+    
+    
+      디스플레이 출력
+      micro-HDMI 포트 2개 (최대 4k60 지원)
+    
+    
+      디스플레이 인터페이스
+      2-레인 MIPI DSI 디스플레이 포트
+    
+    
+      그래픽
+      OpenGL ES 3.1, Vulkan 1.0
+    
+    
+      저장 장치
+      Micro SD 카드 슬롯
+    
+    
+      전원 공급
+      USB-C 포트/GPIO 헤더를 통한 전원 공급, 5V DC, 최소 3A
+    
+  
+
+
+보조 기억 장치
+
+라즈베리 파이4는 SD카드를 지원한다. 운영체제 설치까지 고려해서 용량이 32GB 는 되어야 할 것 같다.
+
+우선 가장 무난하게 Sandisk Ultra 32GB (6천원대) 사용할 예정이다. 호환 가능한 SD 카드 리스트도 확인해보자.
+
+라즈베리 파이 환경에서 SD카드 제품별로 성능을 비교한 훌륭한 블로그글이 있으니 참고하시라.
+
+입출력 장치
+
+
+
+이번에 선물 받은 하기비스 미니 모니터를 연결할 예정이다. 다만 전원 등 호환이 될지 모르겠다. 알리에서 5만원대에 구입했는데, 현재 7만원대로 올랐다.
+
+하기비스 모니터 설명으로 미루어봐서 micro HDMI to USB-C 어댑터가 필요할 것으로 보인다.
+
+  One Cable Connection Mode: USB3.1 Gen2 cable connects HOST port and USB-C port of the laptop, allowing for simultaneous IPS mini screen display and interface expansion. *Note: The USB-C interface of the laptop must be Thunderbolt 3/4, USB4, or a USB-C interface that supports the DisplayPort (DP) protocol in order to use this mode
+
+
+키보드는 집에 있는 키크론 키보드를 활용할 것이다.
+
+사실 입출력 장치는 큰 걱정이 없다. 어차피 맥북으로 SSH 원격 접속할 예정이기 때문이다.
+
+네트워크
+
+자취방의 와이파이를 연결할 예정이다. 다만 자취방 와이파이가 매우 불안정하여 제멋대로 끊길 때가 많은데 - 체감상 4~5시간에 한 번(…) - 이게 얼마나 큰 문제로 작용할지는 … 일단 연결해봐야 알겠다.
+
+전원 공급 장치
+
+라즈베리 파이4 부터는 전원을 USB-C 타입으로 공급 받는다. 모니터를 연결했을 때 전류가 얼마나 될지 모르겠지만, 가장 안전하게 라즈베리 파이4에 맞게 나온 5V 4A 전용 어댑터면 좋을 것 같다. 가격은 7천원.
+
+기타 장비
+
+그 외 케이스, 방열판, 쿨러 등 보조 부품들이 있다. 이것은 필수 부품들을 갖추고 나서 하나씩 모을 생각이다. 이왕이면 이쁜 것들로 고심해서 고르고 싶기도 하고.
+
+결산
+
+
+  
+    
+      필수 부품
+      가격
+    
+  
+  
+    
+      라즈베리 파이
+      78,000원 ~
+    
+    
+      SD 카드
+      6,200원 ~
+    
+    
+      micro HDMI to USB-C 어댑터
+      제품을 찾을 수 없음;;
+    
+    
+      전원 어댑터
+      7,000원
+    
+    
+      보조 장비
+      아직 모름
+    
+    
+      총합
+      83,200원 이상
+    
+  
+
+
+대충 훑어봤지만 micro HDMI to USB-C 제품이 보이지 않는 게 약간 난감하다. micro HDMI 를 HDMI 로 변환한 후에 C타입으로 연결해야 할 것 같은 불길한 느낌. 그래도 필수 부품만 해서 10만원 이하로 맞출 수 있다면 충분히 만족스러울 것 같다.
+
+나가며
+
+오늘은 홈서버 프로젝트를 위해 목표와 장비의 스펙을 정리해보았다. 필수 부품을 하나씩 마련한 후에 운영체제 설치 등 세팅 과정을 블로그에 연재할 계획이다. 실습까지 갈 길이 멀지만 즐겁게, 꾸준히 해보자!
+" />
+    
+    <meta name="author" content="YunsooLog" />
+
+    
+    <meta property="og:title" content="[라즈베리 파이를 활용한 홈서버 구축] 01. 킥오프" />
+    <meta property="twitter:title" content="[라즈베리 파이를 활용한 홈서버 구축] 01. 킥오프" />
+    
+  <!-- Async font loading -->
+<script>
+  window.WebFontConfig = {
+      custom: {
+          families: ['Spoqa Han Sans:100,300,400,700'],
+          urls: ['https://spoqa.github.io/spoqa-han-sans/css/SpoqaHanSans-kr.css']
+      },
+      timeout: 60000
+  };
+  (function(d) {
+      var wf = d.createElement('script'), s = d.scripts[0];
+      wf.src = 'https://ajax.googleapis.com/ajax/libs/webfont/1.5.18/webfont.js';
+      s.parentNode.insertBefore(wf, s);
+  })(document);
+</script>
+
+  <!--[if lt IE 9]>
+    <script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+  <![endif]-->
+
+  <link rel="stylesheet" type="text/css" href="/style.css" />
+  <link rel="alternate" type="application/rss+xml" title="YunsooLog - 행간을 읽는 기계학습 이야기" href="/feed.xml" />
+  <script>
+    document.cookie = "promo_shown=1; SameSite=Lax; path=/";
+  </script>
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.13.11/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.13.11/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.13.11/dist/contrib/auto-render.min.js"
+          onload="renderMathInElement(document.body, {
+            delimiters: [
+              {left: '\\[', right: '\\]', display: true},
+              {left: '$$', right: '$$', display: true},
+              {left: '$', right: '$', display: false},
+            ]
+          });">
+  </script>
+
+  <!-- Created with Jekyll Now - http://github.com/barryclark/jekyll-now -->
+</head>
+  <body>
+    <div class="wrapper-masthead">
+  <div class="container">
+    <header class="masthead clearfix">
+      <a href="/" class="site-avatar"><img src="/images/avatar.png"/></a>
+      
+      <div class="site-info">
+        <h1 class="site-name"><a href="/">YunsooLog</a></h1>
+        <p class="site-description">행간을 읽는 기계학습 이야기</p>
+      </div>
+
+      <nav>
+        
+        
+        <a href="/about">About</a>
+        
+        
+        
+        <a href="/">Blog</a>
+        
+        
+        
+        <a href="/tags">Tags</a>
+        
+        
+        
+        <a href="/timeline">Timeline</a>
+        
+        
+        
+        <ul class="search-icon">
+          <a href="/search">
+          <svg 
+            width="24" 
+            height="24" 
+            viewBox="0 0 24 24" 
+            fill="none" 
+            xmlns="http://www.w3.org/2000/svg">
+            <path d="M10 2C5.58172 2 2 5.58172 2 10C2 14.4183 5.58172 18 10 18C11.8485 18 13.5451 17.3376 14.8458 16.2416L19.7071 21.1029C20.0976 21.4934 20.7308 21.4934 21.1213 21.1029C21.5118 20.7124 21.5118 20.0792 21.1213 19.6887L16.2416 14.809C17.3376 13.5083 18 11.8116 18 10C18 5.58172 14.4183 2 10 2ZM4 10C4 6.68629 6.68629 4 10 4C13.3137 4 16 6.68629 16 10C16 13.3137 13.3137 16 10 16C6.68629 16 4 13.3137 4 10Z" 
+            fill="currentColor"></path>
+          </svg>
+          </a>
+        </ul>
+
+      </nav>
+    </header>
+  </div>
+</div>
+
+    <div id="main" role="main" class="container">
+      <article class="post">
+  <div class="inner-wrap">
+    <h1>[라즈베리 파이를 활용한 홈서버 구축] 01. 킥오프</h1>
+
+    <div>
+      <span class="date">
+        2024-12-22
+      </span>
+
+      <ul class="tag">
+        
+        <li>
+          <a href="https://woocosmos.github.io/tags#홈서버">
+            홈서버
+          </a>
+        </li>
+        
+      </ul>
+    </div>
+
+    <section class="entry">
+      
+      <aside>
+        <nav class="nav-toc">
+          <h3> 목차 </h3>
+          <ul id="toc" class="section-nav">
+<li class="toc-entry toc-h1"><a href="#개요">개요</a></li>
+<li class="toc-entry toc-h1"><a href="#계기">계기</a></li>
+<li class="toc-entry toc-h1"><a href="#목표">목표</a></li>
+<li class="toc-entry toc-h1"><a href="#절대적-우선순위">절대적 우선순위</a></li>
+<li class="toc-entry toc-h1"><a href="#구성-요소">구성 요소</a>
+<ul>
+<li class="toc-entry toc-h2"><a href="#cpu-와-메모리">CPU 와 메모리</a>
+<ul>
+<li class="toc-entry toc-h3"><a href="#상세-스펙">상세 스펙</a></li>
+</ul>
+</li>
+<li class="toc-entry toc-h2"><a href="#보조-기억-장치">보조 기억 장치</a></li>
+<li class="toc-entry toc-h2"><a href="#입출력-장치">입출력 장치</a></li>
+<li class="toc-entry toc-h2"><a href="#네트워크">네트워크</a></li>
+<li class="toc-entry toc-h2"><a href="#전원-공급-장치">전원 공급 장치</a></li>
+<li class="toc-entry toc-h2"><a href="#기타-장비">기타 장비</a>
+<ul>
+<li class="toc-entry toc-h3"><a href="#결산">결산</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toc-entry toc-h1"><a href="#나가며">나가며</a></li>
+</ul>
+        </nav>
+      </aside>
+      <script src="/assets/scroll-spy.js" type="text/javascript"></script>
+      
+      <h1 id="개요">개요</h1>
+
+<p><img src="https://github.com/user-attachments/assets/3950b7db-9f10-4797-983e-d1e389cab2c2" alt="image" width="60%" /></p>
+
+<p>라즈베리 파이(Raspberry Pi)를 활용한 홈서버 구축 프로젝트를 시작하려 한다. 이번 포스트에서는 프로젝트의 목적과 목표를 명확히 하고, 그에 맞춰 필요한 제품 스펙을 결정하는 과정을 기록한다.</p>
+
+<h1 id="계기">계기</h1>
+
+<blockquote>
+  <p>며칠 전, 회사 워크숍에서 버킷리스트를 작성하는 시간을 가졌다. 다들 세계여행이나 내 집 마련 같은 것을 적었는데, 나는 홈서버 구축하기를 쓰고 있었다.
+그러고 보니 인생 버킷리스트까지도 아니고 <em>그냥 당장 실행하면 되지 않을까?</em> 라는 생각이 들었다.</p>
+</blockquote>
+
+<p>작은 자취방에서 가지고 놀 수 있는 <strong>작은 컴퓨터</strong>를 갖고 싶다는 생각에서 시작했다. 운영체제는 리눅스로 해서 CLI 개발 환경의 고수가 되고 싶었다. VSCode 대신에 Vim 으로 코드를 작성하는 지독한 컨셉의 개발자가 되고 싶었다. (이건 농담이다)</p>
+
+<p>지금까지 지나온 개발 환경을 순서대로 짚어보았다.</p>
+
+<ol>
+  <li><strong>구글 코랩</strong> : 밑바닥부터 시작하는 데 이만한 도구가 있을까. 버튼 클릭 하나로 구글 데이터센터의 고성능 GPU 를 사용할 수 있었다.</li>
+  <li><strong>클라우드 서버</strong> : 프로젝트가 본격화되면서 코랩의 사용량 제한이 걸림돌으로 작용했다. 이에 AWS EC2 스팟 인스턴스를 하나 구입해서 사용하기 시작했다.</li>
+  <li><strong>온프레미스 서버</strong> : 국가 사업에 선정되면서 그래픽 카드를 마련할 수 있게 되었다. 사무실 한 켠에서 열과 소음을 뿜어내던 그 녀석을 SSH 로 접근해서 마음대로 다뤄볼 수 있었다.</li>
+  <li>(<em>현재</em>) <strong>로컬 환경</strong> : 이직하고 보니 컴퓨터마다 좋은 그래픽 카드가 하나씩 꽂혀 있었다. (스타트업에 있다 와서 그런지 충격적이었다) 물론 서버 인스턴스만큼은 넉넉하지 않지만, 적당한 크기의 모델 학습이나 추론은 로컬 환경에서도 거뜬했다.</li>
+</ol>
+
+<p>특히 LLM 모델이 거대화되고 API 로 접근하는 방식이 널리 퍼지면서 오히려 로컬 환경에서 개발하기 편리해졌다고 느낀다. 그러나 반대 급부로 그만한 사이즈의 모델을 튜닝하거나 다루기 위해서는 <strong>서버 환경에서의 개발 역량</strong> 또한 놓칠 수 없다고 생각한다.</p>
+
+<p>아쉽지만 현재 회사에서는 프로젝트 상 로컬 환경을 활용하는 것이 최선이므로, 개인적으로 홈서버를 구축하고 스스로 연습하려는 것이다. 먼 이야기지만 나중에 회사에서 서버 인스턴스를 할당 받았을 때 실수나 사고 없이 안정적으로 해내는 모습을 보여드리고 싶기도 하고.</p>
+
+<p><img src="https://github.com/user-attachments/assets/843ec181-9048-4cd4-be37-9a04ecf4fee1" alt="image" /></p>
+
+<p>무엇보다도 전자 회로 기판을 조립해서 만든 작은 컴퓨터는 나만의 작은 공간을 창조한다는 감동을 준달까. 기계와 로우레벨의 교감을 주고 받는 것이다…</p>
+
+<h1 id="목표">목표</h1>
+
+<p>홈서버를 구축하고 난 뒤에 구체적으로 어떤 것들을 해볼 수 있을지 목표를 정리해보았다. 목표는 제품의 스펙을 결정하는 기준이 될 것이다. (나는 보통 목표를 질문의 형식으로 작성하는데, 그 질문들에 답변할 수 있을 때 목표를 이루었다고 여기기 때문이다)</p>
+
+<ul>
+  <li>리눅스 운영체제는 어떻게 동작하는 것일까?</li>
+  <li>파이썬과 운영체제는 어떻게 상호작용하는 것일까?</li>
+  <li>데이터를 최대한 효율적으로 처리하는 방법은 무엇일까?</li>
+  <li>머신러닝 모델을 경량화하는 방법은 무엇일까?</li>
+  <li>머신러닝 모델의 추론과 운영을 어떻게 컨테이너화할까?</li>
+  <li>왜 C/C++ 개발 역량을 지닌 머신러닝 엔지니어가 우대 받는 걸까?</li>
+</ul>
+
+<p><strong>로우레벨 환경에서 운영체제와 파이썬 언어의 동작을 이해하는 것</strong>과 <strong>매우 한정된 성능 안에서 데이터 처리를 최적화하는 것</strong>으로 요약할 수 있겠다.</p>
+
+<h1 id="절대적-우선순위">절대적 우선순위</h1>
+
+<p>제품 스펙을 살펴보기 앞서 현실적으로 고려해야 할 두 가지를 먼저 언급하려 한다. 바로 <strong>가격</strong>과 <strong>사이즈</strong>다.</p>
+
+<p>실습, 장난감 용도이기 때문에 큰 돈을 들일 생각이 없다. 가성비 전략으로 간다. 중고 물품도 적극 고려할 예정.</p>
+
+<p>또한 활동 공간이 3평 남짓한 자취방에서 감당할 수 있어야 하므로 사이즈는 최대한 미니미니하게 해야 한다.</p>
+
+<h1 id="구성-요소">구성 요소</h1>
+
+<p><img src="https://github.com/user-attachments/assets/c3f8de55-84c7-4df3-b279-d21a5168a186" alt="image" /></p>
+
+<p>오늘날 컴퓨터는 폰 노이만 구조를 뼈대로 하여 확장된 형태이다. 이번 프로젝트에서 어떤 구성품을 마련할지 고민하면서 이 폰 노이만 컴퓨터를 참고할 수 있었다.</p>
+
+<p>폰 노이만 구조의 구성 요소는 CPU, 메모리, 프로그램이다. 이때 프로그램은 메모리 안에 저장되고 실행되는 명령어의 집합이다.</p>
+
+<p>그러니까 하드웨어 관점에서 필수 요소는 <strong>처리 장치(CPU)</strong>, <strong>기억 장치(메모리)</strong>, 그리고 이들을 운영하고 제어하기 위한 <strong>입출력 장치</strong>다.</p>
+
+<h2 id="cpu-와-메모리">CPU 와 메모리</h2>
+
+<p>싱글보드 컴퓨터는 메인보드(Motherboard)에 처리 장치인 CPU와 주기억 장치인 RAM이 탑재되어 있는 것을 말한다. 라즈베리 파이가 대표적인 싱글보드 컴퓨터 제품.</p>
+
+<p>사실 엔비디아에도 싱글보드 컴퓨터 라인업이 있으며 GPU 활용이 필요하다면 이쪽이 더 나을 수도 있다.</p>
+
+<p><img src="https://github.com/user-attachments/assets/f1ebca65-b9bc-4ab1-9fa4-a0a45240d6af" alt="image" /></p>
+
+<p>야속하게도 불과 5일 전 엔비디아에서 AI용 싱글보드 컴퓨터 개발자 키트를 매우 합리적인 가격에 출시한다는 <a href="https://www.aitimes.com/news/articleView.html?idxno=166348">소식</a>을 내놨다. <code class="language-plaintext highlighter-rouge">젯슨 오린 나노(Jetson ORIN™ Nano)</code> 라는 제품이고 249달러(한화 약 36만원)다. LLM 등 딥러닝 모델 처리에 특화된 제품이라고 한다.</p>
+
+<blockquote>
+  <p>너무나도 갖고 싶다…</p>
+</blockquote>
+
+<p>하지만 나의 절대적인 기준은 가격이기 때문에 욕심을 내려놓으려 한다. 젯슨 시리즈는 나중에 더 큰 집으로 이사 가면 모셔보겠다 🥲</p>
+
+<hr />
+
+<p>라즈베리 파이도 여러 제품이 있다. 몇 세대를 살지, 램 사이즈는 어느 정도로 할지 결정해야 한다.</p>
+
+<p><strong>몇 세대를 살 것인가?</strong> ➡️ 4 세대</p>
+
+<p>주로 4세대와 5세대를 많이 비교하는 것 같다.</p>
+
+<p>2019년 출시된 4세대는 성능과 가격 측면에서 경쟁력이 있어 독보적으로 인기 있는 제품이라고 한다. 5세대는 비교적 최근인 2023년에 출시되었는데, 이전 세대에 비해 가격도 오른 데다 발열이나 어댑터 등 이슈가 있어 차라리 미니 PC를 사는 편이 낫다고 보는 견해가 많다. 나도 5세대 제품 가격 보고 ‘그냥 젯슨을 살까 …‘라고 고민했는데, 그럴 바에 <u>4세대를 선택하겠다</u>고 판단했다.</p>
+
+<p><strong>램 사이즈는?</strong> ➡️ 4GB</p>
+
+<p>1, 2, 4, 8GB 옵션이 있다. 모델 올리는 것을 생각하면 4GB 이상은 되어야 할 텐데, 4GB는 7만원대이고 8GB는 11만원대로 가격 차이가 난다. 성능보다 가격이 중요한 상황이므로 전자로 결정했다.</p>
+
+<h3 id="상세-스펙">상세 스펙</h3>
+
+<p>구체적인 스펙은 아래와 같다. <a href="https://www.raspberrypi.com/products/raspberry-pi-4-model-b/specifications/">공식 사이트</a>를 참고했다.</p>
+
+<p><img src="https://github.com/user-attachments/assets/15ba5b82-4c60-4571-b6b2-c3f3e19f6b91" alt="image" /></p>
+
+<table>
+  <thead>
+    <tr>
+      <th style="text-align: center"><strong>카테고리</strong></th>
+      <th style="text-align: left"><strong>내용</strong></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style="text-align: center"><strong>프로세서</strong></td>
+      <td style="text-align: left">Broadcom BCM2711, 쿼드코어 Cortex-A72 (ARM v8) 64-bit SoC @ 1.8GHz</td>
+    </tr>
+    <tr>
+      <td style="text-align: center"><strong>메모리(RAM)</strong></td>
+      <td style="text-align: left">8GB</td>
+    </tr>
+    <tr>
+      <td style="text-align: center"><strong>무선 연결</strong></td>
+      <td style="text-align: left">2.4 GHz/5.0GHz 와이파이, Bluetooth 5.0, BLE</td>
+    </tr>
+    <tr>
+      <td style="text-align: center"><strong>유선 연결(이더넷)</strong></td>
+      <td style="text-align: left">기가비트 이더넷</td>
+    </tr>
+    <tr>
+      <td style="text-align: center"><strong>USB 포트</strong></td>
+      <td style="text-align: left">USB 3.0 포트 2개, USB 2.0 포트 2개</td>
+    </tr>
+    <tr>
+      <td style="text-align: center"><strong>GPIO</strong></td>
+      <td style="text-align: left">라즈베리 파이 표준 40핀 GPIO 헤더</td>
+    </tr>
+    <tr>
+      <td style="text-align: center"><strong>디스플레이 출력</strong></td>
+      <td style="text-align: left">micro-HDMI 포트 2개 (최대 4k60 지원)</td>
+    </tr>
+    <tr>
+      <td style="text-align: center"><strong>디스플레이 인터페이스</strong></td>
+      <td style="text-align: left">2-레인 MIPI DSI 디스플레이 포트</td>
+    </tr>
+    <tr>
+      <td style="text-align: center"><strong>그래픽</strong></td>
+      <td style="text-align: left">OpenGL ES 3.1, Vulkan 1.0</td>
+    </tr>
+    <tr>
+      <td style="text-align: center"><strong>저장 장치</strong></td>
+      <td style="text-align: left">Micro SD 카드 슬롯</td>
+    </tr>
+    <tr>
+      <td style="text-align: center"><strong>전원 공급</strong></td>
+      <td style="text-align: left">USB-C 포트/GPIO 헤더를 통한 전원 공급, 5V DC, 최소 3A</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2 id="보조-기억-장치">보조 기억 장치</h2>
+
+<p>라즈베리 파이4는 SD카드를 지원한다. 운영체제 설치까지 고려해서 용량이 32GB 는 되어야 할 것 같다.</p>
+
+<p>우선 가장 무난하게 Sandisk Ultra 32GB (6천원대) 사용할 예정이다. 호환 가능한 <a href="https://elinux.org/RPi_SD_cards#Working_.2F_Non-working_SD_cards">SD 카드 리스트</a>도 확인해보자.</p>
+
+<p>라즈베리 파이 환경에서 SD카드 제품별로 성능을 비교한 훌륭한 <a href="https://makeutil.tistory.com/254">블로그글</a>이 있으니 참고하시라.</p>
+
+<h2 id="입출력-장치">입출력 장치</h2>
+
+<p><img src="https://github.com/user-attachments/assets/e593651c-7542-4f6b-8145-91655025b426" alt="Image" /></p>
+
+<p>이번에 선물 받은 하기비스 미니 모니터를 연결할 예정이다. 다만 전원 등 호환이 될지 모르겠다. <a href="https://ko.aliexpress.com/item/1005006767426312.html?srcSns=sns_KakaoTalk&amp;spreadType=socialShare&amp;bizType=ProductDetail&amp;social_params=6000213862574&amp;aff_fcid=056f945532e144c7ae1b3bbe9066a2b7-1734873003608-04553-_op0QH0f&amp;tt=MG&amp;aff_fsk=_op0QH0f&amp;aff_platform=default&amp;sk=_op0QH0f&amp;aff_trace_key=056f945532e144c7ae1b3bbe9066a2b7-1734873003608-04553-_op0QH0f&amp;shareId=6000213862574&amp;businessType=ProductDetail&amp;platform=AE&amp;terminal_id=8902864ebb8a43d7ac279d621575f15c&amp;afSmartRedirect=y">알리</a>에서 5만원대에 구입했는데, 현재 7만원대로 올랐다.</p>
+
+<p>하기비스 모니터 설명으로 미루어봐서 micro HDMI to USB-C 어댑터가 필요할 것으로 보인다.</p>
+<blockquote>
+  <p>One Cable Connection Mode: USB3.1 Gen2 cable connects HOST port and USB-C port of the laptop, allowing for simultaneous IPS mini screen display and interface expansion. *Note: The USB-C interface of the laptop must be Thunderbolt 3/4, USB4, or a USB-C interface that supports the DisplayPort (DP) protocol in order to use this mode</p>
+</blockquote>
+
+<p>키보드는 집에 있는 키크론 키보드를 활용할 것이다.</p>
+
+<p>사실 입출력 장치는 큰 걱정이 없다. 어차피 맥북으로 SSH 원격 접속할 예정이기 때문이다.</p>
+
+<h2 id="네트워크">네트워크</h2>
+
+<p>자취방의 와이파이를 연결할 예정이다. 다만 자취방 와이파이가 <em>매우 불안정하여</em> 제멋대로 끊길 때가 많은데 - 체감상 4~5시간에 한 번(…) - 이게 얼마나 큰 문제로 작용할지는 … 일단 연결해봐야 알겠다.</p>
+
+<h2 id="전원-공급-장치">전원 공급 장치</h2>
+
+<p>라즈베리 파이4 부터는 전원을 USB-C 타입으로 공급 받는다. 모니터를 연결했을 때 전류가 얼마나 될지 모르겠지만, 가장 안전하게 라즈베리 파이4에 맞게 나온 5V 4A <a href="https://www.devicemart.co.kr/goods/view?no=12544959">전용 어댑터</a>면 좋을 것 같다. 가격은 7천원.</p>
+
+<h2 id="기타-장비">기타 장비</h2>
+
+<p>그 외 케이스, 방열판, 쿨러 등 보조 부품들이 있다. 이것은 필수 부품들을 갖추고 나서 하나씩 모을 생각이다. 이왕이면 이쁜 것들로 고심해서 고르고 싶기도 하고.</p>
+
+<h3 id="결산">결산</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th style="text-align: center"><strong>필수 부품</strong></th>
+      <th style="text-align: left"><strong>가격</strong></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style="text-align: center"><strong>라즈베리 파이</strong></td>
+      <td style="text-align: left">78,000원 ~</td>
+    </tr>
+    <tr>
+      <td style="text-align: center"><strong>SD 카드</strong></td>
+      <td style="text-align: left">6,200원 ~</td>
+    </tr>
+    <tr>
+      <td style="text-align: center"><strong>micro HDMI to USB-C 어댑터</strong></td>
+      <td style="text-align: left">제품을 찾을 수 없음;;</td>
+    </tr>
+    <tr>
+      <td style="text-align: center"><strong>전원 어댑터</strong></td>
+      <td style="text-align: left">7,000원</td>
+    </tr>
+    <tr>
+      <td style="text-align: center"><strong>보조 장비</strong></td>
+      <td style="text-align: left">아직 모름</td>
+    </tr>
+    <tr>
+      <td style="text-align: center"><strong>총합</strong></td>
+      <td style="text-align: left">83,200원 이상</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>대충 훑어봤지만 micro HDMI to USB-C 제품이 보이지 않는 게 약간 난감하다. micro HDMI 를 HDMI 로 변환한 후에 C타입으로 연결해야 할 것 같은 불길한 느낌. 그래도 필수 부품만 해서 10만원 이하로 맞출 수 있다면 충분히 만족스러울 것 같다.</p>
+
+<h1 id="나가며">나가며</h1>
+
+<p>오늘은 홈서버 프로젝트를 위해 목표와 장비의 스펙을 정리해보았다. 필수 부품을 하나씩 마련한 후에 운영체제 설치 등 세팅 과정을 블로그에 연재할 계획이다. 실습까지 갈 길이 멀지만 즐겁게, 꾸준히 해보자!</p>
+
+    </section>
+  </div>
+
+  <div class="pagination">
+    
+      <span class="prev" >
+          <a href="https://woocosmos.github.io/probation/">
+            &#xE000; 내가 무엇을, 왜 하고 있는지 인지하기 [수습기간 회고] 
+          </a>
+      </span>
+    
+    
+      <span class="next" >
+          <a href="https://woocosmos.github.io/obsidian/">
+            옵시디언(Obsidian)을 세팅해보자 - git 활용한 아이폰 동기화까지 &#xE001;
+          </a>
+      </span>
+    
+  </div>
+
+  <div class="comments">
+	<div id="disqus_thread"></div>
+	<script type="text/javascript">
+
+	    var disqus_shortname = 'woocosmos';
+
+	    (function() {
+	        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+	        dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+			dsq.setAttribute('data-timestamp', +new Date()); //추가
+	        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+	    })();
+
+	</script>
+	<noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+  <script type="text/javascript">
+    "use strict"; 
+    function addBackToTop() 
+        { function o() 
+            { 
+                t() >= z ? R && (D.className = "", R = !1) : R || (D.className = "hidden", R = !0) 
+            } 
+          function t() 
+            { 
+                return E.scrollTop || A && document.documentElement.scrollTop || 0 
+            } 
+          function e(o) 
+            { 
+                E.scrollTop = o, A && (document.documentElement.scrollTop = o) 
+            } 
+    
+    var n, i, d, r, c = arguments.length > 0 && void 0 !== arguments[0] ? arguments[0] : {}, a = c.backgroundColor, s = void 0 === a ? "#000" : a, l = c.cornerOffset, u = void 0 === l ? 20 : l, m = c.diameter, p = void 0 === m ? 56 : m, h = c.ease, b = void 0 === h ? function (o) { return .5 * (1 - Math.cos(Math.PI * o)) } : h, v = c.id, f = void 0 === v ? "back-to-top" : v, x = c.innerHTML, g = void 0 === x ? '<svg viewBox="0 0 24 24"><path d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z"></path></svg>' : x, w = c.onClickScrollTo, y = void 0 === w ? 0 : w, k = c.scrollContainer, E = void 0 === k ? document.body : k, T = c.scrollDuration, C = void 0 === T ? 100 : T, M = c.showWhenScrollTopIs, z = void 0 === M ? 1 : M, L = c.size, B = void 0 === L ? p : L, H = c.textColor, I = void 0 === H ? "#fff" : H, N = c.zIndex, S = void 0 === N ? 1 : N, q = E === document.body, A = q && document.documentElement; n = Math.round(.35 * B), i = Math.round(.2 * B), d = "#" + f + "{background:" + s + ";-webkit-border-radius:50%;-moz-border-radius:50%;border-radius:50%;bottom:" + u + "px;-webkit-box-shadow:0 2px 5px 0 rgba(0,0,0,.26);-moz-box-shadow:0 2px 5px 0 rgba(0,0,0,.26);box-shadow:0 2px 5px 0 rgba(0,0,0,.26);color:" + I + ";cursor:pointer;display:block;height:" + B + "px;opacity:1;outline:0;position:fixed;right:" + u + "px;-webkit-tap-highlight-color:transparent;-webkit-touch-callout:none;-webkit-transition:bottom .2s,opacity .2s;-o-transition:bottom .2s,opacity .2s;-moz-transition:bottom .2s,opacity .2s;transition:bottom .2s,opacity .2s;-webkit-user-select:none;-moz-user-select:none;-ms-user-select:none;user-select:none;width:" + B + "px;z-index:" + S + "}#" + f + " svg{display:block;fill:currentColor;height:" + n + "px;margin:" + i + "px auto 0;width:" + n + "px}#" + f + ".hidden{bottom:-" + B + "px;opacity:0}", (r = document.createElement("style")).appendChild(document.createTextNode(d)), document.head.insertAdjacentElement("afterbegin", r); var D = function () { var o = document.createElement("div"); return o.id = f, o.className = "hidden", o.innerHTML = g, o.addEventListener("click", function (o) { o.preventDefault(), function () { var o = "function" == typeof y ? y() : y, n = window, i = n.performance, d = n.requestAnimationFrame; if (C <= 0 || void 0 === i || void 0 === d) return e(o); var r = i.now(), c = t(), a = c - o; d(function o(t) { var n = Math.min((t - r) / C, 1); e(c - Math.round(b(n) * a)), n < 1 && d(o) }) }() }), document.body.appendChild(o), o }(), R = !0; (q ? window : E).addEventListener("scroll", o), o() } window.addEventListener("load", function () { var o = document.getElementById("back-to-top"), t = document.querySelector(".sticky-bottom"), e = document.querySelector(".fixed-bottom"); o && window.addEventListener("scroll", function () { if (t) { var n = t.getBoundingClientRect(); window.scrollY + window.innerHeight > document.body.scrollHeight - n.height ? (o.style.position = "fixed", o.style.bottom = n.height + 15 + "px") : (o.style.position = "fixed", o.style.bottom = "15px") } if (e) { var i = e.getBoundingClientRect(); o.style.position = "fixed", o.style.bottom = i.height + 15 + "px" } }) });
+</script>
+<script>
+    addBackToTop();
+</script>
+
+
+
+
+</article>
+
+    </div>
+    
+    <div class="wrapper-footer">
+      <div class="container">
+        <footer class="footer">
+          <!-- Refer to https://codepen.io/ruandre/pen/howFi -->
+<ul class="svg-icon">
+
+  
+
+  
+
+  
+  <li><a href="mailto:woocosmos@gmail.com" class="icon-8 email" title="Email"><svg viewBox="0 0 512 512"><path d="M101.3 141.6v228.9h0.3 308.4 0.8V141.6H101.3zM375.7 167.8l-119.7 91.5 -119.6-91.5H375.7zM127.6 194.1l64.1 49.1 -64.1 64.1V194.1zM127.8 344.2l84.9-84.9 43.2 33.1 43-32.9 84.7 84.7L127.8 344.2 127.8 344.2zM384.4 307.8l-64.4-64.4 64.4-49.3V307.8z"/></svg><!--[if lt IE 9]><em>Email</em><![endif]--></a></li>
+  
+
+  
+
+  
+
+  
+  <li><a href="https://github.com/woocosmos" class="icon-13 github" title="GitHub"><svg viewBox="0 0 512 512"><path d="M256 70.7c-102.6 0-185.9 83.2-185.9 185.9 0 82.1 53.3 151.8 127.1 176.4 9.3 1.7 12.3-4 12.3-8.9V389.4c-51.7 11.3-62.5-21.9-62.5-21.9 -8.4-21.5-20.6-27.2-20.6-27.2 -16.9-11.5 1.3-11.3 1.3-11.3 18.7 1.3 28.5 19.2 28.5 19.2 16.6 28.4 43.5 20.2 54.1 15.4 1.7-12 6.5-20.2 11.8-24.9 -41.3-4.7-84.7-20.6-84.7-91.9 0-20.3 7.3-36.9 19.2-49.9 -1.9-4.7-8.3-23.6 1.8-49.2 0 0 15.6-5 51.1 19.1 14.8-4.1 30.7-6.2 46.5-6.3 15.8 0.1 31.7 2.1 46.6 6.3 35.5-24 51.1-19.1 51.1-19.1 10.1 25.6 3.8 44.5 1.8 49.2 11.9 13 19.1 29.6 19.1 49.9 0 71.4-43.5 87.1-84.9 91.7 6.7 5.8 12.8 17.1 12.8 34.4 0 24.9 0 44.9 0 51 0 4.9 3 10.7 12.4 8.9 73.8-24.6 127-94.3 127-176.4C441.9 153.9 358.6 70.7 256 70.7z"/></svg><!--[if lt IE 9]><em>GitHub</em><![endif]--></a></li>
+  
+
+  
+
+  
+
+  
+  <li><a href="https://www.linkedin.com/in/yunsoo-woo-245946213" class="icon-17 linkedin" title="LinkedIn"><svg viewBox="0 0 512 512"><path d="M186.4 142.4c0 19-15.3 34.5-34.2 34.5 -18.9 0-34.2-15.4-34.2-34.5 0-19 15.3-34.5 34.2-34.5C171.1 107.9 186.4 123.4 186.4 142.4zM181.4 201.3h-57.8V388.1h57.8V201.3zM273.8 201.3h-55.4V388.1h55.4c0 0 0-69.3 0-98 0-26.3 12.1-41.9 35.2-41.9 21.3 0 31.5 15 31.5 41.9 0 26.9 0 98 0 98h57.5c0 0 0-68.2 0-118.3 0-50-28.3-74.2-68-74.2 -39.6 0-56.3 30.9-56.3 30.9v-25.2H273.8z"/></svg><!--[if lt IE 9]><em>LinkedIn</em><![endif]--></a></li>
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</ul>
+
+
+<p>© 2026 Yunsoo Woo</p>
+
+        </footer>
+      </div>
+    </div>
+
+    <!--  -->
+
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-1YCJCQRD4F"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-1YCJCQRD4F');
+</script>
+    <script type="text/javascript">
+    "use strict"; 
+    function addBackToTop() 
+        { function o() 
+            { 
+                t() >= z ? R && (D.className = "", R = !1) : R || (D.className = "hidden", R = !0) 
+            } 
+          function t() 
+            { 
+                return E.scrollTop || A && document.documentElement.scrollTop || 0 
+            } 
+          function e(o) 
+            { 
+                E.scrollTop = o, A && (document.documentElement.scrollTop = o) 
+            } 
+    
+    var n, i, d, r, c = arguments.length > 0 && void 0 !== arguments[0] ? arguments[0] : {}, a = c.backgroundColor, s = void 0 === a ? "#000" : a, l = c.cornerOffset, u = void 0 === l ? 20 : l, m = c.diameter, p = void 0 === m ? 56 : m, h = c.ease, b = void 0 === h ? function (o) { return .5 * (1 - Math.cos(Math.PI * o)) } : h, v = c.id, f = void 0 === v ? "back-to-top" : v, x = c.innerHTML, g = void 0 === x ? '<svg viewBox="0 0 24 24"><path d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z"></path></svg>' : x, w = c.onClickScrollTo, y = void 0 === w ? 0 : w, k = c.scrollContainer, E = void 0 === k ? document.body : k, T = c.scrollDuration, C = void 0 === T ? 100 : T, M = c.showWhenScrollTopIs, z = void 0 === M ? 1 : M, L = c.size, B = void 0 === L ? p : L, H = c.textColor, I = void 0 === H ? "#fff" : H, N = c.zIndex, S = void 0 === N ? 1 : N, q = E === document.body, A = q && document.documentElement; n = Math.round(.35 * B), i = Math.round(.2 * B), d = "#" + f + "{background:" + s + ";-webkit-border-radius:50%;-moz-border-radius:50%;border-radius:50%;bottom:" + u + "px;-webkit-box-shadow:0 2px 5px 0 rgba(0,0,0,.26);-moz-box-shadow:0 2px 5px 0 rgba(0,0,0,.26);box-shadow:0 2px 5px 0 rgba(0,0,0,.26);color:" + I + ";cursor:pointer;display:block;height:" + B + "px;opacity:1;outline:0;position:fixed;right:" + u + "px;-webkit-tap-highlight-color:transparent;-webkit-touch-callout:none;-webkit-transition:bottom .2s,opacity .2s;-o-transition:bottom .2s,opacity .2s;-moz-transition:bottom .2s,opacity .2s;transition:bottom .2s,opacity .2s;-webkit-user-select:none;-moz-user-select:none;-ms-user-select:none;user-select:none;width:" + B + "px;z-index:" + S + "}#" + f + " svg{display:block;fill:currentColor;height:" + n + "px;margin:" + i + "px auto 0;width:" + n + "px}#" + f + ".hidden{bottom:-" + B + "px;opacity:0}", (r = document.createElement("style")).appendChild(document.createTextNode(d)), document.head.insertAdjacentElement("afterbegin", r); var D = function () { var o = document.createElement("div"); return o.id = f, o.className = "hidden", o.innerHTML = g, o.addEventListener("click", function (o) { o.preventDefault(), function () { var o = "function" == typeof y ? y() : y, n = window, i = n.performance, d = n.requestAnimationFrame; if (C <= 0 || void 0 === i || void 0 === d) return e(o); var r = i.now(), c = t(), a = c - o; d(function o(t) { var n = Math.min((t - r) / C, 1); e(c - Math.round(b(n) * a)), n < 1 && d(o) }) }() }), document.body.appendChild(o), o }(), R = !0; (q ? window : E).addEventListener("scroll", o), o() } window.addEventListener("load", function () { var o = document.getElementById("back-to-top"), t = document.querySelector(".sticky-bottom"), e = document.querySelector(".fixed-bottom"); o && window.addEventListener("scroll", function () { if (t) { var n = t.getBoundingClientRect(); window.scrollY + window.innerHeight > document.body.scrollHeight - n.height ? (o.style.position = "fixed", o.style.bottom = n.height + 15 + "px") : (o.style.position = "fixed", o.style.bottom = "15px") } if (e) { var i = e.getBoundingClientRect(); o.style.position = "fixed", o.style.bottom = i.height + 15 + "px" } }) });
+</script>
+<script>
+    addBackToTop();
+</script>
+
+
+
+
+
+  </body>
+</html>

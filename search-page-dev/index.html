@@ -1,0 +1,1474 @@
+<!DOCTYPE html>
+<html>
+  <head>
+  <title>블로그 키워드 추천 및 검색 기능 구현기 – YunsooLog – 행간을 읽는 기계학습 이야기</title>
+  <link rel="icon" href="/images/favicon.ico">
+      <meta name="google-site-verification" content="NA4jg1Iffw6aA9VWjj3kqoo2jfOkPRxINJtYphd7VeI" />
+    <meta charset="utf-8" />
+    <meta content='text/html; charset=utf-8' http-equiv='Content-Type'>
+    <meta http-equiv='X-UA-Compatible' content='IE=edge'>
+    <meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1.0'>
+    <meta http-equiv="Permissions-Policy" content="interest-cohort=()">
+    
+    
+    <meta name="description" content="요약
+- simple-jekyll-search 라이브러리를 활용하여 검색 기능을 추가했다
+- 탭에서 접근할 수 있는 검색 페이지를 구성하고 검색 결과를 적절하게 시각화했다
+- TF-IDF 값을 활용하여 검색할 키워드를 추천했다
+
+
+개요
+
+Kiko Now Jekyll 테마에 검색 기능이 없는 관계로 직접 검색 페이지를 구성하고 JS 라이브러리로 검색 기능을 적용했다. 블로그에 포스트가 쌓일수록 검색 기능이 필수적이라고 생각했다. 태그 기반의 문서 분류 방식은 한계가 명확하고, 특정 문서를 찾을 때도 검색이 가장 간편하기 때문이다.
+
+블로그 개발 과정은 특정 포스트에 아카이빙하고 있지만, 해당 기능은 분량이 많아 별도로 기록한다.
+
+기본 기능
+입력 키워드로 블로그 내 모든 컨텐츠에 대해 검색하는 기본 기능부터 적용한다.
+
+Simple-Jekyll-Search 라이브러리를 적용했다. 브라우저 단[Client-Side]에서 작동하기 때문에 별도 서버나 DB를 구축할 필요가 없다. 적용 과정 역시 간단하다.
+
+ 첫째, search.json 생성 
+
+블로그의 root 위치에 아래 search.json 파일을 만든다.
+
+---
+layout: none
+---
+[
+  {% for post in site.posts %}
+    {
+      "title"    : "{{ post.title | escape }}",
+      "tags"     : "{{ post.tags | join: ', ' }}",
+      "date"     : "{{ post.date | date: '%Y.%m.%d'}}",
+      "url"  : "{{ site.url }}{{ post.url }}",
+      "content": "{{ post.content | strip_html | strip_newlines | escape }}"
+    } {% unless forloop.last %},{% endunless %}
+  {% endfor %}
+]
+
+기존 코드에 post.content 를 추가하여 본문 텍스트도 가져오게 했다. 이때 strip_html 등 몇 가지 Jekyll 문법을 더했다. 이를 통해 {baseurl}/search.json 주소로 json 파일에 접근할 수 있다. 브라우저로부터 이 파일을 읽어와 검색 데이터로 활용할 것이다.
+
+
+
+
+ 둘째, JavaSript 소스 추가 
+
+simple-jekyll-search.js를 다운 받아 어디든 위치시킨다. 이 스크립트는 search.json으로부터 데이터를 읽어와 입력어에 매칭되는 내용을 찾는 함수 SimpleJekyllSearch를 정의하고 있다.
+
+그 다음 search-and-return.js도 다운 받아 같은 위치에 붙여넣는다. SimpleJekyllSearch 함수를 실행시켜서 결과값을 받아와 처리하는 부분을 별도 스크립트로 작성한 것이다.
+
+var sjs = SimpleJekyllSearch({
+    searchInput: document.getElementById('search-input'),
+    resultsContainer: document.getElementById('results-container'),
+    json: '/search.json',
+    searchResultTemplate: ...
+    noResultsText: '😴 검색 결과가 없습니다',
+    templateMiddleware : ...
+)}
+
+
+나는 assets 라는 폴더를 만들어 이곳에 JS 소스를 모아두기로 했다. 두 스크립트는 다음 서술할 검색 페이지에서 실행시킬 것이다.
+
+ 셋째, 검색 페이지 구성 
+
+root 위치에 search 폴더를 생성하고 그 아래 index.html 파일을 생성한다. 앞서 추가한 JS 스크립트가 실행되면서 검색어 입출력이 진행되는 곳이다.
+
+---
+layout: page
+permalink: /search
+---
+
+&lt;ul class="search"&gt;
+    &lt;div id="search-container"&gt;
+        &lt;input type="search" id="search-input" placeholder="  🤔 검색어를 입력하세요."&gt;
+        &lt;ul id="results-container"&gt;&lt;/ul&gt;
+    &lt;/div&gt;
+&lt;/ul&gt;
+
+&lt;script src="{{ site.baseurl }}/assets/simple-jekyll-search.js" type="text/javascript"&gt;&lt;/script&gt;
+&lt;script src="{{ site.baseurl }}/assets/search-and-return.js" type="text/javascript"&gt;&lt;/script&gt;
+
+
+이렇게 {baseurl}/search 주소로 접근할 수 있는 검색 페이지를 완성하였다.
+
+
+
+한편, 무엇을 클릭했을 때 이 검색 페이지로 연결되도록 할 것인가? 나는 상단의 탭에 돋보기 아이콘을 추가했다. 이를 위해 돋보기 아이콘 svg와 검색 페이지를  연결하여 _includes/nav.html에 추가했다.
+
+&lt;ul class="search-icon"&gt;
+  &lt;a href="{{ site.baseurl }}/search"&gt;
+    &lt;svg 
+      width="24" 
+      height="24" 
+      viewBox="0 0 24 24" 
+      fill="none" 
+      xmlns="http://www.w3.org/2000/svg"&gt;
+      &lt;path d="M10 ...생략" fill="currentColor"&gt;&lt;/path&gt;
+    &lt;/svg&gt;
+  &lt;/a&gt;
+&lt;/ul&gt;
+
+
+
+
+이렇게 검색 페이지를 구성하고 검색용 라이브러리를 적용하는 과정을 마무리하였다.
+
+응용 기능
+기본 검색 기능에 더하여 키워드를 더 쉽게 찾고 검색 결과를 더 잘 표현하기 위해 개선한 사항이다.
+
+결과창 개선
+
+
+
+이미지에 보듯 결과창에 추가한 내용은 다음과 같다.
+
+
+  검색어 하이라이트
+  클릭시 본문 및 태그 페이지로 링크 연결
+  본문 미리보기
+  검색어가 언급된 횟수 표시
+  아이콘과 함께 메타 정보 디스플레이
+
+
+
+이를 위해 SimpleJekyllSearch 함수의 templateMiddleware와 searchResultTemplate 인자를 활용할 것이다. 전자는 검색 결과가 있을 때 호출되는 함수이며 후자는 그 결과를 출력할 HTML 템플릿을 지정하는 인자다. 하나씩 짚어보도록 하겠다.
+
+
+templateMiddleware 인자는 다음과 같이 정의된 함수를 필요로 한다.
+
+function (prop, value, template) {
+    return value
+    }
+
+prop은 json의 key이고 value는 key에 대한 value를 의미한다. 이제 prop, 즉 ‘항목’에 따라 value를 처리할 것이다.
+
+URL과 날짜 항목은 json에 저장된 그대로 사용할 예정이기 때문에 바로 value를 반환하도록 했다.
+
+if (prop === "url" || prop === 'date') {
+          return value;
+        }
+
+
+나머지 제목, 태그, 본문 항목은 검색어 하이라이트를 적용하고 URL과 연결하는 작업이 필요하다.
+우선 검색어를 저장하고, 그것을 찾는 정규표현식 객체와 최종적으로 리턴될 변수를 선언한다.
+
+const searchTerm = document.getElementById("search-input").value;
+const regex = new RegExp(searchTerm, "gi");
+let highlightedValue;
+
+
+제목 항목은 정규표현식 객체로 검색어($&amp;)를 HTML 태그로 감싼다. 배경색깔을 바꾸고 폰트를 굵게 표시한다.
+if (prop === 'title') {
+  highlightedValue = value.replace(regex, '&lt;span style="background:gold"&gt;&lt;b&gt;$&amp;&lt;/b&gt;&lt;/span&gt;')
+  return highlightedValue;
+}
+
+
+태그 항목의 경우 태그 페이지의 각 태그 링크와 연동했다.
+앞서 json을 생성하면서 쉼표로 join 했기 때문에 split하고 join하는 과정을 한번 더 거치는데, search.json을 개선해서 전처리를 간소화하는 대안도 고민해봐야겠다.
+
+if (prop === 'tags') {
+    const dest = window.location.origin;
+    const theTags = value.split(', ').map(tag =&gt; tag.trim());
+    
+    highlightedLinkedValue = theTags.map(tag =&gt; {
+      // 하이라이트를 적용한다
+      const highlightedTag = tag.replace(regex, '&lt;b style="background:gold"&gt;$&amp;&lt;/b&gt;');
+      // 링크를 적용한다
+      return `&lt;a href="${dest}/tags/#${tag}"&gt;&lt;span&gt;${highlightedTag}&lt;/span&gt;&lt;/a&gt;`;
+    }).join(', ');
+    
+    return highlightedLinkedValue;
+        }
+
+
+마지막으로 본문을 보여주는 데 있어 두 가지 지점을 고려했다. 첫번째는 30개 단어까지 미리보기로 보여주는 것이고 두번째는 본문에서 match가 걸린 횟수를 명시하는 것이다.
+
+첫번째 매치를 기준으로 앞뒤 15개 단어까지 슬라이스하였다. 본문에 매치가 없을 경우 처음부터 30개 단어를 가져온다. 마지막으로는 정규표현식 객체에 매치된 matches의 개수를 명시했다.
+
+value = value.replace(/\[.*?\]/g, '');
+const matches = value.match(regex);
+let matchCnt;
+if (matches) {
+    // 띄어쓰기를 기준으로 토큰화한다
+    const wordsArray = value.split(/\s+/);
+
+    // 검색된 단어를 기준으로 앞뒤 15개 토큰을 사용한다
+    const matchIndex = wordsArray.findIndex(word =&gt; regex.test(word));
+    const start = Math.max(0, matchIndex - 15); 
+    const end = Math.min(wordsArray.length, matchIndex + 15 + 1); 
+    const truncatedValue = wordsArray.slice(start, end).join(" ");
+
+    // 하이라이트를 적용한다
+    highlightedValue = truncatedValue.replace(
+        regex,
+        '&lt;span style="background:gold"&gt;&lt;b&gt;$&amp;&lt;/b&gt;&lt;/span&gt;'
+    );
+    matchCnt = matches.length
+
+} else {
+    // 본문에 검색어가 없을 경우 처음부터 30개 토큰을 가져온다
+    const words = value.split(/\s+/).slice(0, 30).join(" ");
+    highlightedValue = `${words}...`;
+    matchCnt = 0
+}
+// 언급수
+highlightedValue += `&lt;div style="padding-top:5px"&gt;&lt;span id="match-counter"&gt;본문에 &lt;b&gt;${matchCnt}&lt;/b&gt;번 언급되었습니다&lt;/span&gt;&lt;/div&gt;`;
+return highlightedValue;
+
+
+이렇게 처리된 결과물은 searchResultTemplate에 정의한 HTML 템플릿대로 디스플레이 된다. 이곳에서 Font Awesome(폰트 어썸) 태그를 정의하여 아이콘으로 영역을 시각적으로 구분했다. 그리고 제목과 본문을 클릭했을 때 본문으로 연결해주는 &lt;a&gt; 태그를 추가했다
+
+searchResultTemplate: 
+        '&lt;article&gt;'+
+        '&lt;div&gt;&lt;i class="fas fa-book fa-fw"&gt;&lt;/i&gt;&lt;a href="{url}"&gt;{title}&lt;/a&gt;&lt;/div&gt;'+
+        '&lt;div&gt;&lt;i class="fas fa-clock fa-fw"&gt;&lt;/i&gt;&lt;span&gt;{date}&lt;/span&gt;&lt;/div&gt;'+
+        '&lt;div&gt;&lt;i class="fas fa-tag fa-fw"&gt;&lt;/i&gt;{tags}&lt;/div&gt;'+
+        '&lt;div style="display:inline-flex"&gt;' + 
+            '&lt;i class="fas fa-pencil-alt fa-fw" style="padding-top:5px"&gt;&lt;/i&gt;&lt;a href="{url}"&gt;&lt;span style="color:#343a40"&gt;{content}&lt;/span&gt;&lt;/a&gt;' + 
+        '&lt;/div&gt;'+
+        '&lt;/article&gt;'
+
+
+참고로 아이콘을 불러오기 위해서는 search 폴더의 index.html에 폰트 어썸 링크를 추가해주어야 한다.
+
+
+&lt;link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"&gt;
+
+
+
+키워드 추천
+
+
+
+유저에게 무슨 키워드를 검색할지 가이드를 제공해주는 것은 어떨까?
+포스트 본문을 데이터로 활용하여 키워드의 중요도를 집계하고 상위 n개 키워드를 추천하는 기능을 떠올렸다.
+
+아이디어는 이렇다.
+
+  블로그 전체에서 제목과 본문 텍스트를 수집하여 전처리하고 키워드를 추출한다
+  블로그 포스트 개수를 고려하여 키워드별 TF-IDF를 집계하고 상위 5개를 저장한다
+  추천 키워드를 불러와 검색 페이지에서 띄워준다
+
+
+1~2번은 Python으로 실행하고 3번은 JavaScript로 구현하기로 했다.
+
+
+데이터 수집과 처리
+{baseurl}/search.json 주소로 json 파일에 접근할 수 있다는 점을 기억하고 requests 모듈로 불러왔다. 그리고 그 중에서 제목과 본문만 저장했다.
+
+def collect_contents(url, pttrn, noTag):
+    '''
+    url   : search.json
+    pttrn : escape 기호 제외하기 위한 정규표현식
+    noTag : 데이터 수집에서 제외할 태그
+    '''
+    response = requests.get(url, verify=False)
+    cleansed_response = re.sub(pttrn, ' ', response.text)
+    normalized_response = re.sub(r'\s+', ' ', cleansed_response)
+    
+    json_data = json.loads(normalized_response)
+    contents = [post['title'] + ' ' + post['content'] for post in json_data if noTag not in post['tags']]
+    return contents
+
+
+수집한 데이터를 키워드 말뭉치 형태로 변환한다. 이때 영어와 한국어를 따로 추출하여 한 글자인 단어와 불용어 사전에 포함된 단어를 제외했다. 명사를 대상으로 하고 싶었기 때문에 한국어는 형태소 분석기를 사용하여 명사를 추출했다.
+
+def create_corpus(contents):
+    # eng_prc, kor_prc는 별도로 정의한 전처리 함수다
+    keywords_eng = list(map(eng_prc, contents))
+    # 한국어는 형태소 분석 후 명사만 사용된다
+    keywords_kor = list(map(kor_prc, contents))
+    corpus = [' '.join(e+k) for e, k in zip(keywords_eng, keywords_kor)]
+    return corpus
+
+
+참고로 한국어 형태소 분석은 konlpy를 사용했다.
+from konlpy.tag import Okt
+
+def kor_prc(c):
+    okt = Okt()
+    kor_res =[]
+    for k in okt.nouns(c):
+        if (len(k) &gt; 1) &amp; (k not in stop_words):
+            kor_res.append(k)
+    return kor_res
+
+
+불용어 사전은 NLTK’s list of english stopwords와 Latex 문법 리스트를 크롤링해서 stopwords.txt 파일로 구축하였다. 더불어 span, div와 같은 HTML 태그도 불용어 사전에 포함했다.
+
+
+TF-IDF 계산
+TF-IDF(Term Frequency-Inverse Document Frequency)는 문서 안에서의 출현 빈도수와 전체 문서 집합에서의 희귀성을 적용한 가중치이다. scikit-learn 의 TfidfVectorizer을 사용해 계산했다. 여러 개 포스트를 올리는 블로그 특성 상 주요 키워드를 추출하는 데 TF-IDF가 적합하다고 생각하여 적용했다.
+
+def extract_keywords(corpus, topN=5, asset_dir=None):
+    vectorizer = TfidfVectorizer()
+    tfidf_matrix = vectorizer.fit_transform(corpus)
+
+    feature_names = vectorizer.get_feature_names_out()
+    # 단어가 열, 문서가 행이므로 각 단어에 대해 문서 전반의 값을 sum
+    sum_tfidf_scores = np.array(tfidf_matrix.sum(axis=0)).flatten()
+    average_tfidf_score = sum_tfidf_scores.mean().round(2)
+
+    top_indices = sum_tfidf_scores.argsort()[-topN:][::-1]
+    top_keywords = [['말뭉치 평균', average_tfidf_score]]
+    top_keywords += [[feature_names[idx], round(sum_tfidf_scores[idx], 2)] for idx in top_indices]
+    ...
+    # 저장
+    with open(save_path, 'w') as f:
+      json.dump(top_keywords, f)
+
+문서별로 단어의 TF-IDF 값이 계산되는데, 전체 블로그 관점에서 중요도를 고려해야 하므로 단어 단위로 총합 값을 계산했다. 또 추출된 키워드의 중요도를 상대적으로 비교할 수 있도록 전체 키워드의 평균 TF-IDF 값도 함께 저장했다.
+
+
+추천 키워드 디스플레이
+파이썬으로 계산한 결과는 keywords.json 이라는 이름으로 따로 저장했다. 첫번째 요소는 전체 말뭉치 평균이고, 그 아래부터 1위, 2위 … 5위에 해당한다. [키워드, 점수] 쌍의 리스트로 이루어져 있다.
+[['말뭉치 평균', 0.05], 
+ ['클러스터', 0.67], 
+ ['toc', 0.42], 
+ ['포인트', 0.38], 
+ ['편차', 0.38], 
+ ['평균', 0.33]]
+
+
+이제 이것을 읽어 검색 페이지에서 보여주는 JavaScript를 작성한다. 해당 스크립트는 search 폴더의 index.html 에서 실행된다. 먼저 json을 읽어온 후 반복문으로 HTML 태그를 추가했다. 키워드를 클릭하면 바로 검색되도록 click 이벤트를 추가했다.
+
+// 미리 추출한 키워드 json 데이터를 불러온다
+const response = await fetch('keywords.json');
+const data = await response.json();
+...
+// 첫번째 요소는 전체 평균이므로 두번째 요소부터 반복문을 시행한다
+data.slice(1).forEach((obj, rnk) =&gt; {
+    const li = document.createElement('li');
+    const span = document.createElement('span');
+
+    // 키워드를 읽어온다
+    span.textContent = obj[0];
+
+    // 클릭할 경우 해당 키워드를 search-input 입력창으로 전달한다
+    span.addEventListener('click', function(event) {
+                    const searchInput = document.getElementById('search-input');
+                    searchInput.value = obj[0];
+
+                    // trigger
+                    const e = new Event('input', { bubbles: true });
+                    searchInput.dispatchEvent(e);
+                });
+    ...
+
+
+클릭하면 검색창에 그 키워드가 입력되면서 검색 기능이 발동된다.
+
+마지막으로 이 키워드들이 왜 추천되는지 도움말 팝업을 추가해보았다. 아이콘 위에 마우스를 호버하면 텍스트 설명이 뜨는 방식이다. 각 추천 키워드의 점수도 obj[1]으로 읽어올 수 있으므로 팝업 코드를 forEach문에 추가했다.
+
+// 도움말 아이콘 팝업
+const svgIcon = document.createElement('span')
+svgIcon.innerHTML = `&lt;svg width="25" height="25" viewBox="0 0 16 16" 생략..&gt; &lt;/svg&gt;`;
+paragraph.appendChild(svgIcon);
+
+const totalAvg = data[0]
+const tooltip = document.createElement('div');
+tooltip.className = 'tooltip';
+tooltip.textContent = `TF-IDF 점수를 기반으로 상위 5개 키워드를 추천합니다\n
+                      현재 블로그의 전체 평균 TF-IDF는 ${totalAvg[1]}점입니다\n
+                      추천 키워드에 마우스를 올려 점수를 비교해보세요`;
+tooltip.style.whiteSpace = 'pre'; // '\n'이 적용되려면
+document.body.appendChild(tooltip);
+
+svgIcon.addEventListener('mouseenter', (event) =&gt; {
+    tooltip.style.display = 'block';
+    tooltip.style.left = `${event.pageX + 10}px`;
+    tooltip.style.top = `${event.pageY + 10}px`;
+});
+
+svgIcon.addEventListener('mousemove', (event) =&gt; {
+    tooltip.style.left = `${event.pageX + 10}px`;
+    tooltip.style.top = `${event.pageY + 10}px`;
+});
+
+svgIcon.addEventListener('mouseleave', () =&gt; {
+    tooltip.style.display = 'none';
+});
+
+
+
+자동화
+끝으로 TF-IDF를 계산하는 파이썬 스크립트의 실행만 자동화하면 된다. 이 부분은 GitHub Actions로 처리했으며 GitHub Actions 활용한 태스크 및 배포 자동화에서 그 과정을 확인할 수 있다.
+
+기타
+JS에서 실행할 수 있는 한국어 토크나이저도 있다. 사이트를 불러올 때마다 점수를 연산하기는 어려울 것 같아서 결국 python으로 구현했지만, 충분히 활용 가치가 있을 것 같아서 기록해둔다
+" />
+    <meta property="og:description" content="요약
+- simple-jekyll-search 라이브러리를 활용하여 검색 기능을 추가했다
+- 탭에서 접근할 수 있는 검색 페이지를 구성하고 검색 결과를 적절하게 시각화했다
+- TF-IDF 값을 활용하여 검색할 키워드를 추천했다
+
+
+개요
+
+Kiko Now Jekyll 테마에 검색 기능이 없는 관계로 직접 검색 페이지를 구성하고 JS 라이브러리로 검색 기능을 적용했다. 블로그에 포스트가 쌓일수록 검색 기능이 필수적이라고 생각했다. 태그 기반의 문서 분류 방식은 한계가 명확하고, 특정 문서를 찾을 때도 검색이 가장 간편하기 때문이다.
+
+블로그 개발 과정은 특정 포스트에 아카이빙하고 있지만, 해당 기능은 분량이 많아 별도로 기록한다.
+
+기본 기능
+입력 키워드로 블로그 내 모든 컨텐츠에 대해 검색하는 기본 기능부터 적용한다.
+
+Simple-Jekyll-Search 라이브러리를 적용했다. 브라우저 단[Client-Side]에서 작동하기 때문에 별도 서버나 DB를 구축할 필요가 없다. 적용 과정 역시 간단하다.
+
+ 첫째, search.json 생성 
+
+블로그의 root 위치에 아래 search.json 파일을 만든다.
+
+---
+layout: none
+---
+[
+  {% for post in site.posts %}
+    {
+      "title"    : "{{ post.title | escape }}",
+      "tags"     : "{{ post.tags | join: ', ' }}",
+      "date"     : "{{ post.date | date: '%Y.%m.%d'}}",
+      "url"  : "{{ site.url }}{{ post.url }}",
+      "content": "{{ post.content | strip_html | strip_newlines | escape }}"
+    } {% unless forloop.last %},{% endunless %}
+  {% endfor %}
+]
+
+기존 코드에 post.content 를 추가하여 본문 텍스트도 가져오게 했다. 이때 strip_html 등 몇 가지 Jekyll 문법을 더했다. 이를 통해 {baseurl}/search.json 주소로 json 파일에 접근할 수 있다. 브라우저로부터 이 파일을 읽어와 검색 데이터로 활용할 것이다.
+
+
+
+
+ 둘째, JavaSript 소스 추가 
+
+simple-jekyll-search.js를 다운 받아 어디든 위치시킨다. 이 스크립트는 search.json으로부터 데이터를 읽어와 입력어에 매칭되는 내용을 찾는 함수 SimpleJekyllSearch를 정의하고 있다.
+
+그 다음 search-and-return.js도 다운 받아 같은 위치에 붙여넣는다. SimpleJekyllSearch 함수를 실행시켜서 결과값을 받아와 처리하는 부분을 별도 스크립트로 작성한 것이다.
+
+var sjs = SimpleJekyllSearch({
+    searchInput: document.getElementById('search-input'),
+    resultsContainer: document.getElementById('results-container'),
+    json: '/search.json',
+    searchResultTemplate: ...
+    noResultsText: '😴 검색 결과가 없습니다',
+    templateMiddleware : ...
+)}
+
+
+나는 assets 라는 폴더를 만들어 이곳에 JS 소스를 모아두기로 했다. 두 스크립트는 다음 서술할 검색 페이지에서 실행시킬 것이다.
+
+ 셋째, 검색 페이지 구성 
+
+root 위치에 search 폴더를 생성하고 그 아래 index.html 파일을 생성한다. 앞서 추가한 JS 스크립트가 실행되면서 검색어 입출력이 진행되는 곳이다.
+
+---
+layout: page
+permalink: /search
+---
+
+&lt;ul class="search"&gt;
+    &lt;div id="search-container"&gt;
+        &lt;input type="search" id="search-input" placeholder="  🤔 검색어를 입력하세요."&gt;
+        &lt;ul id="results-container"&gt;&lt;/ul&gt;
+    &lt;/div&gt;
+&lt;/ul&gt;
+
+&lt;script src="{{ site.baseurl }}/assets/simple-jekyll-search.js" type="text/javascript"&gt;&lt;/script&gt;
+&lt;script src="{{ site.baseurl }}/assets/search-and-return.js" type="text/javascript"&gt;&lt;/script&gt;
+
+
+이렇게 {baseurl}/search 주소로 접근할 수 있는 검색 페이지를 완성하였다.
+
+
+
+한편, 무엇을 클릭했을 때 이 검색 페이지로 연결되도록 할 것인가? 나는 상단의 탭에 돋보기 아이콘을 추가했다. 이를 위해 돋보기 아이콘 svg와 검색 페이지를  연결하여 _includes/nav.html에 추가했다.
+
+&lt;ul class="search-icon"&gt;
+  &lt;a href="{{ site.baseurl }}/search"&gt;
+    &lt;svg 
+      width="24" 
+      height="24" 
+      viewBox="0 0 24 24" 
+      fill="none" 
+      xmlns="http://www.w3.org/2000/svg"&gt;
+      &lt;path d="M10 ...생략" fill="currentColor"&gt;&lt;/path&gt;
+    &lt;/svg&gt;
+  &lt;/a&gt;
+&lt;/ul&gt;
+
+
+
+
+이렇게 검색 페이지를 구성하고 검색용 라이브러리를 적용하는 과정을 마무리하였다.
+
+응용 기능
+기본 검색 기능에 더하여 키워드를 더 쉽게 찾고 검색 결과를 더 잘 표현하기 위해 개선한 사항이다.
+
+결과창 개선
+
+
+
+이미지에 보듯 결과창에 추가한 내용은 다음과 같다.
+
+
+  검색어 하이라이트
+  클릭시 본문 및 태그 페이지로 링크 연결
+  본문 미리보기
+  검색어가 언급된 횟수 표시
+  아이콘과 함께 메타 정보 디스플레이
+
+
+
+이를 위해 SimpleJekyllSearch 함수의 templateMiddleware와 searchResultTemplate 인자를 활용할 것이다. 전자는 검색 결과가 있을 때 호출되는 함수이며 후자는 그 결과를 출력할 HTML 템플릿을 지정하는 인자다. 하나씩 짚어보도록 하겠다.
+
+
+templateMiddleware 인자는 다음과 같이 정의된 함수를 필요로 한다.
+
+function (prop, value, template) {
+    return value
+    }
+
+prop은 json의 key이고 value는 key에 대한 value를 의미한다. 이제 prop, 즉 ‘항목’에 따라 value를 처리할 것이다.
+
+URL과 날짜 항목은 json에 저장된 그대로 사용할 예정이기 때문에 바로 value를 반환하도록 했다.
+
+if (prop === "url" || prop === 'date') {
+          return value;
+        }
+
+
+나머지 제목, 태그, 본문 항목은 검색어 하이라이트를 적용하고 URL과 연결하는 작업이 필요하다.
+우선 검색어를 저장하고, 그것을 찾는 정규표현식 객체와 최종적으로 리턴될 변수를 선언한다.
+
+const searchTerm = document.getElementById("search-input").value;
+const regex = new RegExp(searchTerm, "gi");
+let highlightedValue;
+
+
+제목 항목은 정규표현식 객체로 검색어($&amp;)를 HTML 태그로 감싼다. 배경색깔을 바꾸고 폰트를 굵게 표시한다.
+if (prop === 'title') {
+  highlightedValue = value.replace(regex, '&lt;span style="background:gold"&gt;&lt;b&gt;$&amp;&lt;/b&gt;&lt;/span&gt;')
+  return highlightedValue;
+}
+
+
+태그 항목의 경우 태그 페이지의 각 태그 링크와 연동했다.
+앞서 json을 생성하면서 쉼표로 join 했기 때문에 split하고 join하는 과정을 한번 더 거치는데, search.json을 개선해서 전처리를 간소화하는 대안도 고민해봐야겠다.
+
+if (prop === 'tags') {
+    const dest = window.location.origin;
+    const theTags = value.split(', ').map(tag =&gt; tag.trim());
+    
+    highlightedLinkedValue = theTags.map(tag =&gt; {
+      // 하이라이트를 적용한다
+      const highlightedTag = tag.replace(regex, '&lt;b style="background:gold"&gt;$&amp;&lt;/b&gt;');
+      // 링크를 적용한다
+      return `&lt;a href="${dest}/tags/#${tag}"&gt;&lt;span&gt;${highlightedTag}&lt;/span&gt;&lt;/a&gt;`;
+    }).join(', ');
+    
+    return highlightedLinkedValue;
+        }
+
+
+마지막으로 본문을 보여주는 데 있어 두 가지 지점을 고려했다. 첫번째는 30개 단어까지 미리보기로 보여주는 것이고 두번째는 본문에서 match가 걸린 횟수를 명시하는 것이다.
+
+첫번째 매치를 기준으로 앞뒤 15개 단어까지 슬라이스하였다. 본문에 매치가 없을 경우 처음부터 30개 단어를 가져온다. 마지막으로는 정규표현식 객체에 매치된 matches의 개수를 명시했다.
+
+value = value.replace(/\[.*?\]/g, '');
+const matches = value.match(regex);
+let matchCnt;
+if (matches) {
+    // 띄어쓰기를 기준으로 토큰화한다
+    const wordsArray = value.split(/\s+/);
+
+    // 검색된 단어를 기준으로 앞뒤 15개 토큰을 사용한다
+    const matchIndex = wordsArray.findIndex(word =&gt; regex.test(word));
+    const start = Math.max(0, matchIndex - 15); 
+    const end = Math.min(wordsArray.length, matchIndex + 15 + 1); 
+    const truncatedValue = wordsArray.slice(start, end).join(" ");
+
+    // 하이라이트를 적용한다
+    highlightedValue = truncatedValue.replace(
+        regex,
+        '&lt;span style="background:gold"&gt;&lt;b&gt;$&amp;&lt;/b&gt;&lt;/span&gt;'
+    );
+    matchCnt = matches.length
+
+} else {
+    // 본문에 검색어가 없을 경우 처음부터 30개 토큰을 가져온다
+    const words = value.split(/\s+/).slice(0, 30).join(" ");
+    highlightedValue = `${words}...`;
+    matchCnt = 0
+}
+// 언급수
+highlightedValue += `&lt;div style="padding-top:5px"&gt;&lt;span id="match-counter"&gt;본문에 &lt;b&gt;${matchCnt}&lt;/b&gt;번 언급되었습니다&lt;/span&gt;&lt;/div&gt;`;
+return highlightedValue;
+
+
+이렇게 처리된 결과물은 searchResultTemplate에 정의한 HTML 템플릿대로 디스플레이 된다. 이곳에서 Font Awesome(폰트 어썸) 태그를 정의하여 아이콘으로 영역을 시각적으로 구분했다. 그리고 제목과 본문을 클릭했을 때 본문으로 연결해주는 &lt;a&gt; 태그를 추가했다
+
+searchResultTemplate: 
+        '&lt;article&gt;'+
+        '&lt;div&gt;&lt;i class="fas fa-book fa-fw"&gt;&lt;/i&gt;&lt;a href="{url}"&gt;{title}&lt;/a&gt;&lt;/div&gt;'+
+        '&lt;div&gt;&lt;i class="fas fa-clock fa-fw"&gt;&lt;/i&gt;&lt;span&gt;{date}&lt;/span&gt;&lt;/div&gt;'+
+        '&lt;div&gt;&lt;i class="fas fa-tag fa-fw"&gt;&lt;/i&gt;{tags}&lt;/div&gt;'+
+        '&lt;div style="display:inline-flex"&gt;' + 
+            '&lt;i class="fas fa-pencil-alt fa-fw" style="padding-top:5px"&gt;&lt;/i&gt;&lt;a href="{url}"&gt;&lt;span style="color:#343a40"&gt;{content}&lt;/span&gt;&lt;/a&gt;' + 
+        '&lt;/div&gt;'+
+        '&lt;/article&gt;'
+
+
+참고로 아이콘을 불러오기 위해서는 search 폴더의 index.html에 폰트 어썸 링크를 추가해주어야 한다.
+
+
+&lt;link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"&gt;
+
+
+
+키워드 추천
+
+
+
+유저에게 무슨 키워드를 검색할지 가이드를 제공해주는 것은 어떨까?
+포스트 본문을 데이터로 활용하여 키워드의 중요도를 집계하고 상위 n개 키워드를 추천하는 기능을 떠올렸다.
+
+아이디어는 이렇다.
+
+  블로그 전체에서 제목과 본문 텍스트를 수집하여 전처리하고 키워드를 추출한다
+  블로그 포스트 개수를 고려하여 키워드별 TF-IDF를 집계하고 상위 5개를 저장한다
+  추천 키워드를 불러와 검색 페이지에서 띄워준다
+
+
+1~2번은 Python으로 실행하고 3번은 JavaScript로 구현하기로 했다.
+
+
+데이터 수집과 처리
+{baseurl}/search.json 주소로 json 파일에 접근할 수 있다는 점을 기억하고 requests 모듈로 불러왔다. 그리고 그 중에서 제목과 본문만 저장했다.
+
+def collect_contents(url, pttrn, noTag):
+    '''
+    url   : search.json
+    pttrn : escape 기호 제외하기 위한 정규표현식
+    noTag : 데이터 수집에서 제외할 태그
+    '''
+    response = requests.get(url, verify=False)
+    cleansed_response = re.sub(pttrn, ' ', response.text)
+    normalized_response = re.sub(r'\s+', ' ', cleansed_response)
+    
+    json_data = json.loads(normalized_response)
+    contents = [post['title'] + ' ' + post['content'] for post in json_data if noTag not in post['tags']]
+    return contents
+
+
+수집한 데이터를 키워드 말뭉치 형태로 변환한다. 이때 영어와 한국어를 따로 추출하여 한 글자인 단어와 불용어 사전에 포함된 단어를 제외했다. 명사를 대상으로 하고 싶었기 때문에 한국어는 형태소 분석기를 사용하여 명사를 추출했다.
+
+def create_corpus(contents):
+    # eng_prc, kor_prc는 별도로 정의한 전처리 함수다
+    keywords_eng = list(map(eng_prc, contents))
+    # 한국어는 형태소 분석 후 명사만 사용된다
+    keywords_kor = list(map(kor_prc, contents))
+    corpus = [' '.join(e+k) for e, k in zip(keywords_eng, keywords_kor)]
+    return corpus
+
+
+참고로 한국어 형태소 분석은 konlpy를 사용했다.
+from konlpy.tag import Okt
+
+def kor_prc(c):
+    okt = Okt()
+    kor_res =[]
+    for k in okt.nouns(c):
+        if (len(k) &gt; 1) &amp; (k not in stop_words):
+            kor_res.append(k)
+    return kor_res
+
+
+불용어 사전은 NLTK’s list of english stopwords와 Latex 문법 리스트를 크롤링해서 stopwords.txt 파일로 구축하였다. 더불어 span, div와 같은 HTML 태그도 불용어 사전에 포함했다.
+
+
+TF-IDF 계산
+TF-IDF(Term Frequency-Inverse Document Frequency)는 문서 안에서의 출현 빈도수와 전체 문서 집합에서의 희귀성을 적용한 가중치이다. scikit-learn 의 TfidfVectorizer을 사용해 계산했다. 여러 개 포스트를 올리는 블로그 특성 상 주요 키워드를 추출하는 데 TF-IDF가 적합하다고 생각하여 적용했다.
+
+def extract_keywords(corpus, topN=5, asset_dir=None):
+    vectorizer = TfidfVectorizer()
+    tfidf_matrix = vectorizer.fit_transform(corpus)
+
+    feature_names = vectorizer.get_feature_names_out()
+    # 단어가 열, 문서가 행이므로 각 단어에 대해 문서 전반의 값을 sum
+    sum_tfidf_scores = np.array(tfidf_matrix.sum(axis=0)).flatten()
+    average_tfidf_score = sum_tfidf_scores.mean().round(2)
+
+    top_indices = sum_tfidf_scores.argsort()[-topN:][::-1]
+    top_keywords = [['말뭉치 평균', average_tfidf_score]]
+    top_keywords += [[feature_names[idx], round(sum_tfidf_scores[idx], 2)] for idx in top_indices]
+    ...
+    # 저장
+    with open(save_path, 'w') as f:
+      json.dump(top_keywords, f)
+
+문서별로 단어의 TF-IDF 값이 계산되는데, 전체 블로그 관점에서 중요도를 고려해야 하므로 단어 단위로 총합 값을 계산했다. 또 추출된 키워드의 중요도를 상대적으로 비교할 수 있도록 전체 키워드의 평균 TF-IDF 값도 함께 저장했다.
+
+
+추천 키워드 디스플레이
+파이썬으로 계산한 결과는 keywords.json 이라는 이름으로 따로 저장했다. 첫번째 요소는 전체 말뭉치 평균이고, 그 아래부터 1위, 2위 … 5위에 해당한다. [키워드, 점수] 쌍의 리스트로 이루어져 있다.
+[['말뭉치 평균', 0.05], 
+ ['클러스터', 0.67], 
+ ['toc', 0.42], 
+ ['포인트', 0.38], 
+ ['편차', 0.38], 
+ ['평균', 0.33]]
+
+
+이제 이것을 읽어 검색 페이지에서 보여주는 JavaScript를 작성한다. 해당 스크립트는 search 폴더의 index.html 에서 실행된다. 먼저 json을 읽어온 후 반복문으로 HTML 태그를 추가했다. 키워드를 클릭하면 바로 검색되도록 click 이벤트를 추가했다.
+
+// 미리 추출한 키워드 json 데이터를 불러온다
+const response = await fetch('keywords.json');
+const data = await response.json();
+...
+// 첫번째 요소는 전체 평균이므로 두번째 요소부터 반복문을 시행한다
+data.slice(1).forEach((obj, rnk) =&gt; {
+    const li = document.createElement('li');
+    const span = document.createElement('span');
+
+    // 키워드를 읽어온다
+    span.textContent = obj[0];
+
+    // 클릭할 경우 해당 키워드를 search-input 입력창으로 전달한다
+    span.addEventListener('click', function(event) {
+                    const searchInput = document.getElementById('search-input');
+                    searchInput.value = obj[0];
+
+                    // trigger
+                    const e = new Event('input', { bubbles: true });
+                    searchInput.dispatchEvent(e);
+                });
+    ...
+
+
+클릭하면 검색창에 그 키워드가 입력되면서 검색 기능이 발동된다.
+
+마지막으로 이 키워드들이 왜 추천되는지 도움말 팝업을 추가해보았다. 아이콘 위에 마우스를 호버하면 텍스트 설명이 뜨는 방식이다. 각 추천 키워드의 점수도 obj[1]으로 읽어올 수 있으므로 팝업 코드를 forEach문에 추가했다.
+
+// 도움말 아이콘 팝업
+const svgIcon = document.createElement('span')
+svgIcon.innerHTML = `&lt;svg width="25" height="25" viewBox="0 0 16 16" 생략..&gt; &lt;/svg&gt;`;
+paragraph.appendChild(svgIcon);
+
+const totalAvg = data[0]
+const tooltip = document.createElement('div');
+tooltip.className = 'tooltip';
+tooltip.textContent = `TF-IDF 점수를 기반으로 상위 5개 키워드를 추천합니다\n
+                      현재 블로그의 전체 평균 TF-IDF는 ${totalAvg[1]}점입니다\n
+                      추천 키워드에 마우스를 올려 점수를 비교해보세요`;
+tooltip.style.whiteSpace = 'pre'; // '\n'이 적용되려면
+document.body.appendChild(tooltip);
+
+svgIcon.addEventListener('mouseenter', (event) =&gt; {
+    tooltip.style.display = 'block';
+    tooltip.style.left = `${event.pageX + 10}px`;
+    tooltip.style.top = `${event.pageY + 10}px`;
+});
+
+svgIcon.addEventListener('mousemove', (event) =&gt; {
+    tooltip.style.left = `${event.pageX + 10}px`;
+    tooltip.style.top = `${event.pageY + 10}px`;
+});
+
+svgIcon.addEventListener('mouseleave', () =&gt; {
+    tooltip.style.display = 'none';
+});
+
+
+
+자동화
+끝으로 TF-IDF를 계산하는 파이썬 스크립트의 실행만 자동화하면 된다. 이 부분은 GitHub Actions로 처리했으며 GitHub Actions 활용한 태스크 및 배포 자동화에서 그 과정을 확인할 수 있다.
+
+기타
+JS에서 실행할 수 있는 한국어 토크나이저도 있다. 사이트를 불러올 때마다 점수를 연산하기는 어려울 것 같아서 결국 python으로 구현했지만, 충분히 활용 가치가 있을 것 같아서 기록해둔다
+" />
+    
+    <meta name="author" content="YunsooLog" />
+
+    
+    <meta property="og:title" content="블로그 키워드 추천 및 검색 기능 구현기" />
+    <meta property="twitter:title" content="블로그 키워드 추천 및 검색 기능 구현기" />
+    
+  <!-- Async font loading -->
+<script>
+  window.WebFontConfig = {
+      custom: {
+          families: ['Spoqa Han Sans:100,300,400,700'],
+          urls: ['https://spoqa.github.io/spoqa-han-sans/css/SpoqaHanSans-kr.css']
+      },
+      timeout: 60000
+  };
+  (function(d) {
+      var wf = d.createElement('script'), s = d.scripts[0];
+      wf.src = 'https://ajax.googleapis.com/ajax/libs/webfont/1.5.18/webfont.js';
+      s.parentNode.insertBefore(wf, s);
+  })(document);
+</script>
+
+  <!--[if lt IE 9]>
+    <script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+  <![endif]-->
+
+  <link rel="stylesheet" type="text/css" href="/style.css" />
+  <link rel="alternate" type="application/rss+xml" title="YunsooLog - 행간을 읽는 기계학습 이야기" href="/feed.xml" />
+  <script>
+    document.cookie = "promo_shown=1; SameSite=Lax; path=/";
+  </script>
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.13.11/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.13.11/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.13.11/dist/contrib/auto-render.min.js"
+          onload="renderMathInElement(document.body, {
+            delimiters: [
+              {left: '\\[', right: '\\]', display: true},
+              {left: '$$', right: '$$', display: true},
+              {left: '$', right: '$', display: false},
+            ]
+          });">
+  </script>
+
+  <!-- Created with Jekyll Now - http://github.com/barryclark/jekyll-now -->
+</head>
+  <body>
+    <div class="wrapper-masthead">
+  <div class="container">
+    <header class="masthead clearfix">
+      <a href="/" class="site-avatar"><img src="/images/avatar.png"/></a>
+      
+      <div class="site-info">
+        <h1 class="site-name"><a href="/">YunsooLog</a></h1>
+        <p class="site-description">행간을 읽는 기계학습 이야기</p>
+      </div>
+
+      <nav>
+        
+        
+        <a href="/about">About</a>
+        
+        
+        
+        <a href="/">Blog</a>
+        
+        
+        
+        <a href="/tags">Tags</a>
+        
+        
+        
+        <a href="/timeline">Timeline</a>
+        
+        
+        
+        <ul class="search-icon">
+          <a href="/search">
+          <svg 
+            width="24" 
+            height="24" 
+            viewBox="0 0 24 24" 
+            fill="none" 
+            xmlns="http://www.w3.org/2000/svg">
+            <path d="M10 2C5.58172 2 2 5.58172 2 10C2 14.4183 5.58172 18 10 18C11.8485 18 13.5451 17.3376 14.8458 16.2416L19.7071 21.1029C20.0976 21.4934 20.7308 21.4934 21.1213 21.1029C21.5118 20.7124 21.5118 20.0792 21.1213 19.6887L16.2416 14.809C17.3376 13.5083 18 11.8116 18 10C18 5.58172 14.4183 2 10 2ZM4 10C4 6.68629 6.68629 4 10 4C13.3137 4 16 6.68629 16 10C16 13.3137 13.3137 16 10 16C6.68629 16 4 13.3137 4 10Z" 
+            fill="currentColor"></path>
+          </svg>
+          </a>
+        </ul>
+
+      </nav>
+    </header>
+  </div>
+</div>
+
+    <div id="main" role="main" class="container">
+      <article class="post">
+  <div class="inner-wrap">
+    <h1>블로그 키워드 추천 및 검색 기능 구현기</h1>
+
+    <div>
+      <span class="date">
+        2024-08-26
+      </span>
+
+      <ul class="tag">
+        
+        <li>
+          <a href="https://woocosmos.github.io/tags#JavaScript">
+            JavaScript
+          </a>
+        </li>
+        
+        <li>
+          <a href="https://woocosmos.github.io/tags#NLP">
+            NLP
+          </a>
+        </li>
+        
+      </ul>
+    </div>
+
+    <section class="entry">
+      
+      <aside>
+        <nav class="nav-toc">
+          <h3> 목차 </h3>
+          <ul id="toc" class="section-nav">
+<li class="toc-entry toc-h1"><a href="#개요">개요</a></li>
+<li class="toc-entry toc-h1"><a href="#기본-기능">기본 기능</a></li>
+<li class="toc-entry toc-h1"><a href="#응용-기능">응용 기능</a>
+<ul>
+<li class="toc-entry toc-h2"><a href="#결과창-개선">결과창 개선</a></li>
+<li class="toc-entry toc-h2"><a href="#키워드-추천">키워드 추천</a></li>
+</ul>
+</li>
+<li class="toc-entry toc-h1"><a href="#기타">기타</a></li>
+</ul>
+        </nav>
+      </aside>
+      <script src="/assets/scroll-spy.js" type="text/javascript"></script>
+      
+      <p><strong>요약</strong></p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>- simple-jekyll-search 라이브러리를 활용하여 검색 기능을 추가했다
+- 탭에서 접근할 수 있는 검색 페이지를 구성하고 검색 결과를 적절하게 시각화했다
+- TF-IDF 값을 활용하여 검색할 키워드를 추천했다
+</code></pre></div></div>
+
+<h1 id="개요">개요</h1>
+
+<p><a href="https://github.com/aweekj/kiko-now">Kiko Now</a> Jekyll 테마에 검색 기능이 없는 관계로 <strong>직접 검색 페이지를 구성하고 JS 라이브러리로 검색 기능을 적용</strong>했다. 블로그에 포스트가 쌓일수록 검색 기능이 필수적이라고 생각했다. 태그 기반의 문서 분류 방식은 한계가 명확하고, 특정 문서를 찾을 때도 검색이 가장 간편하기 때문이다.</p>
+
+<p>블로그 개발 과정은 <a href="https://woocosmos.github.io/blog-history/">특정 포스트</a>에 아카이빙하고 있지만, 해당 기능은 분량이 많아 별도로 기록한다.</p>
+
+<h1 id="기본-기능">기본 기능</h1>
+<p>입력 키워드로 블로그 내 모든 컨텐츠에 대해 검색하는 기본 기능부터 적용한다.</p>
+
+<p><a href="https://github.com/christian-fei/Simple-Jekyll-Search"><strong>Simple-Jekyll-Search</strong></a> 라이브러리를 적용했다. 브라우저 단[Client-Side]에서 작동하기 때문에 별도 서버나 DB를 구축할 필요가 없다. 적용 과정 역시 간단하다.</p>
+
+<h3 class="no_toc"> 첫째, search.json 생성 </h3>
+
+<p>블로그의 root 위치에 아래 <code class="language-plaintext highlighter-rouge">search.json</code> 파일을 만든다.</p>
+
+<div class="language-json highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="err">---</span><span class="w">
+</span><span class="err">layout:</span><span class="w"> </span><span class="err">none</span><span class="w">
+</span><span class="err">---</span><span class="w">
+</span><span class="p">[</span><span class="w">
+  </span><span class="p">{</span><span class="err">%</span><span class="w"> </span><span class="err">for</span><span class="w"> </span><span class="err">post</span><span class="w"> </span><span class="err">in</span><span class="w"> </span><span class="err">site.posts</span><span class="w"> </span><span class="err">%</span><span class="p">}</span><span class="w">
+    </span><span class="p">{</span><span class="w">
+      </span><span class="nl">"title"</span><span class="w">    </span><span class="p">:</span><span class="w"> </span><span class="s2">"{{ post.title | escape }}"</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"tags"</span><span class="w">     </span><span class="p">:</span><span class="w"> </span><span class="s2">"{{ post.tags | join: ', ' }}"</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"date"</span><span class="w">     </span><span class="p">:</span><span class="w"> </span><span class="s2">"{{ post.date | date: '%Y.%m.%d'}}"</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"url"</span><span class="w">  </span><span class="p">:</span><span class="w"> </span><span class="s2">"{{ site.url }}{{ post.url }}"</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"content"</span><span class="p">:</span><span class="w"> </span><span class="s2">"{{ post.content | strip_html | strip_newlines | escape }}"</span><span class="w">
+    </span><span class="p">}</span><span class="w"> </span><span class="p">{</span><span class="err">%</span><span class="w"> </span><span class="err">unless</span><span class="w"> </span><span class="err">forloop.last</span><span class="w"> </span><span class="err">%</span><span class="p">},{</span><span class="err">%</span><span class="w"> </span><span class="err">endunless</span><span class="w"> </span><span class="err">%</span><span class="p">}</span><span class="w">
+  </span><span class="p">{</span><span class="err">%</span><span class="w"> </span><span class="err">endfor</span><span class="w"> </span><span class="err">%</span><span class="p">}</span><span class="w">
+</span><span class="p">]</span><span class="w">
+</span></code></pre></div></div>
+<p>기존 코드에 <code class="language-plaintext highlighter-rouge">post.content</code> 를 추가하여 본문 텍스트도 가져오게 했다. 이때 <code class="language-plaintext highlighter-rouge">strip_html</code> 등 몇 가지 Jekyll 문법을 더했다. 이를 통해 <code class="language-plaintext highlighter-rouge">{baseurl}/search.json</code> 주소로 json 파일에 접근할 수 있다. 브라우저로부터 이 파일을 읽어와 검색 데이터로 활용할 것이다.</p>
+
+<p><img src="https://github.com/user-attachments/assets/e2a40f6a-eaea-465f-ab02-42408c060258" alt="image" style="border:black solid 0.5px; padding:10px; width:50%;" class="center-image" />
+<br /></p>
+
+<h3 class="no_toc"> 둘째, JavaSript 소스 추가 </h3>
+
+<p><a href="https://github.com/christian-fei/Simple-Jekyll-Search/blob/master/example/js/simple-jekyll-search.js">simple-jekyll-search.js</a>를 다운 받아 어디든 위치시킨다. 이 스크립트는 <strong><code class="language-plaintext highlighter-rouge">search.json</code>으로부터 데이터를 읽어와 입력어에 매칭되는 내용을 찾는</strong> 함수 <code class="language-plaintext highlighter-rouge">SimpleJekyllSearch</code>를 정의하고 있다.</p>
+
+<p>그 다음 <a href="https://github.com/woocosmos/woocosmos.github.io/blob/master/assets/search-and-return.js">search-and-return.js</a>도 다운 받아 같은 위치에 붙여넣는다. <strong><code class="language-plaintext highlighter-rouge">SimpleJekyllSearch</code> 함수를 실행시켜서 결과값을 받아와 처리하는</strong> 부분을 별도 스크립트로 작성한 것이다.</p>
+
+<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">var</span> <span class="nx">sjs</span> <span class="o">=</span> <span class="nc">SimpleJekyllSearch</span><span class="p">({</span>
+    <span class="na">searchInput</span><span class="p">:</span> <span class="nb">document</span><span class="p">.</span><span class="nf">getElementById</span><span class="p">(</span><span class="dl">'</span><span class="s1">search-input</span><span class="dl">'</span><span class="p">),</span>
+    <span class="na">resultsContainer</span><span class="p">:</span> <span class="nb">document</span><span class="p">.</span><span class="nf">getElementById</span><span class="p">(</span><span class="dl">'</span><span class="s1">results-container</span><span class="dl">'</span><span class="p">),</span>
+    <span class="na">json</span><span class="p">:</span> <span class="dl">'</span><span class="s1">/search.json</span><span class="dl">'</span><span class="p">,</span>
+    <span class="na">searchResultTemplate</span><span class="p">:</span> <span class="p">...</span>
+    <span class="na">noResultsText</span><span class="p">:</span> <span class="dl">'</span><span class="s1">😴 검색 결과가 없습니다</span><span class="dl">'</span><span class="p">,</span>
+    <span class="na">templateMiddleware</span> <span class="p">:</span> <span class="p">...</span>
+<span class="p">)}</span>
+</code></pre></div></div>
+
+<p>나는 assets 라는 폴더를 만들어 이곳에 JS 소스를 모아두기로 했다. 두 스크립트는 다음 서술할 검색 페이지에서 실행시킬 것이다.</p>
+
+<h3 class="no_toc"> 셋째, 검색 페이지 구성 </h3>
+
+<p>root 위치에 <code class="language-plaintext highlighter-rouge">search</code> 폴더를 생성하고 그 아래 <code class="language-plaintext highlighter-rouge">index.html</code> 파일을 생성한다. 앞서 추가한 JS 스크립트가 실행되면서 검색어 입출력이 진행되는 곳이다.</p>
+
+<div class="language-html highlighter-rouge"><div class="highlight"><pre class="highlight"><code>---
+layout: page
+permalink: /search
+---
+
+<span class="nt">&lt;ul</span> <span class="na">class=</span><span class="s">"search"</span><span class="nt">&gt;</span>
+    <span class="nt">&lt;div</span> <span class="na">id=</span><span class="s">"search-container"</span><span class="nt">&gt;</span>
+        <span class="nt">&lt;input</span> <span class="na">type=</span><span class="s">"search"</span> <span class="na">id=</span><span class="s">"search-input"</span> <span class="na">placeholder=</span><span class="s">"  🤔 검색어를 입력하세요."</span><span class="nt">&gt;</span>
+        <span class="nt">&lt;ul</span> <span class="na">id=</span><span class="s">"results-container"</span><span class="nt">&gt;&lt;/ul&gt;</span>
+    <span class="nt">&lt;/div&gt;</span>
+<span class="nt">&lt;/ul&gt;</span>
+
+<span class="nt">&lt;script </span><span class="na">src=</span><span class="s">"{{ site.baseurl }}/assets/simple-jekyll-search.js"</span> <span class="na">type=</span><span class="s">"text/javascript"</span><span class="nt">&gt;&lt;/script&gt;</span>
+<span class="nt">&lt;script </span><span class="na">src=</span><span class="s">"{{ site.baseurl }}/assets/search-and-return.js"</span> <span class="na">type=</span><span class="s">"text/javascript"</span><span class="nt">&gt;&lt;/script&gt;</span>
+</code></pre></div></div>
+
+<p>이렇게 <code class="language-plaintext highlighter-rouge">{baseurl}/search</code> 주소로 접근할 수 있는 검색 페이지를 완성하였다.</p>
+
+<p><img src="https://github.com/user-attachments/assets/a3b2710e-95b2-43d8-b4b7-cdb3375e2625" alt="image" style="border:black solid 0.5px; padding:10px;" class="center-image" /></p>
+
+<p>한편, 무엇을 클릭했을 때 이 검색 페이지로 연결되도록 할 것인가? 나는 상단의 탭에 <strong>돋보기 아이콘</strong>을 추가했다. 이를 위해 돋보기 아이콘 svg와 검색 페이지를  연결하여 <code class="language-plaintext highlighter-rouge">_includes/nav.html</code>에 추가했다.</p>
+
+<div class="language-html highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nt">&lt;ul</span> <span class="na">class=</span><span class="s">"search-icon"</span><span class="nt">&gt;</span>
+  <span class="nt">&lt;a</span> <span class="na">href=</span><span class="s">"{{ site.baseurl }}/search"</span><span class="nt">&gt;</span>
+    <span class="nt">&lt;svg</span> 
+      <span class="na">width=</span><span class="s">"24"</span> 
+      <span class="na">height=</span><span class="s">"24"</span> 
+      <span class="na">viewBox=</span><span class="s">"0 0 24 24"</span> 
+      <span class="na">fill=</span><span class="s">"none"</span> 
+      <span class="na">xmlns=</span><span class="s">"http://www.w3.org/2000/svg"</span><span class="nt">&gt;</span>
+      <span class="nt">&lt;path</span> <span class="na">d=</span><span class="s">"M10 ...생략"</span> <span class="na">fill=</span><span class="s">"currentColor"</span><span class="nt">&gt;&lt;/path&gt;</span>
+    <span class="nt">&lt;/svg&gt;</span>
+  <span class="nt">&lt;/a&gt;</span>
+<span class="nt">&lt;/ul&gt;</span>
+</code></pre></div></div>
+
+<p><img src="https://github.com/user-attachments/assets/96ec0aaf-0692-4da4-b390-313138b53ad0" alt="image" style="border:black solid 0.5px; padding:10px;" class="center-image" /></p>
+
+<p>이렇게 검색 페이지를 구성하고 검색용 라이브러리를 적용하는 과정을 마무리하였다.</p>
+
+<h1 id="응용-기능">응용 기능</h1>
+<p>기본 검색 기능에 더하여 키워드를 더 쉽게 찾고 검색 결과를 더 잘 표현하기 위해 개선한 사항이다.</p>
+
+<h2 id="결과창-개선">결과창 개선</h2>
+
+<p><img src="https://github.com/user-attachments/assets/2759e44c-1170-4c49-9e1a-297d646a8354" alt="image" style="border:black solid 0.5px; padding:10px;" /></p>
+
+<p>이미지에 보듯 결과창에 추가한 내용은 다음과 같다.</p>
+
+<ol>
+  <li>검색어 하이라이트</li>
+  <li>클릭시 본문 및 태그 페이지로 링크 연결</li>
+  <li>본문 미리보기</li>
+  <li>검색어가 언급된 횟수 표시</li>
+  <li>아이콘과 함께 메타 정보 디스플레이
+<br /></li>
+</ol>
+
+<p>이를 위해 <code class="language-plaintext highlighter-rouge">SimpleJekyllSearch</code> 함수의 <code class="language-plaintext highlighter-rouge">templateMiddleware</code>와 <code class="language-plaintext highlighter-rouge">searchResultTemplate</code> 인자를 활용할 것이다. 전자는 검색 결과가 있을 때 호출되는 함수이며 후자는 그 결과를 출력할 HTML 템플릿을 지정하는 인자다. 하나씩 짚어보도록 하겠다.<br />
+<br /></p>
+
+<p><code class="language-plaintext highlighter-rouge">templateMiddleware</code> 인자는 다음과 같이 정의된 함수를 필요로 한다.</p>
+
+<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nf">function </span><span class="p">(</span><span class="nx">prop</span><span class="p">,</span> <span class="nx">value</span><span class="p">,</span> <span class="nx">template</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="nx">value</span>
+    <span class="p">}</span>
+</code></pre></div></div>
+<p><code class="language-plaintext highlighter-rouge">prop</code>은 json의 key이고 <code class="language-plaintext highlighter-rouge">value</code>는 key에 대한 value를 의미한다. 이제 <code class="language-plaintext highlighter-rouge">prop</code>, 즉 ‘항목’에 따라 <code class="language-plaintext highlighter-rouge">value</code>를 처리할 것이다.</p>
+
+<p><strong>URL</strong>과 <strong>날짜</strong> 항목은 json에 저장된 그대로 사용할 예정이기 때문에 바로 <code class="language-plaintext highlighter-rouge">value</code>를 반환하도록 했다.</p>
+
+<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">if </span><span class="p">(</span><span class="nx">prop</span> <span class="o">===</span> <span class="dl">"</span><span class="s2">url</span><span class="dl">"</span> <span class="o">||</span> <span class="nx">prop</span> <span class="o">===</span> <span class="dl">'</span><span class="s1">date</span><span class="dl">'</span><span class="p">)</span> <span class="p">{</span>
+          <span class="k">return</span> <span class="nx">value</span><span class="p">;</span>
+        <span class="p">}</span>
+</code></pre></div></div>
+
+<p>나머지 <strong>제목, 태그, 본문</strong> 항목은 검색어 하이라이트를 적용하고 URL과 연결하는 작업이 필요하다.<br />
+우선 검색어를 저장하고, 그것을 찾는 정규표현식 객체와 최종적으로 리턴될 변수를 선언한다.</p>
+
+<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">const</span> <span class="nx">searchTerm</span> <span class="o">=</span> <span class="nb">document</span><span class="p">.</span><span class="nf">getElementById</span><span class="p">(</span><span class="dl">"</span><span class="s2">search-input</span><span class="dl">"</span><span class="p">).</span><span class="nx">value</span><span class="p">;</span>
+<span class="kd">const</span> <span class="nx">regex</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">RegExp</span><span class="p">(</span><span class="nx">searchTerm</span><span class="p">,</span> <span class="dl">"</span><span class="s2">gi</span><span class="dl">"</span><span class="p">);</span>
+<span class="kd">let</span> <span class="nx">highlightedValue</span><span class="p">;</span>
+</code></pre></div></div>
+
+<p><strong>제목</strong> 항목은 정규표현식 객체로 검색어(<code class="language-plaintext highlighter-rouge">$&amp;</code>)를 HTML 태그로 감싼다. 배경색깔을 바꾸고 폰트를 굵게 표시한다.</p>
+<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">if </span><span class="p">(</span><span class="nx">prop</span> <span class="o">===</span> <span class="dl">'</span><span class="s1">title</span><span class="dl">'</span><span class="p">)</span> <span class="p">{</span>
+  <span class="nx">highlightedValue</span> <span class="o">=</span> <span class="nx">value</span><span class="p">.</span><span class="nf">replace</span><span class="p">(</span><span class="nx">regex</span><span class="p">,</span> <span class="dl">'</span><span class="s1">&lt;span style="background:gold"&gt;&lt;b&gt;$&amp;&lt;/b&gt;&lt;/span&gt;</span><span class="dl">'</span><span class="p">)</span>
+  <span class="k">return</span> <span class="nx">highlightedValue</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p><strong>태그</strong> 항목의 경우 <a href="https://woocosmos.github.io/tags/">태그 페이지</a>의 각 태그 링크와 연동했다.<br />
+앞서 json을 생성하면서 쉼표로 join 했기 때문에 split하고 join하는 과정을 한번 더 거치는데, search.json을 개선해서 전처리를 간소화하는 대안도 고민해봐야겠다.</p>
+
+<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">if </span><span class="p">(</span><span class="nx">prop</span> <span class="o">===</span> <span class="dl">'</span><span class="s1">tags</span><span class="dl">'</span><span class="p">)</span> <span class="p">{</span>
+    <span class="kd">const</span> <span class="nx">dest</span> <span class="o">=</span> <span class="nb">window</span><span class="p">.</span><span class="nx">location</span><span class="p">.</span><span class="nx">origin</span><span class="p">;</span>
+    <span class="kd">const</span> <span class="nx">theTags</span> <span class="o">=</span> <span class="nx">value</span><span class="p">.</span><span class="nf">split</span><span class="p">(</span><span class="dl">'</span><span class="s1">, </span><span class="dl">'</span><span class="p">).</span><span class="nf">map</span><span class="p">(</span><span class="nx">tag</span> <span class="o">=&gt;</span> <span class="nx">tag</span><span class="p">.</span><span class="nf">trim</span><span class="p">());</span>
+    
+    <span class="nx">highlightedLinkedValue</span> <span class="o">=</span> <span class="nx">theTags</span><span class="p">.</span><span class="nf">map</span><span class="p">(</span><span class="nx">tag</span> <span class="o">=&gt;</span> <span class="p">{</span>
+      <span class="c1">// 하이라이트를 적용한다</span>
+      <span class="kd">const</span> <span class="nx">highlightedTag</span> <span class="o">=</span> <span class="nx">tag</span><span class="p">.</span><span class="nf">replace</span><span class="p">(</span><span class="nx">regex</span><span class="p">,</span> <span class="dl">'</span><span class="s1">&lt;b style="background:gold"&gt;$&amp;&lt;/b&gt;</span><span class="dl">'</span><span class="p">);</span>
+      <span class="c1">// 링크를 적용한다</span>
+      <span class="k">return</span> <span class="s2">`&lt;a href="</span><span class="p">${</span><span class="nx">dest</span><span class="p">}</span><span class="s2">/tags/#</span><span class="p">${</span><span class="nx">tag</span><span class="p">}</span><span class="s2">"&gt;&lt;span&gt;</span><span class="p">${</span><span class="nx">highlightedTag</span><span class="p">}</span><span class="s2">&lt;/span&gt;&lt;/a&gt;`</span><span class="p">;</span>
+    <span class="p">}).</span><span class="nf">join</span><span class="p">(</span><span class="dl">'</span><span class="s1">, </span><span class="dl">'</span><span class="p">);</span>
+    
+    <span class="k">return</span> <span class="nx">highlightedLinkedValue</span><span class="p">;</span>
+        <span class="p">}</span>
+</code></pre></div></div>
+
+<p>마지막으로 <strong>본문</strong>을 보여주는 데 있어 두 가지 지점을 고려했다. 첫번째는 30개 단어까지 미리보기로 보여주는 것이고 두번째는 본문에서 match가 걸린 횟수를 명시하는 것이다.</p>
+
+<p>첫번째 매치를 기준으로 앞뒤 15개 단어까지 슬라이스하였다. 본문에 매치가 없을 경우 처음부터 30개 단어를 가져온다. 마지막으로는 정규표현식 객체에 매치된 <code class="language-plaintext highlighter-rouge">matches</code>의 개수를 명시했다.</p>
+
+<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nx">value</span> <span class="o">=</span> <span class="nx">value</span><span class="p">.</span><span class="nf">replace</span><span class="p">(</span><span class="sr">/</span><span class="se">\[</span><span class="sr">.*</span><span class="se">?\]</span><span class="sr">/g</span><span class="p">,</span> <span class="dl">''</span><span class="p">);</span>
+<span class="kd">const</span> <span class="nx">matches</span> <span class="o">=</span> <span class="nx">value</span><span class="p">.</span><span class="nf">match</span><span class="p">(</span><span class="nx">regex</span><span class="p">);</span>
+<span class="kd">let</span> <span class="nx">matchCnt</span><span class="p">;</span>
+<span class="k">if </span><span class="p">(</span><span class="nx">matches</span><span class="p">)</span> <span class="p">{</span>
+    <span class="c1">// 띄어쓰기를 기준으로 토큰화한다</span>
+    <span class="kd">const</span> <span class="nx">wordsArray</span> <span class="o">=</span> <span class="nx">value</span><span class="p">.</span><span class="nf">split</span><span class="p">(</span><span class="sr">/</span><span class="se">\s</span><span class="sr">+/</span><span class="p">);</span>
+
+    <span class="c1">// 검색된 단어를 기준으로 앞뒤 15개 토큰을 사용한다</span>
+    <span class="kd">const</span> <span class="nx">matchIndex</span> <span class="o">=</span> <span class="nx">wordsArray</span><span class="p">.</span><span class="nf">findIndex</span><span class="p">(</span><span class="nx">word</span> <span class="o">=&gt;</span> <span class="nx">regex</span><span class="p">.</span><span class="nf">test</span><span class="p">(</span><span class="nx">word</span><span class="p">));</span>
+    <span class="kd">const</span> <span class="nx">start</span> <span class="o">=</span> <span class="nb">Math</span><span class="p">.</span><span class="nf">max</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nx">matchIndex</span> <span class="o">-</span> <span class="mi">15</span><span class="p">);</span> 
+    <span class="kd">const</span> <span class="nx">end</span> <span class="o">=</span> <span class="nb">Math</span><span class="p">.</span><span class="nf">min</span><span class="p">(</span><span class="nx">wordsArray</span><span class="p">.</span><span class="nx">length</span><span class="p">,</span> <span class="nx">matchIndex</span> <span class="o">+</span> <span class="mi">15</span> <span class="o">+</span> <span class="mi">1</span><span class="p">);</span> 
+    <span class="kd">const</span> <span class="nx">truncatedValue</span> <span class="o">=</span> <span class="nx">wordsArray</span><span class="p">.</span><span class="nf">slice</span><span class="p">(</span><span class="nx">start</span><span class="p">,</span> <span class="nx">end</span><span class="p">).</span><span class="nf">join</span><span class="p">(</span><span class="dl">"</span><span class="s2"> </span><span class="dl">"</span><span class="p">);</span>
+
+    <span class="c1">// 하이라이트를 적용한다</span>
+    <span class="nx">highlightedValue</span> <span class="o">=</span> <span class="nx">truncatedValue</span><span class="p">.</span><span class="nf">replace</span><span class="p">(</span>
+        <span class="nx">regex</span><span class="p">,</span>
+        <span class="dl">'</span><span class="s1">&lt;span style="background:gold"&gt;&lt;b&gt;$&amp;&lt;/b&gt;&lt;/span&gt;</span><span class="dl">'</span>
+    <span class="p">);</span>
+    <span class="nx">matchCnt</span> <span class="o">=</span> <span class="nx">matches</span><span class="p">.</span><span class="nx">length</span>
+
+<span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+    <span class="c1">// 본문에 검색어가 없을 경우 처음부터 30개 토큰을 가져온다</span>
+    <span class="kd">const</span> <span class="nx">words</span> <span class="o">=</span> <span class="nx">value</span><span class="p">.</span><span class="nf">split</span><span class="p">(</span><span class="sr">/</span><span class="se">\s</span><span class="sr">+/</span><span class="p">).</span><span class="nf">slice</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">30</span><span class="p">).</span><span class="nf">join</span><span class="p">(</span><span class="dl">"</span><span class="s2"> </span><span class="dl">"</span><span class="p">);</span>
+    <span class="nx">highlightedValue</span> <span class="o">=</span> <span class="s2">`</span><span class="p">${</span><span class="nx">words</span><span class="p">}</span><span class="s2">...`</span><span class="p">;</span>
+    <span class="nx">matchCnt</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="p">}</span>
+<span class="c1">// 언급수</span>
+<span class="nx">highlightedValue</span> <span class="o">+=</span> <span class="s2">`&lt;div style="padding-top:5px"&gt;&lt;span id="match-counter"&gt;본문에 &lt;b&gt;</span><span class="p">${</span><span class="nx">matchCnt</span><span class="p">}</span><span class="s2">&lt;/b&gt;번 언급되었습니다&lt;/span&gt;&lt;/div&gt;`</span><span class="p">;</span>
+<span class="k">return</span> <span class="nx">highlightedValue</span><span class="p">;</span>
+</code></pre></div></div>
+<p><br />
+이렇게 처리된 결과물은 <code class="language-plaintext highlighter-rouge">searchResultTemplate</code>에 정의한 HTML 템플릿대로 디스플레이 된다. 이곳에서 Font Awesome(폰트 어썸) 태그를 정의하여 아이콘으로 영역을 시각적으로 구분했다. 그리고 제목과 본문을 클릭했을 때 본문으로 연결해주는 <code class="language-plaintext highlighter-rouge">&lt;a&gt;</code> 태그를 추가했다</p>
+
+<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nx">searchResultTemplate</span><span class="p">:</span> 
+        <span class="dl">'</span><span class="s1">&lt;article&gt;</span><span class="dl">'</span><span class="o">+</span>
+        <span class="dl">'</span><span class="s1">&lt;div&gt;&lt;i class="fas fa-book fa-fw"&gt;&lt;/i&gt;&lt;a href="{url}"&gt;{title}&lt;/a&gt;&lt;/div&gt;</span><span class="dl">'</span><span class="o">+</span>
+        <span class="dl">'</span><span class="s1">&lt;div&gt;&lt;i class="fas fa-clock fa-fw"&gt;&lt;/i&gt;&lt;span&gt;{date}&lt;/span&gt;&lt;/div&gt;</span><span class="dl">'</span><span class="o">+</span>
+        <span class="dl">'</span><span class="s1">&lt;div&gt;&lt;i class="fas fa-tag fa-fw"&gt;&lt;/i&gt;{tags}&lt;/div&gt;</span><span class="dl">'</span><span class="o">+</span>
+        <span class="dl">'</span><span class="s1">&lt;div style="display:inline-flex"&gt;</span><span class="dl">'</span> <span class="o">+</span> 
+            <span class="dl">'</span><span class="s1">&lt;i class="fas fa-pencil-alt fa-fw" style="padding-top:5px"&gt;&lt;/i&gt;&lt;a href="{url}"&gt;&lt;span style="color:#343a40"&gt;{content}&lt;/span&gt;&lt;/a&gt;</span><span class="dl">'</span> <span class="o">+</span> 
+        <span class="dl">'</span><span class="s1">&lt;/div&gt;</span><span class="dl">'</span><span class="o">+</span>
+        <span class="dl">'</span><span class="s1">&lt;/article&gt;</span><span class="dl">'</span>
+</code></pre></div></div>
+
+<p>참고로 아이콘을 불러오기 위해서는 search 폴더의 <strong><code class="language-plaintext highlighter-rouge">index.html</code>에 폰트 어썸 링크를 추가</strong>해주어야 한다.</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>
+&lt;link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"&gt;
+
+</code></pre></div></div>
+
+<h2 id="키워드-추천">키워드 추천</h2>
+
+<p><img src="https://github.com/user-attachments/assets/5e9706e8-610d-44de-b117-90876070a57f" alt="image" style="border:black solid 0.5px; padding:10px;" /></p>
+
+<p>유저에게 무슨 키워드를 검색할지 가이드를 제공해주는 것은 어떨까?<br />
+포스트 본문을 데이터로 활용하여 <strong>키워드의 중요도를 집계하고 상위 n개 키워드를 추천</strong>하는 기능을 떠올렸다.</p>
+
+<p>아이디어는 이렇다.</p>
+<ol>
+  <li>블로그 전체에서 제목과 본문 텍스트를 수집하여 전처리하고 키워드를 추출한다</li>
+  <li>블로그 포스트 개수를 고려하여 키워드별 TF-IDF를 집계하고 상위 5개를 저장한다</li>
+  <li>추천 키워드를 불러와 검색 페이지에서 띄워준다</li>
+</ol>
+
+<p>1~2번은 Python으로 실행하고 3번은 JavaScript로 구현하기로 했다.<br />
+<br /></p>
+
+<p><strong>데이터 수집과 처리</strong><br />
+<code class="language-plaintext highlighter-rouge">{baseurl}/search.json</code> 주소로 json 파일에 접근할 수 있다는 점을 기억하고 <code class="language-plaintext highlighter-rouge">requests</code> 모듈로 불러왔다. 그리고 그 중에서 제목과 본문만 저장했다.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="nf">collect_contents</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">pttrn</span><span class="p">,</span> <span class="n">noTag</span><span class="p">):</span>
+    <span class="sh">'''</span><span class="s">
+    url   : search.json
+    pttrn : escape 기호 제외하기 위한 정규표현식
+    noTag : 데이터 수집에서 제외할 태그
+    </span><span class="sh">'''</span>
+    <span class="n">response</span> <span class="o">=</span> <span class="n">requests</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">verify</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+    <span class="n">cleansed_response</span> <span class="o">=</span> <span class="n">re</span><span class="p">.</span><span class="nf">sub</span><span class="p">(</span><span class="n">pttrn</span><span class="p">,</span> <span class="sh">'</span><span class="s"> </span><span class="sh">'</span><span class="p">,</span> <span class="n">response</span><span class="p">.</span><span class="n">text</span><span class="p">)</span>
+    <span class="n">normalized_response</span> <span class="o">=</span> <span class="n">re</span><span class="p">.</span><span class="nf">sub</span><span class="p">(</span><span class="sa">r</span><span class="sh">'</span><span class="s">\s+</span><span class="sh">'</span><span class="p">,</span> <span class="sh">'</span><span class="s"> </span><span class="sh">'</span><span class="p">,</span> <span class="n">cleansed_response</span><span class="p">)</span>
+    
+    <span class="n">json_data</span> <span class="o">=</span> <span class="n">json</span><span class="p">.</span><span class="nf">loads</span><span class="p">(</span><span class="n">normalized_response</span><span class="p">)</span>
+    <span class="n">contents</span> <span class="o">=</span> <span class="p">[</span><span class="n">post</span><span class="p">[</span><span class="sh">'</span><span class="s">title</span><span class="sh">'</span><span class="p">]</span> <span class="o">+</span> <span class="sh">'</span><span class="s"> </span><span class="sh">'</span> <span class="o">+</span> <span class="n">post</span><span class="p">[</span><span class="sh">'</span><span class="s">content</span><span class="sh">'</span><span class="p">]</span> <span class="k">for</span> <span class="n">post</span> <span class="ow">in</span> <span class="n">json_data</span> <span class="k">if</span> <span class="n">noTag</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">post</span><span class="p">[</span><span class="sh">'</span><span class="s">tags</span><span class="sh">'</span><span class="p">]]</span>
+    <span class="k">return</span> <span class="n">contents</span>
+</code></pre></div></div>
+
+<p>수집한 데이터를 키워드 말뭉치 형태로 변환한다. 이때 영어와 한국어를 따로 추출하여 한 글자인 단어와 불용어 사전에 포함된 단어를 제외했다. 명사를 대상으로 하고 싶었기 때문에 <strong>한국어는 형태소 분석기를 사용하여 명사를 추출</strong>했다.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="nf">create_corpus</span><span class="p">(</span><span class="n">contents</span><span class="p">):</span>
+    <span class="c1"># eng_prc, kor_prc는 별도로 정의한 전처리 함수다
+</span>    <span class="n">keywords_eng</span> <span class="o">=</span> <span class="nf">list</span><span class="p">(</span><span class="nf">map</span><span class="p">(</span><span class="n">eng_prc</span><span class="p">,</span> <span class="n">contents</span><span class="p">))</span>
+    <span class="c1"># 한국어는 형태소 분석 후 명사만 사용된다
+</span>    <span class="n">keywords_kor</span> <span class="o">=</span> <span class="nf">list</span><span class="p">(</span><span class="nf">map</span><span class="p">(</span><span class="n">kor_prc</span><span class="p">,</span> <span class="n">contents</span><span class="p">))</span>
+    <span class="n">corpus</span> <span class="o">=</span> <span class="p">[</span><span class="sh">'</span><span class="s"> </span><span class="sh">'</span><span class="p">.</span><span class="nf">join</span><span class="p">(</span><span class="n">e</span><span class="o">+</span><span class="n">k</span><span class="p">)</span> <span class="k">for</span> <span class="n">e</span><span class="p">,</span> <span class="n">k</span> <span class="ow">in</span> <span class="nf">zip</span><span class="p">(</span><span class="n">keywords_eng</span><span class="p">,</span> <span class="n">keywords_kor</span><span class="p">)]</span>
+    <span class="k">return</span> <span class="n">corpus</span>
+</code></pre></div></div>
+
+<p>참고로 한국어 형태소 분석은 <code class="language-plaintext highlighter-rouge">konlpy</code>를 사용했다.</p>
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="n">konlpy.tag</span> <span class="kn">import</span> <span class="n">Okt</span>
+
+<span class="k">def</span> <span class="nf">kor_prc</span><span class="p">(</span><span class="n">c</span><span class="p">):</span>
+    <span class="n">okt</span> <span class="o">=</span> <span class="nc">Okt</span><span class="p">()</span>
+    <span class="n">kor_res</span> <span class="o">=</span><span class="p">[]</span>
+    <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">okt</span><span class="p">.</span><span class="nf">nouns</span><span class="p">(</span><span class="n">c</span><span class="p">):</span>
+        <span class="nf">if </span><span class="p">(</span><span class="nf">len</span><span class="p">(</span><span class="n">k</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">k</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">stop_words</span><span class="p">):</span>
+            <span class="n">kor_res</span><span class="p">.</span><span class="nf">append</span><span class="p">(</span><span class="n">k</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">kor_res</span>
+</code></pre></div></div>
+
+<p>불용어 사전은 <a href="https://gist.github.com/sebleier/554280">NLTK’s list of english stopwords</a>와 <a href="https://www.public.asu.edu/~rjansen/latexdoc/ltx-2.html">Latex 문법 리스트</a>를 크롤링해서 <code class="language-plaintext highlighter-rouge">stopwords.txt</code> 파일로 구축하였다. 더불어 <em>span, div</em>와 같은 HTML 태그도 불용어 사전에 포함했다.<br />
+<br /></p>
+
+<p><strong>TF-IDF 계산</strong><br />
+TF-IDF(Term Frequency-Inverse Document Frequency)는 <strong>문서 안에서의 출현 빈도수와 전체 문서 집합에서의 희귀성을 적용한 가중치</strong>이다. scikit-learn 의 <a href="https://scikit-learn.org/stable/modules/generated/sklearn.feature_extraction.text.TfidfVectorizer.html">TfidfVectorizer</a>을 사용해 계산했다. 여러 개 포스트를 올리는 블로그 특성 상 주요 키워드를 추출하는 데 TF-IDF가 적합하다고 생각하여 적용했다.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="nf">extract_keywords</span><span class="p">(</span><span class="n">corpus</span><span class="p">,</span> <span class="n">topN</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">asset_dir</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="n">vectorizer</span> <span class="o">=</span> <span class="nc">TfidfVectorizer</span><span class="p">()</span>
+    <span class="n">tfidf_matrix</span> <span class="o">=</span> <span class="n">vectorizer</span><span class="p">.</span><span class="nf">fit_transform</span><span class="p">(</span><span class="n">corpus</span><span class="p">)</span>
+
+    <span class="n">feature_names</span> <span class="o">=</span> <span class="n">vectorizer</span><span class="p">.</span><span class="nf">get_feature_names_out</span><span class="p">()</span>
+    <span class="c1"># 단어가 열, 문서가 행이므로 각 단어에 대해 문서 전반의 값을 sum
+</span>    <span class="n">sum_tfidf_scores</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="nf">array</span><span class="p">(</span><span class="n">tfidf_matrix</span><span class="p">.</span><span class="nf">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)).</span><span class="nf">flatten</span><span class="p">()</span>
+    <span class="n">average_tfidf_score</span> <span class="o">=</span> <span class="n">sum_tfidf_scores</span><span class="p">.</span><span class="nf">mean</span><span class="p">().</span><span class="nf">round</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+
+    <span class="n">top_indices</span> <span class="o">=</span> <span class="n">sum_tfidf_scores</span><span class="p">.</span><span class="nf">argsort</span><span class="p">()[</span><span class="o">-</span><span class="n">topN</span><span class="p">:][::</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">top_keywords</span> <span class="o">=</span> <span class="p">[[</span><span class="sh">'</span><span class="s">말뭉치 평균</span><span class="sh">'</span><span class="p">,</span> <span class="n">average_tfidf_score</span><span class="p">]]</span>
+    <span class="n">top_keywords</span> <span class="o">+=</span> <span class="p">[[</span><span class="n">feature_names</span><span class="p">[</span><span class="n">idx</span><span class="p">],</span> <span class="nf">round</span><span class="p">(</span><span class="n">sum_tfidf_scores</span><span class="p">[</span><span class="n">idx</span><span class="p">],</span> <span class="mi">2</span><span class="p">)]</span> <span class="k">for</span> <span class="n">idx</span> <span class="ow">in</span> <span class="n">top_indices</span><span class="p">]</span>
+    <span class="bp">...</span>
+    <span class="c1"># 저장
+</span>    <span class="k">with</span> <span class="nf">open</span><span class="p">(</span><span class="n">save_path</span><span class="p">,</span> <span class="sh">'</span><span class="s">w</span><span class="sh">'</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+      <span class="n">json</span><span class="p">.</span><span class="nf">dump</span><span class="p">(</span><span class="n">top_keywords</span><span class="p">,</span> <span class="n">f</span><span class="p">)</span>
+</code></pre></div></div>
+<p>문서별로 단어의 TF-IDF 값이 계산되는데, 전체 블로그 관점에서 중요도를 고려해야 하므로 단어 단위로 총합 값을 계산했다. 또 추출된 키워드의 중요도를 상대적으로 비교할 수 있도록 전체 키워드의 평균 TF-IDF 값도 함께 저장했다.<br />
+<br /></p>
+
+<p><strong>추천 키워드 디스플레이</strong><br />
+파이썬으로 계산한 결과는 <code class="language-plaintext highlighter-rouge">keywords.json</code> 이라는 이름으로 따로 저장했다. 첫번째 요소는 전체 말뭉치 평균이고, 그 아래부터 1위, 2위 … 5위에 해당한다. [키워드, 점수] 쌍의 리스트로 이루어져 있다.</p>
+<div class="language-json highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">[[</span><span class="err">'말뭉치</span><span class="w"> </span><span class="err">평균'</span><span class="p">,</span><span class="w"> </span><span class="mf">0.05</span><span class="p">],</span><span class="w"> 
+ </span><span class="p">[</span><span class="err">'클러스터'</span><span class="p">,</span><span class="w"> </span><span class="mf">0.67</span><span class="p">],</span><span class="w"> 
+ </span><span class="p">[</span><span class="err">'toc'</span><span class="p">,</span><span class="w"> </span><span class="mf">0.42</span><span class="p">],</span><span class="w"> 
+ </span><span class="p">[</span><span class="err">'포인트'</span><span class="p">,</span><span class="w"> </span><span class="mf">0.38</span><span class="p">],</span><span class="w"> 
+ </span><span class="p">[</span><span class="err">'편차'</span><span class="p">,</span><span class="w"> </span><span class="mf">0.38</span><span class="p">],</span><span class="w"> 
+ </span><span class="p">[</span><span class="err">'평균'</span><span class="p">,</span><span class="w"> </span><span class="mf">0.33</span><span class="p">]]</span><span class="w">
+</span></code></pre></div></div>
+
+<p>이제 이것을 읽어 검색 페이지에서 보여주는 JavaScript를 작성한다. 해당 스크립트는 search 폴더의 <code class="language-plaintext highlighter-rouge">index.html</code> 에서 실행된다. 먼저 json을 읽어온 후 반복문으로 HTML 태그를 추가했다. 키워드를 클릭하면 바로 검색되도록 click 이벤트를 추가했다.</p>
+
+<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// 미리 추출한 키워드 json 데이터를 불러온다</span>
+<span class="kd">const</span> <span class="nx">response</span> <span class="o">=</span> <span class="k">await</span> <span class="nf">fetch</span><span class="p">(</span><span class="dl">'</span><span class="s1">keywords.json</span><span class="dl">'</span><span class="p">);</span>
+<span class="kd">const</span> <span class="nx">data</span> <span class="o">=</span> <span class="k">await</span> <span class="nx">response</span><span class="p">.</span><span class="nf">json</span><span class="p">();</span>
+<span class="p">...</span>
+<span class="c1">// 첫번째 요소는 전체 평균이므로 두번째 요소부터 반복문을 시행한다</span>
+<span class="nx">data</span><span class="p">.</span><span class="nf">slice</span><span class="p">(</span><span class="mi">1</span><span class="p">).</span><span class="nf">forEach</span><span class="p">((</span><span class="nx">obj</span><span class="p">,</span> <span class="nx">rnk</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="p">{</span>
+    <span class="kd">const</span> <span class="nx">li</span> <span class="o">=</span> <span class="nb">document</span><span class="p">.</span><span class="nf">createElement</span><span class="p">(</span><span class="dl">'</span><span class="s1">li</span><span class="dl">'</span><span class="p">);</span>
+    <span class="kd">const</span> <span class="nx">span</span> <span class="o">=</span> <span class="nb">document</span><span class="p">.</span><span class="nf">createElement</span><span class="p">(</span><span class="dl">'</span><span class="s1">span</span><span class="dl">'</span><span class="p">);</span>
+
+    <span class="c1">// 키워드를 읽어온다</span>
+    <span class="nx">span</span><span class="p">.</span><span class="nx">textContent</span> <span class="o">=</span> <span class="nx">obj</span><span class="p">[</span><span class="mi">0</span><span class="p">];</span>
+
+    <span class="c1">// 클릭할 경우 해당 키워드를 search-input 입력창으로 전달한다</span>
+    <span class="nx">span</span><span class="p">.</span><span class="nf">addEventListener</span><span class="p">(</span><span class="dl">'</span><span class="s1">click</span><span class="dl">'</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">event</span><span class="p">)</span> <span class="p">{</span>
+                    <span class="kd">const</span> <span class="nx">searchInput</span> <span class="o">=</span> <span class="nb">document</span><span class="p">.</span><span class="nf">getElementById</span><span class="p">(</span><span class="dl">'</span><span class="s1">search-input</span><span class="dl">'</span><span class="p">);</span>
+                    <span class="nx">searchInput</span><span class="p">.</span><span class="nx">value</span> <span class="o">=</span> <span class="nx">obj</span><span class="p">[</span><span class="mi">0</span><span class="p">];</span>
+
+                    <span class="c1">// trigger</span>
+                    <span class="kd">const</span> <span class="nx">e</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">Event</span><span class="p">(</span><span class="dl">'</span><span class="s1">input</span><span class="dl">'</span><span class="p">,</span> <span class="p">{</span> <span class="na">bubbles</span><span class="p">:</span> <span class="kc">true</span> <span class="p">});</span>
+                    <span class="nx">searchInput</span><span class="p">.</span><span class="nf">dispatchEvent</span><span class="p">(</span><span class="nx">e</span><span class="p">);</span>
+                <span class="p">});</span>
+    <span class="p">...</span>
+</code></pre></div></div>
+<p class="center"><img src="https://github.com/user-attachments/assets/5f04c3c4-89b7-4074-a014-4f4103eeddda" alt="image" style="border:black solid 0.5px; padding:10px;" class="center-image" />
+클릭하면 검색창에 그 키워드가 입력되면서 검색 기능이 발동된다.</p>
+
+<p>마지막으로 <em>이 키워드들이 왜 추천되는지</em> 도움말 팝업을 추가해보았다. 아이콘 위에 마우스를 호버하면 텍스트 설명이 뜨는 방식이다. 각 추천 키워드의 점수도 <code class="language-plaintext highlighter-rouge">obj[1]</code>으로 읽어올 수 있으므로 팝업 코드를 forEach문에 추가했다.</p>
+
+<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// 도움말 아이콘 팝업</span>
+<span class="kd">const</span> <span class="nx">svgIcon</span> <span class="o">=</span> <span class="nb">document</span><span class="p">.</span><span class="nf">createElement</span><span class="p">(</span><span class="dl">'</span><span class="s1">span</span><span class="dl">'</span><span class="p">)</span>
+<span class="nx">svgIcon</span><span class="p">.</span><span class="nx">innerHTML</span> <span class="o">=</span> <span class="s2">`&lt;svg width="25" height="25" viewBox="0 0 16 16" 생략..&gt; &lt;/svg&gt;`</span><span class="p">;</span>
+<span class="nx">paragraph</span><span class="p">.</span><span class="nf">appendChild</span><span class="p">(</span><span class="nx">svgIcon</span><span class="p">);</span>
+
+<span class="kd">const</span> <span class="nx">totalAvg</span> <span class="o">=</span> <span class="nx">data</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+<span class="kd">const</span> <span class="nx">tooltip</span> <span class="o">=</span> <span class="nb">document</span><span class="p">.</span><span class="nf">createElement</span><span class="p">(</span><span class="dl">'</span><span class="s1">div</span><span class="dl">'</span><span class="p">);</span>
+<span class="nx">tooltip</span><span class="p">.</span><span class="nx">className</span> <span class="o">=</span> <span class="dl">'</span><span class="s1">tooltip</span><span class="dl">'</span><span class="p">;</span>
+<span class="nx">tooltip</span><span class="p">.</span><span class="nx">textContent</span> <span class="o">=</span> <span class="s2">`TF-IDF 점수를 기반으로 상위 5개 키워드를 추천합니다\n
+                      현재 블로그의 전체 평균 TF-IDF는 </span><span class="p">${</span><span class="nx">totalAvg</span><span class="p">[</span><span class="mi">1</span><span class="p">]}</span><span class="s2">점입니다\n
+                      추천 키워드에 마우스를 올려 점수를 비교해보세요`</span><span class="p">;</span>
+<span class="nx">tooltip</span><span class="p">.</span><span class="nx">style</span><span class="p">.</span><span class="nx">whiteSpace</span> <span class="o">=</span> <span class="dl">'</span><span class="s1">pre</span><span class="dl">'</span><span class="p">;</span> <span class="c1">// '\n'이 적용되려면</span>
+<span class="nb">document</span><span class="p">.</span><span class="nx">body</span><span class="p">.</span><span class="nf">appendChild</span><span class="p">(</span><span class="nx">tooltip</span><span class="p">);</span>
+
+<span class="nx">svgIcon</span><span class="p">.</span><span class="nf">addEventListener</span><span class="p">(</span><span class="dl">'</span><span class="s1">mouseenter</span><span class="dl">'</span><span class="p">,</span> <span class="p">(</span><span class="nx">event</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="p">{</span>
+    <span class="nx">tooltip</span><span class="p">.</span><span class="nx">style</span><span class="p">.</span><span class="nx">display</span> <span class="o">=</span> <span class="dl">'</span><span class="s1">block</span><span class="dl">'</span><span class="p">;</span>
+    <span class="nx">tooltip</span><span class="p">.</span><span class="nx">style</span><span class="p">.</span><span class="nx">left</span> <span class="o">=</span> <span class="s2">`</span><span class="p">${</span><span class="nx">event</span><span class="p">.</span><span class="nx">pageX</span> <span class="o">+</span> <span class="mi">10</span><span class="p">}</span><span class="s2">px`</span><span class="p">;</span>
+    <span class="nx">tooltip</span><span class="p">.</span><span class="nx">style</span><span class="p">.</span><span class="nx">top</span> <span class="o">=</span> <span class="s2">`</span><span class="p">${</span><span class="nx">event</span><span class="p">.</span><span class="nx">pageY</span> <span class="o">+</span> <span class="mi">10</span><span class="p">}</span><span class="s2">px`</span><span class="p">;</span>
+<span class="p">});</span>
+
+<span class="nx">svgIcon</span><span class="p">.</span><span class="nf">addEventListener</span><span class="p">(</span><span class="dl">'</span><span class="s1">mousemove</span><span class="dl">'</span><span class="p">,</span> <span class="p">(</span><span class="nx">event</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="p">{</span>
+    <span class="nx">tooltip</span><span class="p">.</span><span class="nx">style</span><span class="p">.</span><span class="nx">left</span> <span class="o">=</span> <span class="s2">`</span><span class="p">${</span><span class="nx">event</span><span class="p">.</span><span class="nx">pageX</span> <span class="o">+</span> <span class="mi">10</span><span class="p">}</span><span class="s2">px`</span><span class="p">;</span>
+    <span class="nx">tooltip</span><span class="p">.</span><span class="nx">style</span><span class="p">.</span><span class="nx">top</span> <span class="o">=</span> <span class="s2">`</span><span class="p">${</span><span class="nx">event</span><span class="p">.</span><span class="nx">pageY</span> <span class="o">+</span> <span class="mi">10</span><span class="p">}</span><span class="s2">px`</span><span class="p">;</span>
+<span class="p">});</span>
+
+<span class="nx">svgIcon</span><span class="p">.</span><span class="nf">addEventListener</span><span class="p">(</span><span class="dl">'</span><span class="s1">mouseleave</span><span class="dl">'</span><span class="p">,</span> <span class="p">()</span> <span class="o">=&gt;</span> <span class="p">{</span>
+    <span class="nx">tooltip</span><span class="p">.</span><span class="nx">style</span><span class="p">.</span><span class="nx">display</span> <span class="o">=</span> <span class="dl">'</span><span class="s1">none</span><span class="dl">'</span><span class="p">;</span>
+<span class="p">});</span>
+</code></pre></div></div>
+<p><br /></p>
+
+<p><strong>자동화</strong><br />
+끝으로 TF-IDF를 계산하는 파이썬 스크립트의 실행만 자동화하면 된다. 이 부분은 GitHub Actions로 처리했으며 <a href="https://woocosmos.github.io/github-action/">GitHub Actions 활용한 태스크 및 배포 자동화</a>에서 그 과정을 확인할 수 있다.</p>
+
+<h1 id="기타">기타</h1>
+<p>JS에서 실행할 수 있는 <a href="https://github.com/NOT2ho/notPOS_kr">한국어 토크나이저</a>도 있다. 사이트를 불러올 때마다 점수를 연산하기는 어려울 것 같아서 결국 python으로 구현했지만, 충분히 활용 가치가 있을 것 같아서 기록해둔다</p>
+
+    </section>
+  </div>
+
+  <div class="pagination">
+    
+      <span class="prev" >
+          <a href="https://woocosmos.github.io/basic-statistics/">
+            &#xE000; 수학, 통계 개념 모음집
+          </a>
+      </span>
+    
+    
+      <span class="next" >
+          <a href="https://woocosmos.github.io/github-action/">
+            GitHub Actions 활용한 태스크 및 배포 자동화 &#xE001;
+          </a>
+      </span>
+    
+  </div>
+
+  <div class="comments">
+	<div id="disqus_thread"></div>
+	<script type="text/javascript">
+
+	    var disqus_shortname = 'woocosmos';
+
+	    (function() {
+	        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+	        dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+			dsq.setAttribute('data-timestamp', +new Date()); //추가
+	        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+	    })();
+
+	</script>
+	<noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+  <script type="text/javascript">
+    "use strict"; 
+    function addBackToTop() 
+        { function o() 
+            { 
+                t() >= z ? R && (D.className = "", R = !1) : R || (D.className = "hidden", R = !0) 
+            } 
+          function t() 
+            { 
+                return E.scrollTop || A && document.documentElement.scrollTop || 0 
+            } 
+          function e(o) 
+            { 
+                E.scrollTop = o, A && (document.documentElement.scrollTop = o) 
+            } 
+    
+    var n, i, d, r, c = arguments.length > 0 && void 0 !== arguments[0] ? arguments[0] : {}, a = c.backgroundColor, s = void 0 === a ? "#000" : a, l = c.cornerOffset, u = void 0 === l ? 20 : l, m = c.diameter, p = void 0 === m ? 56 : m, h = c.ease, b = void 0 === h ? function (o) { return .5 * (1 - Math.cos(Math.PI * o)) } : h, v = c.id, f = void 0 === v ? "back-to-top" : v, x = c.innerHTML, g = void 0 === x ? '<svg viewBox="0 0 24 24"><path d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z"></path></svg>' : x, w = c.onClickScrollTo, y = void 0 === w ? 0 : w, k = c.scrollContainer, E = void 0 === k ? document.body : k, T = c.scrollDuration, C = void 0 === T ? 100 : T, M = c.showWhenScrollTopIs, z = void 0 === M ? 1 : M, L = c.size, B = void 0 === L ? p : L, H = c.textColor, I = void 0 === H ? "#fff" : H, N = c.zIndex, S = void 0 === N ? 1 : N, q = E === document.body, A = q && document.documentElement; n = Math.round(.35 * B), i = Math.round(.2 * B), d = "#" + f + "{background:" + s + ";-webkit-border-radius:50%;-moz-border-radius:50%;border-radius:50%;bottom:" + u + "px;-webkit-box-shadow:0 2px 5px 0 rgba(0,0,0,.26);-moz-box-shadow:0 2px 5px 0 rgba(0,0,0,.26);box-shadow:0 2px 5px 0 rgba(0,0,0,.26);color:" + I + ";cursor:pointer;display:block;height:" + B + "px;opacity:1;outline:0;position:fixed;right:" + u + "px;-webkit-tap-highlight-color:transparent;-webkit-touch-callout:none;-webkit-transition:bottom .2s,opacity .2s;-o-transition:bottom .2s,opacity .2s;-moz-transition:bottom .2s,opacity .2s;transition:bottom .2s,opacity .2s;-webkit-user-select:none;-moz-user-select:none;-ms-user-select:none;user-select:none;width:" + B + "px;z-index:" + S + "}#" + f + " svg{display:block;fill:currentColor;height:" + n + "px;margin:" + i + "px auto 0;width:" + n + "px}#" + f + ".hidden{bottom:-" + B + "px;opacity:0}", (r = document.createElement("style")).appendChild(document.createTextNode(d)), document.head.insertAdjacentElement("afterbegin", r); var D = function () { var o = document.createElement("div"); return o.id = f, o.className = "hidden", o.innerHTML = g, o.addEventListener("click", function (o) { o.preventDefault(), function () { var o = "function" == typeof y ? y() : y, n = window, i = n.performance, d = n.requestAnimationFrame; if (C <= 0 || void 0 === i || void 0 === d) return e(o); var r = i.now(), c = t(), a = c - o; d(function o(t) { var n = Math.min((t - r) / C, 1); e(c - Math.round(b(n) * a)), n < 1 && d(o) }) }() }), document.body.appendChild(o), o }(), R = !0; (q ? window : E).addEventListener("scroll", o), o() } window.addEventListener("load", function () { var o = document.getElementById("back-to-top"), t = document.querySelector(".sticky-bottom"), e = document.querySelector(".fixed-bottom"); o && window.addEventListener("scroll", function () { if (t) { var n = t.getBoundingClientRect(); window.scrollY + window.innerHeight > document.body.scrollHeight - n.height ? (o.style.position = "fixed", o.style.bottom = n.height + 15 + "px") : (o.style.position = "fixed", o.style.bottom = "15px") } if (e) { var i = e.getBoundingClientRect(); o.style.position = "fixed", o.style.bottom = i.height + 15 + "px" } }) });
+</script>
+<script>
+    addBackToTop();
+</script>
+
+
+
+
+</article>
+
+    </div>
+    
+    <div class="wrapper-footer">
+      <div class="container">
+        <footer class="footer">
+          <!-- Refer to https://codepen.io/ruandre/pen/howFi -->
+<ul class="svg-icon">
+
+  
+
+  
+
+  
+  <li><a href="mailto:woocosmos@gmail.com" class="icon-8 email" title="Email"><svg viewBox="0 0 512 512"><path d="M101.3 141.6v228.9h0.3 308.4 0.8V141.6H101.3zM375.7 167.8l-119.7 91.5 -119.6-91.5H375.7zM127.6 194.1l64.1 49.1 -64.1 64.1V194.1zM127.8 344.2l84.9-84.9 43.2 33.1 43-32.9 84.7 84.7L127.8 344.2 127.8 344.2zM384.4 307.8l-64.4-64.4 64.4-49.3V307.8z"/></svg><!--[if lt IE 9]><em>Email</em><![endif]--></a></li>
+  
+
+  
+
+  
+
+  
+  <li><a href="https://github.com/woocosmos" class="icon-13 github" title="GitHub"><svg viewBox="0 0 512 512"><path d="M256 70.7c-102.6 0-185.9 83.2-185.9 185.9 0 82.1 53.3 151.8 127.1 176.4 9.3 1.7 12.3-4 12.3-8.9V389.4c-51.7 11.3-62.5-21.9-62.5-21.9 -8.4-21.5-20.6-27.2-20.6-27.2 -16.9-11.5 1.3-11.3 1.3-11.3 18.7 1.3 28.5 19.2 28.5 19.2 16.6 28.4 43.5 20.2 54.1 15.4 1.7-12 6.5-20.2 11.8-24.9 -41.3-4.7-84.7-20.6-84.7-91.9 0-20.3 7.3-36.9 19.2-49.9 -1.9-4.7-8.3-23.6 1.8-49.2 0 0 15.6-5 51.1 19.1 14.8-4.1 30.7-6.2 46.5-6.3 15.8 0.1 31.7 2.1 46.6 6.3 35.5-24 51.1-19.1 51.1-19.1 10.1 25.6 3.8 44.5 1.8 49.2 11.9 13 19.1 29.6 19.1 49.9 0 71.4-43.5 87.1-84.9 91.7 6.7 5.8 12.8 17.1 12.8 34.4 0 24.9 0 44.9 0 51 0 4.9 3 10.7 12.4 8.9 73.8-24.6 127-94.3 127-176.4C441.9 153.9 358.6 70.7 256 70.7z"/></svg><!--[if lt IE 9]><em>GitHub</em><![endif]--></a></li>
+  
+
+  
+
+  
+
+  
+  <li><a href="https://www.linkedin.com/in/yunsoo-woo-245946213" class="icon-17 linkedin" title="LinkedIn"><svg viewBox="0 0 512 512"><path d="M186.4 142.4c0 19-15.3 34.5-34.2 34.5 -18.9 0-34.2-15.4-34.2-34.5 0-19 15.3-34.5 34.2-34.5C171.1 107.9 186.4 123.4 186.4 142.4zM181.4 201.3h-57.8V388.1h57.8V201.3zM273.8 201.3h-55.4V388.1h55.4c0 0 0-69.3 0-98 0-26.3 12.1-41.9 35.2-41.9 21.3 0 31.5 15 31.5 41.9 0 26.9 0 98 0 98h57.5c0 0 0-68.2 0-118.3 0-50-28.3-74.2-68-74.2 -39.6 0-56.3 30.9-56.3 30.9v-25.2H273.8z"/></svg><!--[if lt IE 9]><em>LinkedIn</em><![endif]--></a></li>
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</ul>
+
+
+<p>© 2026 Yunsoo Woo</p>
+
+        </footer>
+      </div>
+    </div>
+
+    <!--  -->
+
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-1YCJCQRD4F"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-1YCJCQRD4F');
+</script>
+    <script type="text/javascript">
+    "use strict"; 
+    function addBackToTop() 
+        { function o() 
+            { 
+                t() >= z ? R && (D.className = "", R = !1) : R || (D.className = "hidden", R = !0) 
+            } 
+          function t() 
+            { 
+                return E.scrollTop || A && document.documentElement.scrollTop || 0 
+            } 
+          function e(o) 
+            { 
+                E.scrollTop = o, A && (document.documentElement.scrollTop = o) 
+            } 
+    
+    var n, i, d, r, c = arguments.length > 0 && void 0 !== arguments[0] ? arguments[0] : {}, a = c.backgroundColor, s = void 0 === a ? "#000" : a, l = c.cornerOffset, u = void 0 === l ? 20 : l, m = c.diameter, p = void 0 === m ? 56 : m, h = c.ease, b = void 0 === h ? function (o) { return .5 * (1 - Math.cos(Math.PI * o)) } : h, v = c.id, f = void 0 === v ? "back-to-top" : v, x = c.innerHTML, g = void 0 === x ? '<svg viewBox="0 0 24 24"><path d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z"></path></svg>' : x, w = c.onClickScrollTo, y = void 0 === w ? 0 : w, k = c.scrollContainer, E = void 0 === k ? document.body : k, T = c.scrollDuration, C = void 0 === T ? 100 : T, M = c.showWhenScrollTopIs, z = void 0 === M ? 1 : M, L = c.size, B = void 0 === L ? p : L, H = c.textColor, I = void 0 === H ? "#fff" : H, N = c.zIndex, S = void 0 === N ? 1 : N, q = E === document.body, A = q && document.documentElement; n = Math.round(.35 * B), i = Math.round(.2 * B), d = "#" + f + "{background:" + s + ";-webkit-border-radius:50%;-moz-border-radius:50%;border-radius:50%;bottom:" + u + "px;-webkit-box-shadow:0 2px 5px 0 rgba(0,0,0,.26);-moz-box-shadow:0 2px 5px 0 rgba(0,0,0,.26);box-shadow:0 2px 5px 0 rgba(0,0,0,.26);color:" + I + ";cursor:pointer;display:block;height:" + B + "px;opacity:1;outline:0;position:fixed;right:" + u + "px;-webkit-tap-highlight-color:transparent;-webkit-touch-callout:none;-webkit-transition:bottom .2s,opacity .2s;-o-transition:bottom .2s,opacity .2s;-moz-transition:bottom .2s,opacity .2s;transition:bottom .2s,opacity .2s;-webkit-user-select:none;-moz-user-select:none;-ms-user-select:none;user-select:none;width:" + B + "px;z-index:" + S + "}#" + f + " svg{display:block;fill:currentColor;height:" + n + "px;margin:" + i + "px auto 0;width:" + n + "px}#" + f + ".hidden{bottom:-" + B + "px;opacity:0}", (r = document.createElement("style")).appendChild(document.createTextNode(d)), document.head.insertAdjacentElement("afterbegin", r); var D = function () { var o = document.createElement("div"); return o.id = f, o.className = "hidden", o.innerHTML = g, o.addEventListener("click", function (o) { o.preventDefault(), function () { var o = "function" == typeof y ? y() : y, n = window, i = n.performance, d = n.requestAnimationFrame; if (C <= 0 || void 0 === i || void 0 === d) return e(o); var r = i.now(), c = t(), a = c - o; d(function o(t) { var n = Math.min((t - r) / C, 1); e(c - Math.round(b(n) * a)), n < 1 && d(o) }) }() }), document.body.appendChild(o), o }(), R = !0; (q ? window : E).addEventListener("scroll", o), o() } window.addEventListener("load", function () { var o = document.getElementById("back-to-top"), t = document.querySelector(".sticky-bottom"), e = document.querySelector(".fixed-bottom"); o && window.addEventListener("scroll", function () { if (t) { var n = t.getBoundingClientRect(); window.scrollY + window.innerHeight > document.body.scrollHeight - n.height ? (o.style.position = "fixed", o.style.bottom = n.height + 15 + "px") : (o.style.position = "fixed", o.style.bottom = "15px") } if (e) { var i = e.getBoundingClientRect(); o.style.position = "fixed", o.style.bottom = i.height + 15 + "px" } }) });
+</script>
+<script>
+    addBackToTop();
+</script>
+
+
+
+
+
+  </body>
+</html>

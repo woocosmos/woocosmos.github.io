@@ -1,0 +1,830 @@
+<!DOCTYPE html>
+<html>
+  <head>
+  <title>내가 무엇을, 왜 하고 있는지 인지하기 [수습기간 회고]  – YunsooLog – 행간을 읽는 기계학습 이야기</title>
+  <link rel="icon" href="/images/favicon.ico">
+      <meta name="google-site-verification" content="NA4jg1Iffw6aA9VWjj3kqoo2jfOkPRxINJtYphd7VeI" />
+    <meta charset="utf-8" />
+    <meta content='text/html; charset=utf-8' http-equiv='Content-Type'>
+    <meta http-equiv='X-UA-Compatible' content='IE=edge'>
+    <meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1.0'>
+    <meta http-equiv="Permissions-Policy" content="interest-cohort=()">
+    
+    
+    <meta name="description" content="들어가며
+
+2024년 9월 지금의 조직으로 이동하여 3개월의 수습 기간 종료를 앞두고 있다. 합류와 동시에 바로 현업에 투입되었기 때문에 what/why/how를 정리하지 못한 채 정신없이 시간을 보냈다. 이번 수습 회고에서는 지금까지 해온 구체적인 ACTION을 직무 관점에서 ‘무엇을 했는지’로 추상화하고, ‘왜 그렇게 했는지’ 의도를 부여하려 한다. 그리고 과정 중에서 어려움을 느꼈거나 개선의 여지가 있는 지점을 파악할 것이다.
+
+물론 프로젝트의 내용은 밝히기 어려우니 기술 스택을 중점으로 다룰 예정이다. 일부 구체적인 사례가 필요한 경우에는 간단한 예시로 대체하겠다.
+
+직무에 대해서
+
+지금 회사에서 나의 직무는 분석가다. 여기서 분석가는 UX분석가, 데이터분석가, AI엔지니어 등을 포괄적으로 지칭하는 말이다. 그 중에서 나는 AI엔지니어라는 포지션로 입사했지만 대체로 데이터 과학자, 데이터 분석가, ML엔지니어를 오가는 다양한 업무를 접했다.
+
+이전 회사에서는 하나의 프로젝트에 소속된 상태였다. 따라서 해당 서비스의 데이터 안에서 여러 방면으로 경험할 수 있었다. 당연하게도 모든 일의 목적은 근본적으로 ‘서비스를 성공시키는 것’이기 때문에 업무마다 문제와 목표가 달라지곤 했다. 간단하게는 지표의 현황을 파악하는 것, 위험을 최소화하기 위해 pain point를 탐색하는 것, 서비스의 피처가 의도대로 작동하는지 확인하는 것, ML 기반의 새로운 컨텐츠를 리서치하는 것, 내부 개발진을 대상으로 데이터 기반의 의사결정을 도모하는 것 등등.
+
+이렇게 분석가로서 다양한 영역의 작업을 경험한다는 것은 뚜렷한 장단점을 지닌다.
+
+
+  장점
+    
+      다양한 스킬셋을 확보할 수 있었다
+      비즈니스와 기술적 액션의 연결고리를 이해하게 되었다
+      협업과 커뮤니케이션 역량을 강화했다
+    
+  
+  단점
+    
+      나의 역할과 커리어의 방향성 불분명했다
+      특정 영역의 전문성을 쌓기 어려웠다
+    
+  
+
+
+특히 비즈니스와 기술적 액션을 연결 짓는 역량은 나에게 대단한 발전이었다. 어쨌든 회사는 돈을 벌어야 한다. 기술적으로 깊이를 더하거나 새로운 기술을 도입, 고도화하더라도 그것이 비즈니스 임팩트를 창출하거나 의사결정에 실질적으로 기여하지 못한다면 “그래서 이걸 해서 뭐?” 라는 허무한 질문으로 끝나버릴 수 있는 것이다. 조직과 나의 성과로 연결되는 일을 해야 한다는 중요한 깨달음을 얻었다. (물론 리서치 중심의 조직이거나 학술적 목적이 주가 되는 곳이라면 상황이 다를 수 있다)
+
+한편 커리어의 방향성이 불분명하다는 것은 여전히 고민 지점이다. 예를 들어 데이터 직군의 채용 공고를 아무거나 눌러 읽어본다. JD에 나열된 기술 역량을 살펴보면 애매하다. 채용공고만 봐도 나의 경험과 역량이 여러 포지션에 걸쳐져 있다는 것을 알 수 있다. 심지어는 특정 자격 요건에 해당 되더라도 “내가 이걸 해봤다고 말할 수 있나?” 라고 자문하게 된다. 해본 건 맞다. 그런데 그것을 전문적으로, 깊이 있게, 비즈니스 성과로 이어지도록 해냈는지는 확신을 갖기 어려운 것이다.
+
+실제로 지난 면접에서 오간 대화를 통해 나의 전문성이 부족하다는 것을 깨달을 수 있었다. 최종적으로는 불합격한 포지션이었다.
+
+
+  면접관
+  A 모델의 학습 과정에 B 모델을 접목 시킨 이유가 무엇이었나요?
+  나
+  B 모델의 XX적 특성이 문제와 연결된다고 생각해서 적용했습니다.
+  면접관
+  실제로 그 접근 방식이 잘 워킹하는지 어떻게 검증하셨나요?
+  나
+  OOO 지표가 기존보다 빠르게 수렴하는 것을 확인할 수 있었습니다.
+  면접관
+  B 모델의 내부 요소가 A 모델에 어떤 영향을 미쳐서 성능이 향상되는지 검증해본 적 있나요?
+  나
+  (일단 적용하는 데만 공수를 겁나 들였고 전반적인 성능만 확인해서 할 말이 없음)
+  면접관
+  B 모델의 +++ 를 추출해서 시각화하는 방식은 생각해보셨나요?
+  나
+  그런 검증 방식은 떠올리지 못했습니다.
+
+
+
+창피하다…
+
+그렇다. 나는 ‘일단 해본다’에서 그쳐온 것이다. 아니, 사실은 내가 정확히 무엇을, 어떻게, 왜 했는지조차 설명할 수준이 안 되었던 것이다. 일련의 깨달음을 끝으로 나는 기본기와 전문성을 갖추는 것 그리고 내가 무슨 일을 하는지 명확하게 정리하고 인지하는 것에 집중하기로 결심한다.
+
+작업 정리
+
+정리한 방식은 이렇다.
+
+  업무 일지를 기반으로 구체적인 작업을 리스트로 나열한다
+  각 항목을 추상적인 표현으로 바꾸고 큼직한 키워드로 분류한다
+  각 항목의 의도를 설명한다
+  어려웠거나 개선의 여지가 있는 지점을 짚는다
+
+
+예를 들어,
+
+
+  ACTION
+    
+      Snowflake 에서 AAA 라는 스키마 아래에 있는 TABLE0, TABLE1, TABLE2를 참조하는 SQL 문을 작성했다
+    
+  
+  WHAT
+    
+      클라우드 기반의 데이터 웨어하우스의 구조를 이해하고 여러 소스로부터 데이터를 통합하는 SQL 쿼리를 작성했다 =&gt; Data Engineering
+    
+  
+  WHY
+    
+      최신 데이터를 정확하고 효율적으로 통합함으로써 데이터 분석과 시각화의 기반을 마련하고자 했다
+    
+  
+  HOW
+    
+      복잡한 SQL 쿼리 : API로 fetch 한 JSON 배치가 통째로 한 셀에 들어가 매우 nested된 형식이었다. 더 효율적인 데이터 추출을 위해 최적화할 필요가 있다.
+      낯선 데이터베이스의 구조 파악 : 구조화된 문서로 세부 사항을 기록하고, 필요한 경우 자체 데이터 사전(Data Dictionary)을 구축할 수 있다
+    
+  
+
+
+실제로 수행한 업무는 Snowflake 에서 AAA 라는 스키마 아래에 있는 TABLE0, TABLE1, TABLE2를 참조하는 SQL 문을 작성했다 이지만, 데이터 직무의 관점에서 무슨 일을 한 건지 객관화, 추상화할 수 있게 된다.
+
+
+
+정리 결과, 키워드는 크게 네 가지로 나눌 수 있었다. 각 키워드에 해당하는 WHAT 들을 아래 나열해본다.
+
+
+
+
+  
+    
+      협업 및 운영
+      데이터 분석
+    
+  
+  
+    
+      - 데이터 분석을 위한 Ubuntu 개발 환경 구축  - CI/CD 도구와 협업 도구 통합 설정  - 데이터플랫폼 계정 및 라이센스 할당, 스펙 설정  - API 및 데이터 웨어하우스 활용 가이드 제공  - 외부 리소스 활용한 아이디어, 방향성 제시
+      - NLP 모델 활용한 다국어 데이터 처리 리서치  - LLM 프롬프트와 호출 비용 분석 - 통계 기반 가설 검증과 인사이트 도출 - 비즈니스 목적에 맞춘 모델 평가 지표 설계
+    
+    
+      데이터 엔지니어링
+      데이터 시각화
+    
+    
+      - 데이터 그레인 정의, API 활용 가능성 리서치  - 외부 API 기반의 데이터 수집  - 클라우드 기반 데이터 웨어하우스 연동 최적화  - 데이터베이스 메타 분석과 문서화  - SQL 쿼리 최적화 및 성능 모니터링, 검증 - 데이터 정합성 문제 해결 및 관계 테이블 설계  - 대시보드용 요약 테이블 운영 - 데이터 통합 플랫폼 활용한 파이프라인 구축
+      - 데이터 기반 대시보드 설계 및 구현  - 대시보드 설계 단계의 시뮬레이션 및 피드백 수집  - BI 도구와 클라우드/정적 데이터 연동  - 인포그래픽 및 웹앱 설계, 제작
+    
+  
+
+
+지난 3개월 동안 진행한 내용 중 제일 비중이 컸던 키워드는 데이터 엔지니어링이었다. 글 서두에 합류 직후 현업에 바로 투입되었다고 언급했는데, 데이터 인프라를 셋업하기 위한 업무를 주로 진행했기 때문이다.
+
+“당장 필요하니까 해본다”의 방식으로 일을 진행해왔는데, 이렇게 정리함으로써 내가 무엇을 하고 있는지 보다 명확하게 파악할 수 있었다. 특히 구체적인 업무 내용을 데이터 분야의 용어로 추상화할 수 있다는 점이 만족스럽다. 머릿속에서 명쾌하게 설명할 수 있게 되었다고 느낀 요소들을 몇 가지 나열해보면 이렇다.
+
+데이터(통합)플랫폼
+데이터를 통합, 활용하기 위한 각종 시스템을 ‘데이터 통합 플랫폼’이라는 용어로 표현할 수 있었다. Snowflake, Tableau 등이 여기에 해당된다.
+
+데이터웨어하우스(DHW)
+데이터베이스 이론에서 항상 보던 이 용어가 바로 여기에 쓰인다는 것을 알았다. ‘대용량 데이터를 중앙 집중식으로 관리하는 저장소’ 라는 정의로는 크게 와닿지 않았는데, 실제 업무를 해온 환경을 돌아보면 데이터 레이크, 웨어하우스, 데이터 마트 등으로 모두 설명할 수 있었다.
+
+데이터 그레인 (Granularity)
+데이터를 적재, 분석하는 세부 수준을 일컫는 말이다. ‘데이터를 어떤 기준과 단위로 다뤄야 하지?’ 라는 고민이 곧 데이터 그레인에 대한 정의였음을 알았다.
+
+데이터베이스 메타 분석
+쿼리를 작성하기 위해서는 데이터베이스의 구조부터 전반적으로 파악해야 했다. 이러한 일련의 작업은 메타 분석이라는 이름으로 정리할  수 있었다.
+
+데이터 정합성
+샘플이 중복되거나, 일관되지 않거나, 누락되기도 했다. 또 맵핑하는 key에 따라 결과가 부정확하기도 했다. 데이터를 정확하게 추출한다는 것은 데이터의 정합성을 체크했음을 전제로 한다.
+
+요약 테이블
+여러 소스로부터 데이터를 수집하고 가공, 집계한 결과를 하나의 테이블에 밀어 넣었다. 단순하게 ‘대시보드용 테이블’이라고 부르던 것을 요약 테이블이라는 말로 설명할 수 있게 되었다.
+
+그 외에도 API가 무엇인지 실질적으로 이해했고, 데이터베이스의 기본 요소나 성능 최적화에 대해서도 고려할 수 있게 되었다. 면접에서 “API 가 무엇인가요?” 라고 물어보았을 때,  “Application Programming Interface의 줄임말입니다” 라고 외운 대로 읊는 수준에서 한 걸음 더 발전한 느낌이랄까.
+
+나가며
+
+마지막으로 나의 결심을 다시 한번 상기해보겠다.
+
+
+  기본기와 전문성을 갖추는 것
+  내가 무슨 일을 하는지 명확하게 정리하고 인지하는 것
+
+
+사실 1번과 2번은 아주 밀접하게 연결되어 있었다. 기본적인 지식이 있어야 내가 무슨 일을 하는지 이해할 수 있다.
+
+지난 3개월은 각종 불안과 불확신으로 가득했다. 특히 실력을 키워야 한다는 강박관념이 제일 컸다. 때로는 퇴근하면서 “오늘 엄청나게 바빴지만, 실제적으로 한 일은 없는 것 같다” 라는 불안감에 떨기도 했다. 하지만 이번 회고를 통해 내가 해본 적 없는 영역의 기본기를 쌓는 과정이었음을 배웠다. 어떻게 보면 퍼즐이 맞춰지는 과정과도 같았다. ‘그래서 팀원이 그때 그렇게 했구나’ 혹은 ‘그래서 SQLD 시험에 그런 내용이 포함되어 있었구나’ 라고 깨달은 것이다.
+
+어쩌면 이것은 비전공자의 숙명일지도 모른다. 이 모든 걸 전공 수업에서 진작에 배웠다면 좀 달랐을까? 하는 상상이 스쳐 지나갔지만, 이제 그런 걱정은 소용이 없다. 앞으로 무엇을 할지가 더 중요하니까. ML엔지니어답게 베이즈 업데이트해갈 뿐이다.
+
+(난데없지만 나의 성장 과정이 베이즈 확률 모델처럼 작동한다고 느껴졌다. 초보적인 이해라는 사전 확률에서 시작하여 다양한 경험과 시행착오를 통해 데이터를 쌓고 사후 확률로서 업데이트된 실력으로 나아가는 것이다 … 이런 비유가 자꾸 떠오르는 것은 인문학도의 숙명이라고 하자.)
+
+여전히 내가 무엇을 하고 싶은지 딱 잘라 말하기 어렵고 나의 직무에 대해서 자신 있게 설명하지 못한다. 그럼에도 불구하고 다행인 것은 아직도 하고 싶은 게 너무나도 많다는 것이다! ML엔지니어가 아니면 안 된다는 고집과 스페셜리스트가 되는 것에 대한 로망은 잠시 내려놓고, 초심으로 돌아가려 한다. “앞으로 무엇이 되어야 한다” 라는 강박에서 벗어나기 위함이다. “지금 당장 할 수 있는 것”을 수행하고 그 경험을 잘 정리하는 것이 어제의 나보다 나아지는 길일 테다.
+
+그럼, 내일도 힘 내보자.
+" />
+    <meta property="og:description" content="들어가며
+
+2024년 9월 지금의 조직으로 이동하여 3개월의 수습 기간 종료를 앞두고 있다. 합류와 동시에 바로 현업에 투입되었기 때문에 what/why/how를 정리하지 못한 채 정신없이 시간을 보냈다. 이번 수습 회고에서는 지금까지 해온 구체적인 ACTION을 직무 관점에서 ‘무엇을 했는지’로 추상화하고, ‘왜 그렇게 했는지’ 의도를 부여하려 한다. 그리고 과정 중에서 어려움을 느꼈거나 개선의 여지가 있는 지점을 파악할 것이다.
+
+물론 프로젝트의 내용은 밝히기 어려우니 기술 스택을 중점으로 다룰 예정이다. 일부 구체적인 사례가 필요한 경우에는 간단한 예시로 대체하겠다.
+
+직무에 대해서
+
+지금 회사에서 나의 직무는 분석가다. 여기서 분석가는 UX분석가, 데이터분석가, AI엔지니어 등을 포괄적으로 지칭하는 말이다. 그 중에서 나는 AI엔지니어라는 포지션로 입사했지만 대체로 데이터 과학자, 데이터 분석가, ML엔지니어를 오가는 다양한 업무를 접했다.
+
+이전 회사에서는 하나의 프로젝트에 소속된 상태였다. 따라서 해당 서비스의 데이터 안에서 여러 방면으로 경험할 수 있었다. 당연하게도 모든 일의 목적은 근본적으로 ‘서비스를 성공시키는 것’이기 때문에 업무마다 문제와 목표가 달라지곤 했다. 간단하게는 지표의 현황을 파악하는 것, 위험을 최소화하기 위해 pain point를 탐색하는 것, 서비스의 피처가 의도대로 작동하는지 확인하는 것, ML 기반의 새로운 컨텐츠를 리서치하는 것, 내부 개발진을 대상으로 데이터 기반의 의사결정을 도모하는 것 등등.
+
+이렇게 분석가로서 다양한 영역의 작업을 경험한다는 것은 뚜렷한 장단점을 지닌다.
+
+
+  장점
+    
+      다양한 스킬셋을 확보할 수 있었다
+      비즈니스와 기술적 액션의 연결고리를 이해하게 되었다
+      협업과 커뮤니케이션 역량을 강화했다
+    
+  
+  단점
+    
+      나의 역할과 커리어의 방향성 불분명했다
+      특정 영역의 전문성을 쌓기 어려웠다
+    
+  
+
+
+특히 비즈니스와 기술적 액션을 연결 짓는 역량은 나에게 대단한 발전이었다. 어쨌든 회사는 돈을 벌어야 한다. 기술적으로 깊이를 더하거나 새로운 기술을 도입, 고도화하더라도 그것이 비즈니스 임팩트를 창출하거나 의사결정에 실질적으로 기여하지 못한다면 “그래서 이걸 해서 뭐?” 라는 허무한 질문으로 끝나버릴 수 있는 것이다. 조직과 나의 성과로 연결되는 일을 해야 한다는 중요한 깨달음을 얻었다. (물론 리서치 중심의 조직이거나 학술적 목적이 주가 되는 곳이라면 상황이 다를 수 있다)
+
+한편 커리어의 방향성이 불분명하다는 것은 여전히 고민 지점이다. 예를 들어 데이터 직군의 채용 공고를 아무거나 눌러 읽어본다. JD에 나열된 기술 역량을 살펴보면 애매하다. 채용공고만 봐도 나의 경험과 역량이 여러 포지션에 걸쳐져 있다는 것을 알 수 있다. 심지어는 특정 자격 요건에 해당 되더라도 “내가 이걸 해봤다고 말할 수 있나?” 라고 자문하게 된다. 해본 건 맞다. 그런데 그것을 전문적으로, 깊이 있게, 비즈니스 성과로 이어지도록 해냈는지는 확신을 갖기 어려운 것이다.
+
+실제로 지난 면접에서 오간 대화를 통해 나의 전문성이 부족하다는 것을 깨달을 수 있었다. 최종적으로는 불합격한 포지션이었다.
+
+
+  면접관
+  A 모델의 학습 과정에 B 모델을 접목 시킨 이유가 무엇이었나요?
+  나
+  B 모델의 XX적 특성이 문제와 연결된다고 생각해서 적용했습니다.
+  면접관
+  실제로 그 접근 방식이 잘 워킹하는지 어떻게 검증하셨나요?
+  나
+  OOO 지표가 기존보다 빠르게 수렴하는 것을 확인할 수 있었습니다.
+  면접관
+  B 모델의 내부 요소가 A 모델에 어떤 영향을 미쳐서 성능이 향상되는지 검증해본 적 있나요?
+  나
+  (일단 적용하는 데만 공수를 겁나 들였고 전반적인 성능만 확인해서 할 말이 없음)
+  면접관
+  B 모델의 +++ 를 추출해서 시각화하는 방식은 생각해보셨나요?
+  나
+  그런 검증 방식은 떠올리지 못했습니다.
+
+
+
+창피하다…
+
+그렇다. 나는 ‘일단 해본다’에서 그쳐온 것이다. 아니, 사실은 내가 정확히 무엇을, 어떻게, 왜 했는지조차 설명할 수준이 안 되었던 것이다. 일련의 깨달음을 끝으로 나는 기본기와 전문성을 갖추는 것 그리고 내가 무슨 일을 하는지 명확하게 정리하고 인지하는 것에 집중하기로 결심한다.
+
+작업 정리
+
+정리한 방식은 이렇다.
+
+  업무 일지를 기반으로 구체적인 작업을 리스트로 나열한다
+  각 항목을 추상적인 표현으로 바꾸고 큼직한 키워드로 분류한다
+  각 항목의 의도를 설명한다
+  어려웠거나 개선의 여지가 있는 지점을 짚는다
+
+
+예를 들어,
+
+
+  ACTION
+    
+      Snowflake 에서 AAA 라는 스키마 아래에 있는 TABLE0, TABLE1, TABLE2를 참조하는 SQL 문을 작성했다
+    
+  
+  WHAT
+    
+      클라우드 기반의 데이터 웨어하우스의 구조를 이해하고 여러 소스로부터 데이터를 통합하는 SQL 쿼리를 작성했다 =&gt; Data Engineering
+    
+  
+  WHY
+    
+      최신 데이터를 정확하고 효율적으로 통합함으로써 데이터 분석과 시각화의 기반을 마련하고자 했다
+    
+  
+  HOW
+    
+      복잡한 SQL 쿼리 : API로 fetch 한 JSON 배치가 통째로 한 셀에 들어가 매우 nested된 형식이었다. 더 효율적인 데이터 추출을 위해 최적화할 필요가 있다.
+      낯선 데이터베이스의 구조 파악 : 구조화된 문서로 세부 사항을 기록하고, 필요한 경우 자체 데이터 사전(Data Dictionary)을 구축할 수 있다
+    
+  
+
+
+실제로 수행한 업무는 Snowflake 에서 AAA 라는 스키마 아래에 있는 TABLE0, TABLE1, TABLE2를 참조하는 SQL 문을 작성했다 이지만, 데이터 직무의 관점에서 무슨 일을 한 건지 객관화, 추상화할 수 있게 된다.
+
+
+
+정리 결과, 키워드는 크게 네 가지로 나눌 수 있었다. 각 키워드에 해당하는 WHAT 들을 아래 나열해본다.
+
+
+
+
+  
+    
+      협업 및 운영
+      데이터 분석
+    
+  
+  
+    
+      - 데이터 분석을 위한 Ubuntu 개발 환경 구축  - CI/CD 도구와 협업 도구 통합 설정  - 데이터플랫폼 계정 및 라이센스 할당, 스펙 설정  - API 및 데이터 웨어하우스 활용 가이드 제공  - 외부 리소스 활용한 아이디어, 방향성 제시
+      - NLP 모델 활용한 다국어 데이터 처리 리서치  - LLM 프롬프트와 호출 비용 분석 - 통계 기반 가설 검증과 인사이트 도출 - 비즈니스 목적에 맞춘 모델 평가 지표 설계
+    
+    
+      데이터 엔지니어링
+      데이터 시각화
+    
+    
+      - 데이터 그레인 정의, API 활용 가능성 리서치  - 외부 API 기반의 데이터 수집  - 클라우드 기반 데이터 웨어하우스 연동 최적화  - 데이터베이스 메타 분석과 문서화  - SQL 쿼리 최적화 및 성능 모니터링, 검증 - 데이터 정합성 문제 해결 및 관계 테이블 설계  - 대시보드용 요약 테이블 운영 - 데이터 통합 플랫폼 활용한 파이프라인 구축
+      - 데이터 기반 대시보드 설계 및 구현  - 대시보드 설계 단계의 시뮬레이션 및 피드백 수집  - BI 도구와 클라우드/정적 데이터 연동  - 인포그래픽 및 웹앱 설계, 제작
+    
+  
+
+
+지난 3개월 동안 진행한 내용 중 제일 비중이 컸던 키워드는 데이터 엔지니어링이었다. 글 서두에 합류 직후 현업에 바로 투입되었다고 언급했는데, 데이터 인프라를 셋업하기 위한 업무를 주로 진행했기 때문이다.
+
+“당장 필요하니까 해본다”의 방식으로 일을 진행해왔는데, 이렇게 정리함으로써 내가 무엇을 하고 있는지 보다 명확하게 파악할 수 있었다. 특히 구체적인 업무 내용을 데이터 분야의 용어로 추상화할 수 있다는 점이 만족스럽다. 머릿속에서 명쾌하게 설명할 수 있게 되었다고 느낀 요소들을 몇 가지 나열해보면 이렇다.
+
+데이터(통합)플랫폼
+데이터를 통합, 활용하기 위한 각종 시스템을 ‘데이터 통합 플랫폼’이라는 용어로 표현할 수 있었다. Snowflake, Tableau 등이 여기에 해당된다.
+
+데이터웨어하우스(DHW)
+데이터베이스 이론에서 항상 보던 이 용어가 바로 여기에 쓰인다는 것을 알았다. ‘대용량 데이터를 중앙 집중식으로 관리하는 저장소’ 라는 정의로는 크게 와닿지 않았는데, 실제 업무를 해온 환경을 돌아보면 데이터 레이크, 웨어하우스, 데이터 마트 등으로 모두 설명할 수 있었다.
+
+데이터 그레인 (Granularity)
+데이터를 적재, 분석하는 세부 수준을 일컫는 말이다. ‘데이터를 어떤 기준과 단위로 다뤄야 하지?’ 라는 고민이 곧 데이터 그레인에 대한 정의였음을 알았다.
+
+데이터베이스 메타 분석
+쿼리를 작성하기 위해서는 데이터베이스의 구조부터 전반적으로 파악해야 했다. 이러한 일련의 작업은 메타 분석이라는 이름으로 정리할  수 있었다.
+
+데이터 정합성
+샘플이 중복되거나, 일관되지 않거나, 누락되기도 했다. 또 맵핑하는 key에 따라 결과가 부정확하기도 했다. 데이터를 정확하게 추출한다는 것은 데이터의 정합성을 체크했음을 전제로 한다.
+
+요약 테이블
+여러 소스로부터 데이터를 수집하고 가공, 집계한 결과를 하나의 테이블에 밀어 넣었다. 단순하게 ‘대시보드용 테이블’이라고 부르던 것을 요약 테이블이라는 말로 설명할 수 있게 되었다.
+
+그 외에도 API가 무엇인지 실질적으로 이해했고, 데이터베이스의 기본 요소나 성능 최적화에 대해서도 고려할 수 있게 되었다. 면접에서 “API 가 무엇인가요?” 라고 물어보았을 때,  “Application Programming Interface의 줄임말입니다” 라고 외운 대로 읊는 수준에서 한 걸음 더 발전한 느낌이랄까.
+
+나가며
+
+마지막으로 나의 결심을 다시 한번 상기해보겠다.
+
+
+  기본기와 전문성을 갖추는 것
+  내가 무슨 일을 하는지 명확하게 정리하고 인지하는 것
+
+
+사실 1번과 2번은 아주 밀접하게 연결되어 있었다. 기본적인 지식이 있어야 내가 무슨 일을 하는지 이해할 수 있다.
+
+지난 3개월은 각종 불안과 불확신으로 가득했다. 특히 실력을 키워야 한다는 강박관념이 제일 컸다. 때로는 퇴근하면서 “오늘 엄청나게 바빴지만, 실제적으로 한 일은 없는 것 같다” 라는 불안감에 떨기도 했다. 하지만 이번 회고를 통해 내가 해본 적 없는 영역의 기본기를 쌓는 과정이었음을 배웠다. 어떻게 보면 퍼즐이 맞춰지는 과정과도 같았다. ‘그래서 팀원이 그때 그렇게 했구나’ 혹은 ‘그래서 SQLD 시험에 그런 내용이 포함되어 있었구나’ 라고 깨달은 것이다.
+
+어쩌면 이것은 비전공자의 숙명일지도 모른다. 이 모든 걸 전공 수업에서 진작에 배웠다면 좀 달랐을까? 하는 상상이 스쳐 지나갔지만, 이제 그런 걱정은 소용이 없다. 앞으로 무엇을 할지가 더 중요하니까. ML엔지니어답게 베이즈 업데이트해갈 뿐이다.
+
+(난데없지만 나의 성장 과정이 베이즈 확률 모델처럼 작동한다고 느껴졌다. 초보적인 이해라는 사전 확률에서 시작하여 다양한 경험과 시행착오를 통해 데이터를 쌓고 사후 확률로서 업데이트된 실력으로 나아가는 것이다 … 이런 비유가 자꾸 떠오르는 것은 인문학도의 숙명이라고 하자.)
+
+여전히 내가 무엇을 하고 싶은지 딱 잘라 말하기 어렵고 나의 직무에 대해서 자신 있게 설명하지 못한다. 그럼에도 불구하고 다행인 것은 아직도 하고 싶은 게 너무나도 많다는 것이다! ML엔지니어가 아니면 안 된다는 고집과 스페셜리스트가 되는 것에 대한 로망은 잠시 내려놓고, 초심으로 돌아가려 한다. “앞으로 무엇이 되어야 한다” 라는 강박에서 벗어나기 위함이다. “지금 당장 할 수 있는 것”을 수행하고 그 경험을 잘 정리하는 것이 어제의 나보다 나아지는 길일 테다.
+
+그럼, 내일도 힘 내보자.
+" />
+    
+    <meta name="author" content="YunsooLog" />
+
+    
+    <meta property="og:title" content="내가 무엇을, 왜 하고 있는지 인지하기 [수습기간 회고] " />
+    <meta property="twitter:title" content="내가 무엇을, 왜 하고 있는지 인지하기 [수습기간 회고] " />
+    
+  <!-- Async font loading -->
+<script>
+  window.WebFontConfig = {
+      custom: {
+          families: ['Spoqa Han Sans:100,300,400,700'],
+          urls: ['https://spoqa.github.io/spoqa-han-sans/css/SpoqaHanSans-kr.css']
+      },
+      timeout: 60000
+  };
+  (function(d) {
+      var wf = d.createElement('script'), s = d.scripts[0];
+      wf.src = 'https://ajax.googleapis.com/ajax/libs/webfont/1.5.18/webfont.js';
+      s.parentNode.insertBefore(wf, s);
+  })(document);
+</script>
+
+  <!--[if lt IE 9]>
+    <script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+  <![endif]-->
+
+  <link rel="stylesheet" type="text/css" href="/style.css" />
+  <link rel="alternate" type="application/rss+xml" title="YunsooLog - 행간을 읽는 기계학습 이야기" href="/feed.xml" />
+  <script>
+    document.cookie = "promo_shown=1; SameSite=Lax; path=/";
+  </script>
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.13.11/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.13.11/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.13.11/dist/contrib/auto-render.min.js"
+          onload="renderMathInElement(document.body, {
+            delimiters: [
+              {left: '\\[', right: '\\]', display: true},
+              {left: '$$', right: '$$', display: true},
+              {left: '$', right: '$', display: false},
+            ]
+          });">
+  </script>
+
+  <!-- Created with Jekyll Now - http://github.com/barryclark/jekyll-now -->
+</head>
+  <body>
+    <div class="wrapper-masthead">
+  <div class="container">
+    <header class="masthead clearfix">
+      <a href="/" class="site-avatar"><img src="/images/avatar.png"/></a>
+      
+      <div class="site-info">
+        <h1 class="site-name"><a href="/">YunsooLog</a></h1>
+        <p class="site-description">행간을 읽는 기계학습 이야기</p>
+      </div>
+
+      <nav>
+        
+        
+        <a href="/about">About</a>
+        
+        
+        
+        <a href="/">Blog</a>
+        
+        
+        
+        <a href="/tags">Tags</a>
+        
+        
+        
+        <a href="/timeline">Timeline</a>
+        
+        
+        
+        <ul class="search-icon">
+          <a href="/search">
+          <svg 
+            width="24" 
+            height="24" 
+            viewBox="0 0 24 24" 
+            fill="none" 
+            xmlns="http://www.w3.org/2000/svg">
+            <path d="M10 2C5.58172 2 2 5.58172 2 10C2 14.4183 5.58172 18 10 18C11.8485 18 13.5451 17.3376 14.8458 16.2416L19.7071 21.1029C20.0976 21.4934 20.7308 21.4934 21.1213 21.1029C21.5118 20.7124 21.5118 20.0792 21.1213 19.6887L16.2416 14.809C17.3376 13.5083 18 11.8116 18 10C18 5.58172 14.4183 2 10 2ZM4 10C4 6.68629 6.68629 4 10 4C13.3137 4 16 6.68629 16 10C16 13.3137 13.3137 16 10 16C6.68629 16 4 13.3137 4 10Z" 
+            fill="currentColor"></path>
+          </svg>
+          </a>
+        </ul>
+
+      </nav>
+    </header>
+  </div>
+</div>
+
+    <div id="main" role="main" class="container">
+      <article class="post">
+  <div class="inner-wrap">
+    <h1>내가 무엇을, 왜 하고 있는지 인지하기 [수습기간 회고] </h1>
+
+    <div>
+      <span class="date">
+        2024-11-21
+      </span>
+
+      <ul class="tag">
+        
+        <li>
+          <a href="https://woocosmos.github.io/tags#회고">
+            회고
+          </a>
+        </li>
+        
+      </ul>
+    </div>
+
+    <section class="entry">
+      
+      <aside>
+        <nav class="nav-toc">
+          <h3> 목차 </h3>
+          <ul id="toc" class="section-nav">
+<li class="toc-entry toc-h1"><a href="#들어가며">들어가며</a></li>
+<li class="toc-entry toc-h1"><a href="#직무에-대해서">직무에 대해서</a></li>
+<li class="toc-entry toc-h1"><a href="#작업-정리">작업 정리</a></li>
+<li class="toc-entry toc-h1"><a href="#나가며">나가며</a></li>
+</ul>
+        </nav>
+      </aside>
+      <script src="/assets/scroll-spy.js" type="text/javascript"></script>
+      
+      <h1 id="들어가며">들어가며</h1>
+
+<p>2024년 9월 지금의 조직으로 이동하여 3개월의 수습 기간 종료를 앞두고 있다. 합류와 동시에 바로 현업에 투입되었기 때문에 what/why/how를 정리하지 못한 채 정신없이 시간을 보냈다. 이번 수습 회고에서는 지금까지 해온 구체적인 ACTION을 직무 관점에서 ‘무엇을 했는지’로 추상화하고, ‘왜 그렇게 했는지’ 의도를 부여하려 한다. 그리고 과정 중에서 어려움을 느꼈거나 개선의 여지가 있는 지점을 파악할 것이다.</p>
+
+<p>물론 프로젝트의 내용은 밝히기 어려우니 기술 스택을 중점으로 다룰 예정이다. 일부 구체적인 사례가 필요한 경우에는 간단한 예시로 대체하겠다.</p>
+
+<h1 id="직무에-대해서">직무에 대해서</h1>
+
+<p>지금 회사에서 나의 직무는 분석가다. 여기서 분석가는 UX분석가, 데이터분석가, AI엔지니어 등을 포괄적으로 지칭하는 말이다. 그 중에서 나는 <strong>AI엔지니어</strong>라는 포지션로 입사했지만 대체로 데이터 과학자, 데이터 분석가, ML엔지니어를 오가는 다양한 업무를 접했다.</p>
+
+<p>이전 회사에서는 하나의 프로젝트에 소속된 상태였다. 따라서 해당 서비스의 데이터 안에서 여러 방면으로 경험할 수 있었다. 당연하게도 모든 일의 목적은 근본적으로 ‘서비스를 성공시키는 것’이기 때문에 업무마다 문제와 목표가 달라지곤 했다. 간단하게는 지표의 현황을 파악하는 것, 위험을 최소화하기 위해 pain point를 탐색하는 것, 서비스의 피처가 의도대로 작동하는지 확인하는 것, ML 기반의 새로운 컨텐츠를 리서치하는 것, 내부 개발진을 대상으로 데이터 기반의 의사결정을 도모하는 것 등등.</p>
+
+<p>이렇게 분석가로서 다양한 영역의 작업을 경험한다는 것은 뚜렷한 장단점을 지닌다.</p>
+
+<ul>
+  <li>장점
+    <ul>
+      <li>다양한 스킬셋을 확보할 수 있었다</li>
+      <li>비즈니스와 기술적 액션의 연결고리를 이해하게 되었다</li>
+      <li>협업과 커뮤니케이션 역량을 강화했다</li>
+    </ul>
+  </li>
+  <li>단점
+    <ul>
+      <li>나의 역할과 커리어의 방향성 불분명했다</li>
+      <li>특정 영역의 전문성을 쌓기 어려웠다</li>
+    </ul>
+  </li>
+</ul>
+
+<p>특히 <strong>비즈니스와 기술적 액션을 연결 짓는 역량</strong>은 나에게 대단한 발전이었다. <em>어쨌든 회사는 돈을 벌어야 한다.</em> 기술적으로 깊이를 더하거나 새로운 기술을 도입, 고도화하더라도 그것이 비즈니스 임팩트를 창출하거나 의사결정에 실질적으로 기여하지 못한다면 “그래서 이걸 해서 뭐?” 라는 허무한 질문으로 끝나버릴 수 있는 것이다. 조직과 나의 성과로 연결되는 일을 해야 한다는 중요한 깨달음을 얻었다. (물론 리서치 중심의 조직이거나 학술적 목적이 주가 되는 곳이라면 상황이 다를 수 있다)</p>
+
+<p>한편 <strong>커리어의 방향성이 불분명하다</strong>는 것은 여전히 고민 지점이다. 예를 들어 데이터 직군의 채용 공고를 아무거나 눌러 읽어본다. JD에 나열된 기술 역량을 살펴보면 <em>애매하다</em>. 채용공고만 봐도 나의 경험과 역량이 여러 포지션에 걸쳐져 있다는 것을 알 수 있다. 심지어는 특정 자격 요건에 해당 되더라도 “내가 이걸 해봤다고 말할 수 있나?” 라고 자문하게 된다. 해본 건 맞다. 그런데 그것을 전문적으로, 깊이 있게, 비즈니스 성과로 이어지도록 해냈는지는 확신을 갖기 어려운 것이다.</p>
+
+<p>실제로 지난 면접에서 오간 대화를 통해 <strong>나의 전문성이 부족하다</strong>는 것을 깨달을 수 있었다. 최종적으로는 불합격한 포지션이었다.</p>
+
+<dl>
+  <dt>면접관</dt>
+  <dd>A 모델의 학습 과정에 B 모델을 접목 시킨 이유가 무엇이었나요?</dd>
+  <dt>나</dt>
+  <dd>B 모델의 XX적 특성이 문제와 연결된다고 생각해서 적용했습니다.</dd>
+  <dt>면접관</dt>
+  <dd>실제로 그 접근 방식이 잘 워킹하는지 어떻게 검증하셨나요?</dd>
+  <dt>나</dt>
+  <dd>OOO 지표가 기존보다 빠르게 수렴하는 것을 확인할 수 있었습니다.</dd>
+  <dt>면접관</dt>
+  <dd>B 모델의 내부 요소가 A 모델에 어떤 영향을 미쳐서 성능이 향상되는지 <strong>검증</strong>해본 적 있나요?</dd>
+  <dt>나</dt>
+  <dd>(일단 적용하는 데만 공수를 겁나 들였고 전반적인 성능만 확인해서 할 말이 없음)</dd>
+  <dt>면접관</dt>
+  <dd>B 모델의 +++ 를 추출해서 시각화하는 방식은 생각해보셨나요?</dd>
+  <dt>나</dt>
+  <dd>그런 검증 방식은 떠올리지 못했습니다.</dd>
+</dl>
+
+<p class="center"><img src="https://github.com/user-attachments/assets/b1c0aff0-1bba-43a6-9ded-799580fe7559" alt="image" class="center-image" />
+<em>창피하다…</em></p>
+
+<p>그렇다. 나는 ‘일단 해본다’에서 그쳐온 것이다. 아니, 사실은 내가 정확히 <strong>무엇을, 어떻게, 왜</strong> 했는지조차 설명할 수준이 안 되었던 것이다. 일련의 깨달음을 끝으로 나는 <u>기본기와 전문성을 갖추는 것</u> 그리고 <u>내가 무슨 일을 하는지 명확하게 정리하고 인지하는 것</u>에 집중하기로 결심한다.</p>
+
+<h1 id="작업-정리">작업 정리</h1>
+
+<p>정리한 방식은 이렇다.</p>
+<ul>
+  <li>업무 일지를 기반으로 구체적인 작업을 리스트로 나열한다</li>
+  <li>각 항목을 추상적인 표현으로 바꾸고 큼직한 <u>키워드</u>로 분류한다</li>
+  <li>각 항목의 의도를 설명한다</li>
+  <li>어려웠거나 개선의 여지가 있는 지점을 짚는다</li>
+</ul>
+
+<p>예를 들어,</p>
+
+<ul>
+  <li><strong>ACTION</strong>
+    <ul>
+      <li>Snowflake 에서 AAA 라는 스키마 아래에 있는 TABLE0, TABLE1, TABLE2를 참조하는 SQL 문을 작성했다</li>
+    </ul>
+  </li>
+  <li><strong>WHAT</strong>
+    <ul>
+      <li>클라우드 기반의 데이터 웨어하우스의 구조를 이해하고 여러 소스로부터 데이터를 통합하는 SQL 쿼리를 작성했다 =&gt; <mark>Data Engineering</mark></li>
+    </ul>
+  </li>
+  <li><strong>WHY</strong>
+    <ul>
+      <li>최신 데이터를 정확하고 효율적으로 통합함으로써 데이터 분석과 시각화의 기반을 마련하고자 했다</li>
+    </ul>
+  </li>
+  <li><strong>HOW</strong>
+    <ul>
+      <li><strong>복잡한 SQL 쿼리</strong> : API로 fetch 한 JSON 배치가 통째로 한 셀에 들어가 매우 nested된 형식이었다. 더 효율적인 데이터 추출을 위해 최적화할 필요가 있다.</li>
+      <li><strong>낯선 데이터베이스의 구조 파악</strong> : 구조화된 문서로 세부 사항을 기록하고, 필요한 경우 자체 데이터 사전(Data Dictionary)을 구축할 수 있다</li>
+    </ul>
+  </li>
+</ul>
+
+<p>실제로 수행한 업무는 <code class="language-plaintext highlighter-rouge">Snowflake 에서 AAA 라는 스키마 아래에 있는 TABLE0, TABLE1, TABLE2를 참조하는 SQL 문을 작성했다</code> 이지만, 데이터 직무의 관점에서 무슨 일을 한 건지 객관화, 추상화할 수 있게 된다.</p>
+
+<hr />
+
+<p>정리 결과, 키워드는 크게 네 가지로 나눌 수 있었다. 각 키워드에 해당하는 WHAT 들을 아래 나열해본다.</p>
+
+<style>
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+th, td:first-child {
+  background-color: transparent; /* Remove background for this row */
+}
+thead tr:first-child {
+  background-color: #f2f2f2; /* Green color for header row */
+}
+tr:nth-child(2) {
+  text-align: center;
+  background-color: #f2f2f2; /* Remove background for the second row */
+}
+</style>
+
+<table>
+  <thead>
+    <tr>
+      <th><strong>협업 및 운영</strong></th>
+      <th><strong>데이터 분석</strong></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>- 데이터 분석을 위한 Ubuntu 개발 환경 구축 <br /> - CI/CD 도구와 협업 도구 통합 설정 <br /> - 데이터플랫폼 계정 및 라이센스 할당, 스펙 설정 <br /> - API 및 데이터 웨어하우스 활용 가이드 제공 <br /> - 외부 리소스 활용한 아이디어, 방향성 제시</td>
+      <td>- NLP 모델 활용한 다국어 데이터 처리 리서치 <br /> - LLM 프롬프트와 호출 비용 분석 <br />- 통계 기반 가설 검증과 인사이트 도출 <br />- 비즈니스 목적에 맞춘 모델 평가 지표 설계</td>
+    </tr>
+    <tr>
+      <td><strong>데이터 엔지니어링</strong></td>
+      <td><strong>데이터 시각화</strong></td>
+    </tr>
+    <tr>
+      <td>- 데이터 그레인 정의, API 활용 가능성 리서치 <br /> - 외부 API 기반의 데이터 수집 <br /> - 클라우드 기반 데이터 웨어하우스 연동 최적화 <br /> - 데이터베이스 메타 분석과 문서화 <br /> - SQL 쿼리 최적화 및 성능 모니터링, 검증 <br />- 데이터 정합성 문제 해결 및 관계 테이블 설계 <br /> - 대시보드용 요약 테이블 운영 <br />- 데이터 통합 플랫폼 활용한 파이프라인 구축</td>
+      <td>- 데이터 기반 대시보드 설계 및 구현 <br /> - 대시보드 설계 단계의 시뮬레이션 및 피드백 수집 <br /> - BI 도구와 클라우드/정적 데이터 연동 <br /> - 인포그래픽 및 웹앱 설계, 제작</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>지난 3개월 동안 진행한 내용 중 제일 비중이 컸던 키워드는 <strong>데이터 엔지니어링</strong>이었다. 글 서두에 합류 직후 현업에 바로 투입되었다고 언급했는데, 데이터 인프라를 셋업하기 위한 업무를 주로 진행했기 때문이다.</p>
+
+<p>“당장 필요하니까 해본다”의 방식으로 일을 진행해왔는데, 이렇게 정리함으로써 내가 무엇을 하고 있는지 보다 명확하게 파악할 수 있었다. 특히 구체적인 업무 내용을 데이터 분야의 용어로 추상화할 수 있다는 점이 만족스럽다. 머릿속에서 명쾌하게 설명할 수 있게 되었다고 느낀 요소들을 몇 가지 나열해보면 이렇다.</p>
+
+<p><strong>데이터(통합)플랫폼</strong><br />
+데이터를 통합, 활용하기 위한 각종 시스템을 ‘데이터 통합 플랫폼’이라는 용어로 표현할 수 있었다. Snowflake, Tableau 등이 여기에 해당된다.</p>
+
+<p><strong>데이터웨어하우스(DHW)</strong><br />
+데이터베이스 이론에서 항상 보던 이 용어가 바로 여기에 쓰인다는 것을 알았다. ‘대용량 데이터를 중앙 집중식으로 관리하는 저장소’ 라는 정의로는 크게 와닿지 않았는데, 실제 업무를 해온 환경을 돌아보면 데이터 레이크, 웨어하우스, 데이터 마트 등으로 모두 설명할 수 있었다.</p>
+
+<p><strong>데이터 그레인 (Granularity)</strong><br />
+데이터를 적재, 분석하는 세부 수준을 일컫는 말이다. ‘데이터를 어떤 기준과 단위로 다뤄야 하지?’ 라는 고민이 곧 데이터 그레인에 대한 정의였음을 알았다.</p>
+
+<p><strong>데이터베이스 메타 분석</strong><br />
+쿼리를 작성하기 위해서는 데이터베이스의 구조부터 전반적으로 파악해야 했다. 이러한 일련의 작업은 메타 분석이라는 이름으로 정리할  수 있었다.</p>
+
+<p><strong>데이터 정합성</strong><br />
+샘플이 중복되거나, 일관되지 않거나, 누락되기도 했다. 또 맵핑하는 key에 따라 결과가 부정확하기도 했다. 데이터를 정확하게 추출한다는 것은 데이터의 정합성을 체크했음을 전제로 한다.</p>
+
+<p><strong>요약 테이블</strong><br />
+여러 소스로부터 데이터를 수집하고 가공, 집계한 결과를 하나의 테이블에 밀어 넣었다. 단순하게 ‘대시보드용 테이블’이라고 부르던 것을 요약 테이블이라는 말로 설명할 수 있게 되었다.</p>
+
+<p>그 외에도 API가 무엇인지 실질적으로 이해했고, 데이터베이스의 기본 요소나 성능 최적화에 대해서도 고려할 수 있게 되었다. 면접에서 “API 가 무엇인가요?” 라고 물어보았을 때,  “Application Programming Interface의 줄임말입니다” 라고 외운 대로 읊는 수준에서 한 걸음 더 발전한 느낌이랄까.</p>
+
+<h1 id="나가며">나가며</h1>
+
+<p>마지막으로 나의 결심을 다시 한번 상기해보겠다.</p>
+
+<ol>
+  <li>기본기와 전문성을 갖추는 것</li>
+  <li>내가 무슨 일을 하는지 명확하게 정리하고 인지하는 것</li>
+</ol>
+
+<p>사실 1번과 2번은 아주 밀접하게 연결되어 있었다. 기본적인 지식이 있어야 내가 무슨 일을 하는지 이해할 수 있다.</p>
+
+<p>지난 3개월은 각종 불안과 불확신으로 가득했다. 특히 실력을 키워야 한다는 강박관념이 제일 컸다. 때로는 퇴근하면서 “오늘 엄청나게 바빴지만, 실제적으로 한 일은 없는 것 같다” 라는 불안감에 떨기도 했다. 하지만 이번 회고를 통해 <strong>내가 해본 적 없는 영역의 기본기를 쌓는 과정</strong>이었음을 배웠다. 어떻게 보면 퍼즐이 맞춰지는 과정과도 같았다. ‘그래서 팀원이 그때 그렇게 했구나’ 혹은 ‘그래서 SQLD 시험에 그런 내용이 포함되어 있었구나’ 라고 깨달은 것이다.</p>
+
+<p>어쩌면 이것은 비전공자의 숙명일지도 모른다. <em>이 모든 걸 전공 수업에서 진작에 배웠다면 좀 달랐을까?</em> 하는 상상이 스쳐 지나갔지만, 이제 그런 걱정은 소용이 없다. 앞으로 무엇을 할지가 더 중요하니까. ML엔지니어답게 베이즈 업데이트해갈 뿐이다.</p>
+
+<p>(난데없지만 나의 성장 과정이 베이즈 확률 모델처럼 작동한다고 느껴졌다. 초보적인 이해라는 사전 확률에서 시작하여 다양한 경험과 시행착오를 통해 데이터를 쌓고 사후 확률로서 업데이트된 실력으로 나아가는 것이다 … 이런 비유가 자꾸 떠오르는 것은 인문학도의 숙명이라고 하자.)</p>
+
+<p>여전히 내가 무엇을 하고 싶은지 딱 잘라 말하기 어렵고 나의 직무에 대해서 자신 있게 설명하지 못한다. 그럼에도 불구하고 다행인 것은 <strong>아직도 하고 싶은 게 너무나도 많다</strong>는 것이다! ML엔지니어가 아니면 안 된다는 고집과 스페셜리스트가 되는 것에 대한 로망은 잠시 내려놓고, 초심으로 돌아가려 한다. “앞으로 무엇이 되어야 한다” 라는 강박에서 벗어나기 위함이다. “지금 당장 할 수 있는 것”을 수행하고 그 경험을 잘 정리하는 것이 어제의 나보다 나아지는 길일 테다.</p>
+
+<p>그럼, 내일도 힘 내보자.</p>
+
+    </section>
+  </div>
+
+  <div class="pagination">
+    
+      <span class="prev" >
+          <a href="https://woocosmos.github.io/decision-tree/">
+            &#xE000; 결정트리 모델(Decision Tree)이 나의 문제를 해결해줄 수 있을까?
+          </a>
+      </span>
+    
+    
+      <span class="next" >
+          <a href="https://woocosmos.github.io/raspberry-pi-01/">
+            [라즈베리 파이를 활용한 홈서버 구축] 01. 킥오프 &#xE001;
+          </a>
+      </span>
+    
+  </div>
+
+  <div class="comments">
+	<div id="disqus_thread"></div>
+	<script type="text/javascript">
+
+	    var disqus_shortname = 'woocosmos';
+
+	    (function() {
+	        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+	        dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+			dsq.setAttribute('data-timestamp', +new Date()); //추가
+	        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+	    })();
+
+	</script>
+	<noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+  <script type="text/javascript">
+    "use strict"; 
+    function addBackToTop() 
+        { function o() 
+            { 
+                t() >= z ? R && (D.className = "", R = !1) : R || (D.className = "hidden", R = !0) 
+            } 
+          function t() 
+            { 
+                return E.scrollTop || A && document.documentElement.scrollTop || 0 
+            } 
+          function e(o) 
+            { 
+                E.scrollTop = o, A && (document.documentElement.scrollTop = o) 
+            } 
+    
+    var n, i, d, r, c = arguments.length > 0 && void 0 !== arguments[0] ? arguments[0] : {}, a = c.backgroundColor, s = void 0 === a ? "#000" : a, l = c.cornerOffset, u = void 0 === l ? 20 : l, m = c.diameter, p = void 0 === m ? 56 : m, h = c.ease, b = void 0 === h ? function (o) { return .5 * (1 - Math.cos(Math.PI * o)) } : h, v = c.id, f = void 0 === v ? "back-to-top" : v, x = c.innerHTML, g = void 0 === x ? '<svg viewBox="0 0 24 24"><path d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z"></path></svg>' : x, w = c.onClickScrollTo, y = void 0 === w ? 0 : w, k = c.scrollContainer, E = void 0 === k ? document.body : k, T = c.scrollDuration, C = void 0 === T ? 100 : T, M = c.showWhenScrollTopIs, z = void 0 === M ? 1 : M, L = c.size, B = void 0 === L ? p : L, H = c.textColor, I = void 0 === H ? "#fff" : H, N = c.zIndex, S = void 0 === N ? 1 : N, q = E === document.body, A = q && document.documentElement; n = Math.round(.35 * B), i = Math.round(.2 * B), d = "#" + f + "{background:" + s + ";-webkit-border-radius:50%;-moz-border-radius:50%;border-radius:50%;bottom:" + u + "px;-webkit-box-shadow:0 2px 5px 0 rgba(0,0,0,.26);-moz-box-shadow:0 2px 5px 0 rgba(0,0,0,.26);box-shadow:0 2px 5px 0 rgba(0,0,0,.26);color:" + I + ";cursor:pointer;display:block;height:" + B + "px;opacity:1;outline:0;position:fixed;right:" + u + "px;-webkit-tap-highlight-color:transparent;-webkit-touch-callout:none;-webkit-transition:bottom .2s,opacity .2s;-o-transition:bottom .2s,opacity .2s;-moz-transition:bottom .2s,opacity .2s;transition:bottom .2s,opacity .2s;-webkit-user-select:none;-moz-user-select:none;-ms-user-select:none;user-select:none;width:" + B + "px;z-index:" + S + "}#" + f + " svg{display:block;fill:currentColor;height:" + n + "px;margin:" + i + "px auto 0;width:" + n + "px}#" + f + ".hidden{bottom:-" + B + "px;opacity:0}", (r = document.createElement("style")).appendChild(document.createTextNode(d)), document.head.insertAdjacentElement("afterbegin", r); var D = function () { var o = document.createElement("div"); return o.id = f, o.className = "hidden", o.innerHTML = g, o.addEventListener("click", function (o) { o.preventDefault(), function () { var o = "function" == typeof y ? y() : y, n = window, i = n.performance, d = n.requestAnimationFrame; if (C <= 0 || void 0 === i || void 0 === d) return e(o); var r = i.now(), c = t(), a = c - o; d(function o(t) { var n = Math.min((t - r) / C, 1); e(c - Math.round(b(n) * a)), n < 1 && d(o) }) }() }), document.body.appendChild(o), o }(), R = !0; (q ? window : E).addEventListener("scroll", o), o() } window.addEventListener("load", function () { var o = document.getElementById("back-to-top"), t = document.querySelector(".sticky-bottom"), e = document.querySelector(".fixed-bottom"); o && window.addEventListener("scroll", function () { if (t) { var n = t.getBoundingClientRect(); window.scrollY + window.innerHeight > document.body.scrollHeight - n.height ? (o.style.position = "fixed", o.style.bottom = n.height + 15 + "px") : (o.style.position = "fixed", o.style.bottom = "15px") } if (e) { var i = e.getBoundingClientRect(); o.style.position = "fixed", o.style.bottom = i.height + 15 + "px" } }) });
+</script>
+<script>
+    addBackToTop();
+</script>
+
+
+
+
+</article>
+
+    </div>
+    
+    <div class="wrapper-footer">
+      <div class="container">
+        <footer class="footer">
+          <!-- Refer to https://codepen.io/ruandre/pen/howFi -->
+<ul class="svg-icon">
+
+  
+
+  
+
+  
+  <li><a href="mailto:woocosmos@gmail.com" class="icon-8 email" title="Email"><svg viewBox="0 0 512 512"><path d="M101.3 141.6v228.9h0.3 308.4 0.8V141.6H101.3zM375.7 167.8l-119.7 91.5 -119.6-91.5H375.7zM127.6 194.1l64.1 49.1 -64.1 64.1V194.1zM127.8 344.2l84.9-84.9 43.2 33.1 43-32.9 84.7 84.7L127.8 344.2 127.8 344.2zM384.4 307.8l-64.4-64.4 64.4-49.3V307.8z"/></svg><!--[if lt IE 9]><em>Email</em><![endif]--></a></li>
+  
+
+  
+
+  
+
+  
+  <li><a href="https://github.com/woocosmos" class="icon-13 github" title="GitHub"><svg viewBox="0 0 512 512"><path d="M256 70.7c-102.6 0-185.9 83.2-185.9 185.9 0 82.1 53.3 151.8 127.1 176.4 9.3 1.7 12.3-4 12.3-8.9V389.4c-51.7 11.3-62.5-21.9-62.5-21.9 -8.4-21.5-20.6-27.2-20.6-27.2 -16.9-11.5 1.3-11.3 1.3-11.3 18.7 1.3 28.5 19.2 28.5 19.2 16.6 28.4 43.5 20.2 54.1 15.4 1.7-12 6.5-20.2 11.8-24.9 -41.3-4.7-84.7-20.6-84.7-91.9 0-20.3 7.3-36.9 19.2-49.9 -1.9-4.7-8.3-23.6 1.8-49.2 0 0 15.6-5 51.1 19.1 14.8-4.1 30.7-6.2 46.5-6.3 15.8 0.1 31.7 2.1 46.6 6.3 35.5-24 51.1-19.1 51.1-19.1 10.1 25.6 3.8 44.5 1.8 49.2 11.9 13 19.1 29.6 19.1 49.9 0 71.4-43.5 87.1-84.9 91.7 6.7 5.8 12.8 17.1 12.8 34.4 0 24.9 0 44.9 0 51 0 4.9 3 10.7 12.4 8.9 73.8-24.6 127-94.3 127-176.4C441.9 153.9 358.6 70.7 256 70.7z"/></svg><!--[if lt IE 9]><em>GitHub</em><![endif]--></a></li>
+  
+
+  
+
+  
+
+  
+  <li><a href="https://www.linkedin.com/in/yunsoo-woo-245946213" class="icon-17 linkedin" title="LinkedIn"><svg viewBox="0 0 512 512"><path d="M186.4 142.4c0 19-15.3 34.5-34.2 34.5 -18.9 0-34.2-15.4-34.2-34.5 0-19 15.3-34.5 34.2-34.5C171.1 107.9 186.4 123.4 186.4 142.4zM181.4 201.3h-57.8V388.1h57.8V201.3zM273.8 201.3h-55.4V388.1h55.4c0 0 0-69.3 0-98 0-26.3 12.1-41.9 35.2-41.9 21.3 0 31.5 15 31.5 41.9 0 26.9 0 98 0 98h57.5c0 0 0-68.2 0-118.3 0-50-28.3-74.2-68-74.2 -39.6 0-56.3 30.9-56.3 30.9v-25.2H273.8z"/></svg><!--[if lt IE 9]><em>LinkedIn</em><![endif]--></a></li>
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</ul>
+
+
+<p>© 2026 Yunsoo Woo</p>
+
+        </footer>
+      </div>
+    </div>
+
+    <!--  -->
+
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-1YCJCQRD4F"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-1YCJCQRD4F');
+</script>
+    <script type="text/javascript">
+    "use strict"; 
+    function addBackToTop() 
+        { function o() 
+            { 
+                t() >= z ? R && (D.className = "", R = !1) : R || (D.className = "hidden", R = !0) 
+            } 
+          function t() 
+            { 
+                return E.scrollTop || A && document.documentElement.scrollTop || 0 
+            } 
+          function e(o) 
+            { 
+                E.scrollTop = o, A && (document.documentElement.scrollTop = o) 
+            } 
+    
+    var n, i, d, r, c = arguments.length > 0 && void 0 !== arguments[0] ? arguments[0] : {}, a = c.backgroundColor, s = void 0 === a ? "#000" : a, l = c.cornerOffset, u = void 0 === l ? 20 : l, m = c.diameter, p = void 0 === m ? 56 : m, h = c.ease, b = void 0 === h ? function (o) { return .5 * (1 - Math.cos(Math.PI * o)) } : h, v = c.id, f = void 0 === v ? "back-to-top" : v, x = c.innerHTML, g = void 0 === x ? '<svg viewBox="0 0 24 24"><path d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z"></path></svg>' : x, w = c.onClickScrollTo, y = void 0 === w ? 0 : w, k = c.scrollContainer, E = void 0 === k ? document.body : k, T = c.scrollDuration, C = void 0 === T ? 100 : T, M = c.showWhenScrollTopIs, z = void 0 === M ? 1 : M, L = c.size, B = void 0 === L ? p : L, H = c.textColor, I = void 0 === H ? "#fff" : H, N = c.zIndex, S = void 0 === N ? 1 : N, q = E === document.body, A = q && document.documentElement; n = Math.round(.35 * B), i = Math.round(.2 * B), d = "#" + f + "{background:" + s + ";-webkit-border-radius:50%;-moz-border-radius:50%;border-radius:50%;bottom:" + u + "px;-webkit-box-shadow:0 2px 5px 0 rgba(0,0,0,.26);-moz-box-shadow:0 2px 5px 0 rgba(0,0,0,.26);box-shadow:0 2px 5px 0 rgba(0,0,0,.26);color:" + I + ";cursor:pointer;display:block;height:" + B + "px;opacity:1;outline:0;position:fixed;right:" + u + "px;-webkit-tap-highlight-color:transparent;-webkit-touch-callout:none;-webkit-transition:bottom .2s,opacity .2s;-o-transition:bottom .2s,opacity .2s;-moz-transition:bottom .2s,opacity .2s;transition:bottom .2s,opacity .2s;-webkit-user-select:none;-moz-user-select:none;-ms-user-select:none;user-select:none;width:" + B + "px;z-index:" + S + "}#" + f + " svg{display:block;fill:currentColor;height:" + n + "px;margin:" + i + "px auto 0;width:" + n + "px}#" + f + ".hidden{bottom:-" + B + "px;opacity:0}", (r = document.createElement("style")).appendChild(document.createTextNode(d)), document.head.insertAdjacentElement("afterbegin", r); var D = function () { var o = document.createElement("div"); return o.id = f, o.className = "hidden", o.innerHTML = g, o.addEventListener("click", function (o) { o.preventDefault(), function () { var o = "function" == typeof y ? y() : y, n = window, i = n.performance, d = n.requestAnimationFrame; if (C <= 0 || void 0 === i || void 0 === d) return e(o); var r = i.now(), c = t(), a = c - o; d(function o(t) { var n = Math.min((t - r) / C, 1); e(c - Math.round(b(n) * a)), n < 1 && d(o) }) }() }), document.body.appendChild(o), o }(), R = !0; (q ? window : E).addEventListener("scroll", o), o() } window.addEventListener("load", function () { var o = document.getElementById("back-to-top"), t = document.querySelector(".sticky-bottom"), e = document.querySelector(".fixed-bottom"); o && window.addEventListener("scroll", function () { if (t) { var n = t.getBoundingClientRect(); window.scrollY + window.innerHeight > document.body.scrollHeight - n.height ? (o.style.position = "fixed", o.style.bottom = n.height + 15 + "px") : (o.style.position = "fixed", o.style.bottom = "15px") } if (e) { var i = e.getBoundingClientRect(); o.style.position = "fixed", o.style.bottom = i.height + 15 + "px" } }) });
+</script>
+<script>
+    addBackToTop();
+</script>
+
+
+
+
+
+  </body>
+</html>
