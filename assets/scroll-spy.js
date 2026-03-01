@@ -5,8 +5,8 @@ document.addEventListener('DOMContentLoaded', () => {
   })
   const anchors = Array.from(links).map(link => {
     const href = link.getAttribute('href');
-    if (href) {
-      return document.querySelector(href);
+    if (href && href.startsWith('#')) {
+      return document.getElementById(href.slice(1));
     }
     return null;
   }).filter(anchor => anchor !== null);
