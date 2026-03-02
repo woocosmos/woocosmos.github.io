@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html>
+  <head>
+  <title>YunsooLog – 행간을 읽는 기계학습 이야기</title>
+  <link rel="icon" href="/images/favicon.ico">
+      <meta name="google-site-verification" content="NA4jg1Iffw6aA9VWjj3kqoo2jfOkPRxINJtYphd7VeI" />
+    <meta charset="utf-8" />
+    <meta content='text/html; charset=utf-8' http-equiv='Content-Type'>
+    <meta http-equiv='X-UA-Compatible' content='IE=edge'>
+    <meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1.0'>
+    <meta http-equiv="Permissions-Policy" content="interest-cohort=()">
+    
+    
+    <meta name="description" content="행간을 읽는 기계학습 이야기">
+    <meta property="og:description" content="행간을 읽는 기계학습 이야기" />
+    
+    <meta name="author" content="YunsooLog" />
+
+    
+  <!-- Async font loading -->
+<script>
+  window.WebFontConfig = {
+      custom: {
+          families: ['Spoqa Han Sans:100,300,400,700'],
+          urls: ['https://spoqa.github.io/spoqa-han-sans/css/SpoqaHanSans-kr.css']
+      },
+      timeout: 60000
+  };
+  (function(d) {
+      var wf = d.createElement('script'), s = d.scripts[0];
+      wf.src = 'https://ajax.googleapis.com/ajax/libs/webfont/1.5.18/webfont.js';
+      s.parentNode.insertBefore(wf, s);
+  })(document);
+</script>
+
+  <!--[if lt IE 9]>
+    <script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+  <![endif]-->
+
+  <link rel="stylesheet" type="text/css" href="/style.css" />
+  <link rel="alternate" type="application/rss+xml" title="YunsooLog - 행간을 읽는 기계학습 이야기" href="/feed.xml" />
+  <script>
+    document.cookie = "promo_shown=1; SameSite=Lax; path=/";
+  </script>
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.13.11/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.13.11/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.13.11/dist/contrib/auto-render.min.js"
+          onload="renderMathInElement(document.body, {
+            delimiters: [
+              {left: '\\[', right: '\\]', display: true},
+              {left: '$$', right: '$$', display: true},
+              {left: '$', right: '$', display: false},
+            ]
+          });">
+  </script>
+
+  <!-- Created with Jekyll Now - http://github.com/barryclark/jekyll-now -->
+</head>
+  <body>
+    <div class="wrapper-masthead">
+  <div class="container">
+    <header class="masthead clearfix">
+      <a href="/" class="site-avatar"><img src="/images/avatar.png"/></a>
+      
+      <div class="site-info">
+        <h1 class="site-name"><a href="/">YunsooLog</a></h1>
+        <p class="site-description">행간을 읽는 기계학습 이야기</p>
+      </div>
+
+      <nav>
+        
+        
+        <a href="/about">About</a>
+        
+        
+        
+        <a href="/">Blog</a>
+        
+        
+        
+        <a href="/tags">Tags</a>
+        
+        
+        
+        <a href="/timeline">Timeline</a>
+        
+        
+        
+        <ul class="search-icon">
+          <a href="/search">
+          <svg 
+            width="24" 
+            height="24" 
+            viewBox="0 0 24 24" 
+            fill="none" 
+            xmlns="http://www.w3.org/2000/svg">
+            <path d="M10 2C5.58172 2 2 5.58172 2 10C2 14.4183 5.58172 18 10 18C11.8485 18 13.5451 17.3376 14.8458 16.2416L19.7071 21.1029C20.0976 21.4934 20.7308 21.4934 21.1213 21.1029C21.5118 20.7124 21.5118 20.0792 21.1213 19.6887L16.2416 14.809C17.3376 13.5083 18 11.8116 18 10C18 5.58172 14.4183 2 10 2ZM4 10C4 6.68629 6.68629 4 10 4C13.3137 4 16 6.68629 16 10C16 13.3137 13.3137 16 10 16C6.68629 16 4 13.3137 4 10Z" 
+            fill="currentColor"></path>
+          </svg>
+          </a>
+        </ul>
+
+      </nav>
+    </header>
+  </div>
+</div>
+
+    <div id="main" role="main" class="container">
+      <article class="page">
+
+  
+    <h1></h1>
+  
+
+  <div class="entry">
+    <h1 style="text-align:center; margin-bottom:0;">우연수</h1>
+<p style="text-align:center; color:#868e96; font-size:16px; margin-top:5px;">LLM · ML Engineer</p>
+
+<p style="text-align:center; background:#f1f3f5; border-radius:8px; padding:14px 20px; font-size:16px; color:#495057; margin:20px auto; max-width:600px;">
+문제를 <strong>쉬운 언어</strong>로 차근차근 정의하고, <strong>결과물</strong>로 성과를 입증합니다.
+</p>
+
+<p style="text-align:center; margin-bottom:40px;">
+<a href="https://github.com/woocosmos"><img src="https://img.shields.io/badge/GitHub-181717?style=for-the-badge&amp;logo=github&amp;logoColor=white" alt="GitHub" style="display:inline; margin:0 4px; border-radius:4px;" /></a>
+<a href="mailto:woocosmos@gmail.com"><img src="https://img.shields.io/badge/Email-EA4335?style=for-the-badge&amp;logo=gmail&amp;logoColor=white" alt="Email" style="display:inline; margin:0 4px; border-radius:4px;" /></a>
+<a href="https://www.linkedin.com/in/yunsoo-woo-245946213"><img src="https://img.shields.io/badge/LinkedIn-0A66C2?style=for-the-badge&amp;logo=linkedin&amp;logoColor=white" alt="LinkedIn" style="display:inline; margin:0 4px; border-radius:4px;" /></a>
+</p>
+<hr />
+
+<h2 id="-핵심-역량">📊 핵심 역량</h2>
+
+<div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px; margin:20px 0; text-align:center;">
+  <div style="background:#f8f9fa; border-radius:8px; padding:20px 12px;">
+    <p style="font-size:24px; font-weight:bold; margin:0; color:#1862ab;">문제 (재)정의</p>
+    <p style="font-size:13px; color:#495057; margin:8px 0 0; line-height:1.5;">주어진 문제를 그대로 풀지 않고<br />구조와 관점을 바꿔 본질에 접근합니다</p>
+    <p style="font-size:12px; color:#868e96; margin:8px 0 0;">절대 매출 대신에 시장 내 상대적 위치 예측<br />게임의 일대일 경합 결과를 Bradley-Terry 환산</p>
+  </div>
+  <div style="background:#f8f9fa; border-radius:8px; padding:20px 12px;">
+    <p style="font-size:24px; font-weight:bold; margin:0; color:#2b8a3e;">LLM 실무 적용</p>
+    <p style="font-size:13px; color:#495057; margin:8px 0 0; line-height:1.5;">LLM을 통해 작업 생산성을 높일 뿐만 아니라<br />실무 문제 해결에 방법론으로서 적용합니다</p>
+    <p style="font-size:12px; color:#868e96; margin:8px 0 0;">Cursor 환경에서 Plan-Act 프레임워크 활용<br />google ADK 활용한 멀티에이전트 시스템 개발</p>
+  </div>
+  <div style="background:#f8f9fa; border-radius:8px; padding:20px 12px;">
+    <p style="font-size:24px; font-weight:bold; margin:0; color:#e67700;">비즈니스 의사결정</p>
+    <p style="font-size:13px; color:#495057; margin:8px 0 0; line-height:1.5;">분석과 모델의 결과가 리서치에 그치지 않고<br />실제 의사결정으로 이어지게 합니다</p>
+    <p style="font-size:12px; color:#868e96; margin:8px 0 0;">매출 예측 모델로 첫 개발사 계약 성사<br />사업 조직의 니즈에 맞춘 모델 평가 지표</p>
+  </div>
+</div>
+
+<hr />
+
+<h2 id="️-커리어">🧗‍♀️ 커리어</h2>
+
+<div style="max-width:700px; margin:20px auto;">
+
+  <!-- 넥슨컴퍼니 — 넥슨코리아 (현재) -->
+  <div style="display:flex; margin-bottom:0;">
+    <div style="display:flex; flex-direction:column; align-items:center; margin-right:20px;">
+      <div style="width:12px; height:12px; border-radius:50%; background:#7048e8; box-shadow:0 0 0 4px #d0bfff; flex-shrink:0;"></div>
+      <div style="width:2px; flex:1; background:#dee2e6;"></div>
+    </div>
+    <div style="flex:1; padding-bottom:24px;">
+      <p style="margin:0; font-weight:bold; font-size:16px;">넥슨컴퍼니 · 넥슨코리아 <span style="background:#7048e8; color:#fff; font-size:11px; padding:2px 8px; border-radius:3px; margin-left:6px; font-weight:normal;">현재</span></p>
+      <p style="margin:0; font-size:14px; color:#495057;">분석가 (AI엔지니어)</p>
+      <p style="margin:2px 0 0; color:#868e96; font-size:13px;">2024.09 — 현재</p>
+      <p style="margin:6px 0 0; font-size:14px; color:#495057;">LLM, 머신러닝 등 다양한 방법론을 통해 게임의 잠재 가치를 정량화여 비즈니스 의사결정에 직접적으로 기여하고 있습니다</p>
+    </div>
+  </div>
+
+  <!-- 넥슨컴퍼니 — 니트로스튜디오 -->
+  <div style="display:flex; margin-bottom:0;">
+    <div style="display:flex; flex-direction:column; align-items:center; margin-right:20px;">
+      <div style="width:12px; height:12px; border-radius:50%; background:#e83e8c; box-shadow:0 0 0 4px #fcc2d7; flex-shrink:0;"></div>
+      <div style="width:2px; flex:1; background:#dee2e6;"></div>
+    </div>
+    <div style="flex:1; padding-bottom:24px;">
+      <p style="margin:0; font-weight:bold; font-size:16px;">넥슨컴퍼니 · 니트로스튜디오</p>
+      <p style="margin:0; font-size:14px; color:#495057;">분석가 (AI엔지니어)</p>
+      <p style="margin:2px 0 0; color:#868e96; font-size:13px;">2022.12 — 2024.08</p>
+      <p style="margin:6px 0 0; font-size:14px; color:#495057;">인게임 로그 데이터를 기반으로 유저 행동을 분석하고, 강화학습 기반 자율주행 시스템을 리서치했습니다</p>
+    </div>
+  </div>
+
+  <!-- 플랫팜 -->
+  <div style="display:flex; margin-bottom:0;">
+    <div style="display:flex; flex-direction:column; align-items:center; margin-right:20px;">
+      <div style="width:12px; height:12px; border-radius:50%; background:#e67700; box-shadow:0 0 0 4px #fff3bf; flex-shrink:0;"></div>
+      <div style="width:2px; flex:1; background:#dee2e6;"></div>
+    </div>
+    <div style="flex:1; padding-bottom:24px;">
+      <p style="margin:0; font-weight:bold; font-size:16px;">플랫팜</p>
+      <p style="margin:0; font-size:14px; color:#495057;">AI 리서치 엔지니어</p>
+      <p style="margin:2px 0 0; color:#868e96; font-size:13px;">2021.07 — 2022.08</p>
+      <p style="margin:6px 0 0; font-size:14px; color:#495057;">2D·3D 딥러닝 모델을 기반으로 자동 콘텐츠 제작 파이프라인을 구축하였습니다</p>
+    </div>
+  </div>
+
+  <!-- 성균관대학교 -->
+  <div style="display:flex; margin-bottom:0;">
+    <div style="display:flex; flex-direction:column; align-items:center; margin-right:20px;">
+      <div style="width:12px; height:12px; border-radius:50%; background:#1862ab; box-shadow:0 0 0 4px #d0ebff; flex-shrink:0;"></div>
+    </div>
+    <div style="flex:1; padding-bottom:8px;">
+      <p style="margin:0; font-weight:bold; font-size:16px;">성균관대학교</p>
+      <p style="margin:0; font-size:14px; color:#495057;">독문학·국문학 전공</p>
+      <p style="margin:2px 0 0; color:#868e96; font-size:13px;">2016.02 — 2021.02</p>
+      <p style="margin:6px 0 0; font-size:14px; color:#495057;">언어와 텍스트에 대한 관심이 자연어처리(NLP)로 이어졌습니다</p>
+    </div>
+  </div>
+
+</div>
+
+<hr />
+
+<h2 id="-주요-프로젝트">🚀 주요 프로젝트</h2>
+
+<!-- ────────── Project 1 ────────── -->
+<div style="border-left:4px solid #1862ab; padding:16px 20px; margin:24px 0; background:#f8f9fa; border-radius:0 8px 8px 0;">
+  <h3 style="margin:0 0 4px; color:#1862ab;">페르소나 기반 멀티 에이전트 시스템을 활용한 게임 IP평가</h3>
+  <p style="margin:0 0 12px; color:#868e96; font-size:14px;">
+    2026.02 — 2026.02 · 분석가 · 넥슨코리아
+  </p>
+  <p style="margin:0 0 8px;">
+    <img src="https://img.shields.io/badge/OpenAI-412991?style=flat-square&amp;logo=OpenAI&amp;logoColor=white" alt="OpenAI" style="display:inline; margin:0 2px 4px 0; border-radius:3px;" />
+    <img src="https://img.shields.io/badge/Microsoft%20Azure-0078D4?style=flat-square&amp;logo=microsoftazure&amp;logoColor=white" alt="Azure" style="display:inline; margin:0 2px 4px 0; border-radius:3px;" />
+  </p>
+  <h4 style="margin:12px 0 4px; font-size:15px;">문제 상황</h4>
+  <p style="margin:0; font-size:15px;">KPI 외 인지도, 팬덤 등의 정성 요인을 반영하여 IP의 사업가치를 점수화하고자 함</p>
+  <h4 style="margin:12px 0 4px; font-size:15px;">접근 방법</h4>
+  <ul style="margin:0; font-size:15px;">
+    <li>6개 페르소나(게이머, 사업개발실 실장 등)를 서로 다른 관점의 평가 에이전트로 두고 같은 항목을 독립적으로 평가</li>
+    <li>점수화 과정의 편향을 줄이기 위해 평가 에이전트의 서술식 발언을 점수로 환산하는 별도의 에이전트 활용</li>
+  </ul>
+  <h4 style="margin:12px 0 4px; font-size:15px;">결과 및 성과</h4>
+  <p style="margin:0; font-size:15px;">
+    <span style="background:#1862ab; color:#fff; padding:2px 8px; border-radius:3px; font-size:13px;">성과</span>
+    평가 결과를 대표 이사진 대상으로 보고하여 비즈니스 의사결정의 근거로 활용
+  </p>
+  <h4 style="margin:12px 0 4px; font-size:15px;">배운 점</h4>
+  <p style="margin:0; font-size:15px;">멀티 페르소나 프레임워크를 통해 말투만 바꾼 응답이 아닌, 실제 그 페르소나에 입각한 주장을 유도함으로써 관점의 다양성을 확보하고 실제에 가까운 평가 내용을 추출</p>
+</div>
+
+<div style="border-left:4px solid #7048e8; padding:16px 20px; margin:24px 0; background:#f8f9fa; border-radius:0 8px 8px 0;">
+  <h3 style="margin:0 0 4px; color:#7048e8;">모바일 게임 출시 후 1년 누적 매출 예측 머신러닝 모델 고도화</h3>
+  <p style="margin:0 0 12px; color:#868e96; font-size:14px;">
+    2025.02 — 진행 중 · 분석가 · 넥슨코리아
+  </p>
+  <p style="margin:0 0 8px;">
+    <img src="https://img.shields.io/badge/MLflow-0194E2?style=flat-square&amp;logo=mlflow&amp;logoColor=white" alt="MLflow" style="display:inline; margin:0 2px 4px 0; border-radius:3px;" />
+    <img src="https://img.shields.io/badge/scikit--learn-F7931E?style=flat-square&amp;logo=scikitlearn&amp;logoColor=white" alt="scikit-learn" style="display:inline; margin:0 2px 4px 0; border-radius:3px;" />
+  </p>
+  <h4 style="margin:12px 0 4px; font-size:15px;">문제 상황</h4>
+  <p style="margin:0; font-size:15px;">학습 데이터 구조와 모델 가정이 충분히 검증되지 않아 데이터 분포 및 평가 인원 변화에 취약한 기존 매출 예측 모델의 개선이 필요</p>
+  <h4 style="margin:12px 0 4px; font-size:15px;">접근 방법</h4>
+  <ul style="margin:0; font-size:15px;">
+    <li>평가자 단위 샘플 구조로 데이터셋을 재구성하여 구조적 안정성을 확보하고 데이터 증강 효과 확인</li>
+    <li>SHAP 분석과 평가자 인터뷰를 통해 예측 오류가 발생하는 구간의 원인을 분석하여 신규 평가 문항 설계</li>
+    <li>단순 오차 기반 평가 대신 실제 의사결정에 필요한 손익분기점 구간의 변별력을 fuzzy하게 반영한 성능 지표 개발</li>
+    <li>절대 매출 예측이 중간값으로 수렴하는 문제를 해결하기 위해 시장 내 상대적 위치(z-score) 예측 방식으로 재구성</li>
+  </ul>
+  <h4 style="margin:12px 0 4px; font-size:15px;">결과 및 성과</h4>
+  <p style="margin:0; font-size:15px;">
+    <span style="background:#1862ab; color:#fff; padding:2px 8px; border-radius:3px; font-size:13px;">성과</span>
+    약 200여 개 게임에 대한 매출 추론 수행하여 첫 개발사 계약 성사, 학습 데이터가 2배 증가하고 평가자풀이 변화하는 분포 변화 환경에서도 RMSE 100만 달러 이상 감소, MAPE 절반 수준으로 감소
+  </p>
+  <h4 style="margin:12px 0 4px; font-size:15px;">배운 점</h4>
+  <p style="margin:0; font-size:15px;">모델 성능 개선은 알고리즘 변경보다 문제 정의, 데이터 구조, 평가 지표, 운영 프로세스를 함께 개선할 때 실질적인 효과가 발생하며, 실제 비즈니스 의사결정 환경에서는 모델 정확도뿐 아니라 조직이 활용 가능한 형태로 문제를 재정의하는 과정이 핵심임을 경험</p>
+</div>
+
+<!-- ────────── Project 2 ────────── -->
+<div style="border-left:4px solid #2b8a3e; padding:16px 20px; margin:24px 0; background:#f8f9fa; border-radius:0 8px 8px 0;">
+  <h3 style="margin:0 0 4px; color:#2b8a3e;">매칭 대기 시간 및 경기 품질 지표가 유저의 이탈과 리텐션에 미치는 영향 분석</h3>
+  <p style="margin:0 0 12px; color:#868e96; font-size:14px;">
+    2024.03 — 2024.04 · 분석가 · 니트로스튜디오
+  </p>
+  <h4 style="margin:12px 0 4px; font-size:15px;">문제 상황</h4>
+  <p style="margin:0; font-size:15px;">매칭 시스템의 '양적 관점(대기 시간 최소화)'과 '질적 관점(실력 격차 최소화)' 사이의 트레이드오프를 규명</p>
+  <h4 style="margin:12px 0 4px; font-size:15px;">접근 방법</h4>
+  <ul style="margin:0; font-size:15px;">
+    <li>유저 행동을 즉각적인 세션 이탈과 장기적인 잔존으로 구분함으로써 특정 변수가 유저의 만족에 미치는 영향이 단기적인지 장기적인지를 구분</li>
+    <li>티어와 권역에 따라 유저 세그먼트를 나누어 숙련도(티어)와 지역적 특성에 따라 반응 양상이 다름을 확인</li>
+  </ul>
+  <h4 style="margin:12px 0 4px; font-size:15px;">결과 및 성과</h4>
+  <p style="margin:0; font-size:15px;">
+    <span style="background:#2b8a3e; color:#fff; padding:2px 8px; border-radius:3px; font-size:13px;">성과</span>
+    매칭 시스템 개선을 위한 파라미터 제시 (허용할 수 있는 최대 대기 시간 및 적정 수준의 유저 기록 격차)
+  </p>
+  <h4 style="margin:12px 0 4px; font-size:15px;">배운 점</h4>
+  <p style="margin:0; font-size:15px;">유저의 경험이 행동(결과)으로 이어지는 흐름을 데이터로 확인함으로써 유입부터 정착까지 유저 생애 주기(LTV)를 고려한 인사이트 도출</p>
+</div>
+
+<div style="border-left:4px solid #e67700; padding:16px 20px; margin:24px 0; background:#f8f9fa; border-radius:0 8px 8px 0;">
+  <h3 style="margin:0 0 4px; color:#e67700;">3D Pose Estimation 기반 자동 콘텐츠 제작 파이프라인 구축</h3>
+  <p style="margin:0 0 12px; color:#868e96; font-size:14px;">
+    2021.11 — 2022.08 · AI 리서치 엔지니어 · 플랫팜
+  </p>
+  <p style="margin:0 0 8px;">
+    <img src="https://img.shields.io/badge/Python-3776AB?style=flat-square&amp;logo=python&amp;logoColor=white" alt="Python" style="display:inline; margin:0 2px 4px 0; border-radius:3px;" />
+    <img src="https://img.shields.io/badge/TensorFlow-FF6F00?style=flat-square&amp;logo=tensorflow&amp;logoColor=white" alt="TensorFlow" style="display:inline; margin:0 2px 4px 0; border-radius:3px;" />
+    <img src="https://img.shields.io/badge/Docker-2496ED?style=flat-square&amp;logo=docker&amp;logoColor=white" alt="Docker" style="display:inline; margin:0 2px 4px 0; border-radius:3px;" />
+    <img src="https://img.shields.io/badge/Blender-F5792A?style=flat-square&amp;logo=blender&amp;logoColor=white" alt="Blender" style="display:inline; margin:0 2px 4px 0; border-radius:3px;" />
+  </p>
+  <h4 style="margin:12px 0 4px; font-size:15px;">목표</h4>
+  <p style="margin:0; font-size:15px;">트렌드 Meme 이미지를 자사 캐릭터 스타일로 변환하여 콘텐츠를 자동 생성</p>
+  <h4 style="margin:12px 0 4px; font-size:15px;">접근 방법</h4>
+  <ul style="margin:0; font-size:15px;">
+    <li>ROMP 기반 3D pose 추출 → 캐릭터 리타겟팅 → 영상 렌더링까지 전체 콘텐츠 제작 과정을 자동화 파이프라인으로 설계</li>
+    <li>Docker 및 multiprocessing 기반 병렬 처리 구조를 적용해 대량 영상 처리 시간을 단축</li>
+  </ul>
+  <h4 style="margin:12px 0 4px; font-size:15px;">결과 및 성과</h4>
+  <p style="margin:0; font-size:15px;">
+    <span style="background:#1862ab; color:#fff; padding:2px 8px; border-radius:3px; font-size:13px;">성과</span>
+    콘텐츠 조회수 1만 이상 기록 | SIGGRAPH 2022 출품
+  </p>
+  <h4 style="margin:12px 0 4px; font-size:15px;">배운 점</h4>
+  <p style="margin:0; font-size:15px;">모델 연구 결과를 실제 서비스 제작 파이프라인에 적용하는 과정에서 데이터 흐름 설계, 병렬 처리, 자동화 구조 설계 경험</p>
+</div>
+
+<!-- 프로젝트 추가 시: 위 블록을 복사하고 border-left 색상만 변경 -->
+<!-- 추천 색상: #1862ab(파랑) #2b8a3e(초록) #e67700(주황) #7048e8(보라) #c92a2a(빨강) -->
+
+<hr />
+
+<h2 id="-경험-아카이브">👉 경험 아카이브</h2>
+
+<details style="margin:16px 0; border:1px solid #e9ecef; border-radius:8px;">
+<summary style="padding:12px 16px; cursor:pointer; font-weight:bold; font-size:16px; background:#f8f9fa; border-radius:8px;">
+LLM 엔지니어링</summary>
+<div style="padding:12px 16px; font-size:15px;">
+<p style="margin:0 0 6px; font-weight:bold;">에이전트 및 파이프라인</p>
+<ul style="margin:0 0 14px; padding-left:20px;">
+  <li>Google ADK 기반 UA소재 생성을 위한 파이프라인 구축 (진행중)</li>
+  <li>LLM 기반 게임 상대 평가 결과를 Bradley–Terry 알고리즘으로 가공해 모델 피처로 활용</li>
+  <li>VLM 기반 이미지 태그 추출 및 임베딩 기반 예측 실험 수행</li>
+</ul>
+<p style="margin:0 0 6px; font-weight:bold;">어플리케이션 및 활용</p>
+<ul style="margin:0; padding-left:20px;">
+  <li>LLM API 비용 구조 분석 및 활용 시나리오 정립</li>
+  <li>LLM 프롬프트 및 파라미터 튜닝을 통한 결과 최적화</li>
+</ul>
+</div>
+</details>
+
+<details style="margin:16px 0; border:1px solid #e9ecef; border-radius:8px;">
+<summary style="padding:12px 16px; cursor:pointer; font-weight:bold; font-size:16px; background:#f8f9fa; border-radius:8px;">
+딥러닝 모델</summary>
+<div style="padding:12px 16px; font-size:15px;">
+<p style="margin:0 0 6px; font-weight:bold;">생성 모델 및 컴퓨터 비전 연구·개발</p>
+<ul style="margin:0 0 14px; padding-left:20px;">
+  <li>GAN / StyleGAN 기반 이미지 생성 및 스타일 변환 모델 개발</li>
+  <li>Image translation 및 few-shot adaptation 기반 캐릭터 스타일 변환 실험</li>
+  <li>데이터 수집·전처리·학습·latent space 탐색 전 과정 수행</li>
+  <li>텍스처 합성 및 스타일 보정 모델 후처리 적용</li>
+</ul>
+<p style="margin:0 0 6px; font-weight:bold;">모션 모방 및 3D 기반 모델 확장</p>
+<ul style="margin:0 0 14px; padding-left:20px;">
+  <li>Few-shot 기반 motion imitation 모델 연구 및 실험 수행</li>
+  <li>영상 모션을 캐릭터 이미지에 적용하는 파이프라인 구축</li>
+  <li>SMPL 기반 인간 모션 구조 이해 및 적용 경험 확보</li>
+  <li>2D 이미지 중심 연구에서 3D 모션 영역으로 기술 확장</li>
+</ul>
+<p style="margin:0 0 6px; font-weight:bold">강화학습 기반 주행 AI 연구</p>
+<ul style="margin:0; padding-left:20px;">
+  <li>PPO 기반 아이템전 자율주행 에이전트 개선</li>
+  <li>PointNet 기반 공간 정보 처리 구조 적용</li>
+  <li>Delayed reward 문제 해결을 위한 보상 구조 설계</li>
+</ul>
+</div>
+</details>
+
+<details style="margin:16px 0; border:1px solid #e9ecef; border-radius:8px;">
+<summary style="padding:12px 16px; cursor:pointer; font-weight:bold; font-size:16px; background:#f8f9fa; border-radius:8px;">
+데이터 분석
+</summary>
+<div style="padding:12px 16px; font-size:15px;">
+<p style="margin:0 0 6px; font-weight:bold;">게임 플레이 데이터 분석 및 운영 인사이트 도출</p>
+<ul style="margin:0 0 14px; padding-left:20px;">
+  <li>매칭 품질, 실력 격차, 대기 시간과 리텐션 관계 분석</li>
+  <li>유저 티어 및 권역별 매칭 전략 차별화 필요성 도출</li>
+  <li>세션 이탈과 장기 리텐션 영향 분리 분석</li>
+</ul>
+<p style="margin:0 0 6px; font-weight:bold;">AI봇 및 게임 난이도 튜닝 분석</p>
+<ul style="margin:0 0 14px; padding-left:20px;">
+  <li>트랙별 AI 리타이어율 및 랩타임 분석</li>
+  <li>AI봇 주행 실패 구간 히트맵 분석</li>
+  <li>시즌별 AI 난이도 변화 모니터링 및 튜닝 대상 구간 도출</li>
+</ul>
+<p style="margin:0 0 6px; font-weight:bold;">유저 세그먼트 및 행동 분석</p>
+<ul style="margin:0 0 14px; padding-left:20px;">
+  <li>신규 유저 행동 로그 기반 세그먼트 모델 구축</li>
+  <li>접속 빈도·플레이 방식·소비 패턴 기반 유형 분류</li>
+  <li>권역 및 플랫폼별 세그먼트 분포 및 소비 패턴 분석</li>
+</ul>
+<p style="margin:0 0 6px; font-weight:bold;">게임 시스템 및 콘텐츠 밸런스 분석</p>
+<ul style="margin:0 0 14px; padding-left:20px;">
+  <li>카트 업그레이드 성능 및 랩타임 영향 분석</li>
+  <li>캐릭터 조합 및 승률 영향 분석</li>
+  <li>라이센스 콘텐츠 난이도 및 이탈 구간 분석</li>
+  <li>튜토리얼 및 신규 모드 참여 패턴 분석</li>
+</ul>
+<p style="margin:0 0 6px; font-weight:bold;">게임 경제 및 상품 소비 구조 분석</p>
+<ul style="margin:0 0 14px; padding-left:20px;">
+  <li>프리미엄 패스 구매와 리텐션 관계 분석</li>
+  <li>재화 순환 구조 및 소비 병목 구간 분석</li>
+  <li>보너스권 구매 및 실제 사용 패턴 분석</li>
+</ul>
+<p style="margin:0 0 6px; font-weight:bold;">플랫폼 및 환경 요인 분석</p>
+<ul style="margin:0; padding-left:20px;">
+  <li>플랫폼별 플레이 패턴 및 접속 구조 분석</li>
+  <li>패치 용량 및 기기 환경과 리텐션 영향 분석</li>
+  <li>플랫폼 간 유저 이동 패턴 분석</li>
+</ul>
+</div>
+</details>
+
+<details style="margin:16px 0; border:1px solid #e9ecef; border-radius:8px;">
+<summary style="padding:12px 16px; cursor:pointer; font-weight:bold; font-size:16px; background:#f8f9fa; border-radius:8px;">
+대시보드 및 인프라
+</summary>
+<div style="padding:12px 16px; font-size:15px;">
+<p style="margin:0 0 6px; font-weight:bold;">대시보드 구축</p>
+<ul style="margin:0 0 14px; padding-left:20px;">
+  <li>캐릭터/카트, 리텐션 Tableau 대시보드 구축 및 운영</li>
+  <li>실험 트랙킹을 위한 MLflow 대시보드 활용</li>
+  <li>Sensortower API를 활용한 해외 신규 가망 게임 대시보드 개발</li>
+</ul>
+<p style="margin:0 0 6px; font-weight:bold;">데이터 인프라 및 파이프라인</p>
+<ul style="margin:0 0 14px; padding-left:20px;">
+  <li>로그 이벤트 구조 개선 및 분석 환경 정비</li>
+  <li>Snowflake DB 스키마 설계, Airflow DAG 자동 적재</li>
+  <li>UNIFIED_APP_ID 등 게임 단위 식별자 체계 도입 및 데이터 자산 구조화</li>
+</ul>
+<p style="margin:0 0 6px; font-weight:bold;">성능 최적화 및 자동화</p>
+<ul style="margin:0; padding-left:20px;">
+  <li>모델 학습 및 추론 파이프라인 병렬 처리 적용으로 연산 속도 16배 개선 (30분 → 2분)</li>
+  <li>GPT Batch 처리 및 API 기반 자동화 도입으로 기존 수동 작업 대폭 단축</li>
+</ul>
+</div>
+</details>
+
+<hr />
+
+<h2 id="활동">활동</h2>
+
+<ul>
+  <li><a href="https://youtu.be/os1IUUxy9vI?si=XFbqtcHSqt_aGn_J&amp;t=58">2024년 구글 ML부트캠프 Tips for Kaggle 발표</a> - 구글 머신러닝 부트캠프의 졸업생으로서 후배들을 위한 Kaggle 상위권 달성 팁을 전달하였습니다.</li>
+  <li><a href="https://aixdesign.space/asianPOV/content/421">Where can creative AI take over - where not?</a> - 독일 함부르크응용과학대학교 Peter Kabel 교수와 AI 와 디자인의 교차지점에 대해 인터뷰를 진행하였습니다.</li>
+  <li><a href="https://www.superookie.com/contents/6194d1ec8b129f47845e5812">[슈퍼루키 직무소개] 플랫팜의 Data Engineering 직무</a></li>
+</ul>
+
+  </div>
+  <script type="text/javascript">
+    "use strict"; 
+    function addBackToTop() 
+        { function o() 
+            { 
+                t() >= z ? R && (D.className = "", R = !1) : R || (D.className = "hidden", R = !0) 
+            } 
+          function t() 
+            { 
+                return E.scrollTop || A && document.documentElement.scrollTop || 0 
+            } 
+          function e(o) 
+            { 
+                E.scrollTop = o, A && (document.documentElement.scrollTop = o) 
+            } 
+    
+    var n, i, d, r, c = arguments.length > 0 && void 0 !== arguments[0] ? arguments[0] : {}, a = c.backgroundColor, s = void 0 === a ? "#000" : a, l = c.cornerOffset, u = void 0 === l ? 20 : l, m = c.diameter, p = void 0 === m ? 56 : m, h = c.ease, b = void 0 === h ? function (o) { return .5 * (1 - Math.cos(Math.PI * o)) } : h, v = c.id, f = void 0 === v ? "back-to-top" : v, x = c.innerHTML, g = void 0 === x ? '<svg viewBox="0 0 24 24"><path d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z"></path></svg>' : x, w = c.onClickScrollTo, y = void 0 === w ? 0 : w, k = c.scrollContainer, E = void 0 === k ? document.body : k, T = c.scrollDuration, C = void 0 === T ? 100 : T, M = c.showWhenScrollTopIs, z = void 0 === M ? 1 : M, L = c.size, B = void 0 === L ? p : L, H = c.textColor, I = void 0 === H ? "#fff" : H, N = c.zIndex, S = void 0 === N ? 1 : N, q = E === document.body, A = q && document.documentElement; n = Math.round(.35 * B), i = Math.round(.2 * B), d = "#" + f + "{background:" + s + ";-webkit-border-radius:50%;-moz-border-radius:50%;border-radius:50%;bottom:" + u + "px;-webkit-box-shadow:0 2px 5px 0 rgba(0,0,0,.26);-moz-box-shadow:0 2px 5px 0 rgba(0,0,0,.26);box-shadow:0 2px 5px 0 rgba(0,0,0,.26);color:" + I + ";cursor:pointer;display:block;height:" + B + "px;opacity:1;outline:0;position:fixed;right:" + u + "px;-webkit-tap-highlight-color:transparent;-webkit-touch-callout:none;-webkit-transition:bottom .2s,opacity .2s;-o-transition:bottom .2s,opacity .2s;-moz-transition:bottom .2s,opacity .2s;transition:bottom .2s,opacity .2s;-webkit-user-select:none;-moz-user-select:none;-ms-user-select:none;user-select:none;width:" + B + "px;z-index:" + S + "}#" + f + " svg{display:block;fill:currentColor;height:" + n + "px;margin:" + i + "px auto 0;width:" + n + "px}#" + f + ".hidden{bottom:-" + B + "px;opacity:0}", (r = document.createElement("style")).appendChild(document.createTextNode(d)), document.head.insertAdjacentElement("afterbegin", r); var D = function () { var o = document.createElement("div"); return o.id = f, o.className = "hidden", o.innerHTML = g, o.addEventListener("click", function (o) { o.preventDefault(), function () { var o = "function" == typeof y ? y() : y, n = window, i = n.performance, d = n.requestAnimationFrame; if (C <= 0 || void 0 === i || void 0 === d) return e(o); var r = i.now(), c = t(), a = c - o; d(function o(t) { var n = Math.min((t - r) / C, 1); e(c - Math.round(b(n) * a)), n < 1 && d(o) }) }() }), document.body.appendChild(o), o }(), R = !0; (q ? window : E).addEventListener("scroll", o), o() } window.addEventListener("load", function () { var o = document.getElementById("back-to-top"), t = document.querySelector(".sticky-bottom"), e = document.querySelector(".fixed-bottom"); o && window.addEventListener("scroll", function () { if (t) { var n = t.getBoundingClientRect(); window.scrollY + window.innerHeight > document.body.scrollHeight - n.height ? (o.style.position = "fixed", o.style.bottom = n.height + 15 + "px") : (o.style.position = "fixed", o.style.bottom = "15px") } if (e) { var i = e.getBoundingClientRect(); o.style.position = "fixed", o.style.bottom = i.height + 15 + "px" } }) });
+</script>
+<script>
+    addBackToTop();
+</script>
+
+
+
+
+</article>
+    </div>
+    
+    <div class="wrapper-footer">
+      <div class="container">
+        <footer class="footer">
+          <!-- Refer to https://codepen.io/ruandre/pen/howFi -->
+<ul class="svg-icon">
+
+  
+
+  
+
+  
+  <li><a href="mailto:woocosmos@gmail.com" class="icon-8 email" title="Email"><svg viewBox="0 0 512 512"><path d="M101.3 141.6v228.9h0.3 308.4 0.8V141.6H101.3zM375.7 167.8l-119.7 91.5 -119.6-91.5H375.7zM127.6 194.1l64.1 49.1 -64.1 64.1V194.1zM127.8 344.2l84.9-84.9 43.2 33.1 43-32.9 84.7 84.7L127.8 344.2 127.8 344.2zM384.4 307.8l-64.4-64.4 64.4-49.3V307.8z"/></svg><!--[if lt IE 9]><em>Email</em><![endif]--></a></li>
+  
+
+  
+
+  
+
+  
+  <li><a href="https://github.com/woocosmos" class="icon-13 github" title="GitHub"><svg viewBox="0 0 512 512"><path d="M256 70.7c-102.6 0-185.9 83.2-185.9 185.9 0 82.1 53.3 151.8 127.1 176.4 9.3 1.7 12.3-4 12.3-8.9V389.4c-51.7 11.3-62.5-21.9-62.5-21.9 -8.4-21.5-20.6-27.2-20.6-27.2 -16.9-11.5 1.3-11.3 1.3-11.3 18.7 1.3 28.5 19.2 28.5 19.2 16.6 28.4 43.5 20.2 54.1 15.4 1.7-12 6.5-20.2 11.8-24.9 -41.3-4.7-84.7-20.6-84.7-91.9 0-20.3 7.3-36.9 19.2-49.9 -1.9-4.7-8.3-23.6 1.8-49.2 0 0 15.6-5 51.1 19.1 14.8-4.1 30.7-6.2 46.5-6.3 15.8 0.1 31.7 2.1 46.6 6.3 35.5-24 51.1-19.1 51.1-19.1 10.1 25.6 3.8 44.5 1.8 49.2 11.9 13 19.1 29.6 19.1 49.9 0 71.4-43.5 87.1-84.9 91.7 6.7 5.8 12.8 17.1 12.8 34.4 0 24.9 0 44.9 0 51 0 4.9 3 10.7 12.4 8.9 73.8-24.6 127-94.3 127-176.4C441.9 153.9 358.6 70.7 256 70.7z"/></svg><!--[if lt IE 9]><em>GitHub</em><![endif]--></a></li>
+  
+
+  
+
+  
+
+  
+  <li><a href="https://www.linkedin.com/in/yunsoo-woo-245946213" class="icon-17 linkedin" title="LinkedIn"><svg viewBox="0 0 512 512"><path d="M186.4 142.4c0 19-15.3 34.5-34.2 34.5 -18.9 0-34.2-15.4-34.2-34.5 0-19 15.3-34.5 34.2-34.5C171.1 107.9 186.4 123.4 186.4 142.4zM181.4 201.3h-57.8V388.1h57.8V201.3zM273.8 201.3h-55.4V388.1h55.4c0 0 0-69.3 0-98 0-26.3 12.1-41.9 35.2-41.9 21.3 0 31.5 15 31.5 41.9 0 26.9 0 98 0 98h57.5c0 0 0-68.2 0-118.3 0-50-28.3-74.2-68-74.2 -39.6 0-56.3 30.9-56.3 30.9v-25.2H273.8z"/></svg><!--[if lt IE 9]><em>LinkedIn</em><![endif]--></a></li>
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</ul>
+
+
+<p>© 2026 Yunsoo Woo</p>
+
+        </footer>
+      </div>
+    </div>
+
+    <!--  -->
+
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-1YCJCQRD4F"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-1YCJCQRD4F');
+</script>
+    <script type="text/javascript">
+    "use strict"; 
+    function addBackToTop() 
+        { function o() 
+            { 
+                t() >= z ? R && (D.className = "", R = !1) : R || (D.className = "hidden", R = !0) 
+            } 
+          function t() 
+            { 
+                return E.scrollTop || A && document.documentElement.scrollTop || 0 
+            } 
+          function e(o) 
+            { 
+                E.scrollTop = o, A && (document.documentElement.scrollTop = o) 
+            } 
+    
+    var n, i, d, r, c = arguments.length > 0 && void 0 !== arguments[0] ? arguments[0] : {}, a = c.backgroundColor, s = void 0 === a ? "#000" : a, l = c.cornerOffset, u = void 0 === l ? 20 : l, m = c.diameter, p = void 0 === m ? 56 : m, h = c.ease, b = void 0 === h ? function (o) { return .5 * (1 - Math.cos(Math.PI * o)) } : h, v = c.id, f = void 0 === v ? "back-to-top" : v, x = c.innerHTML, g = void 0 === x ? '<svg viewBox="0 0 24 24"><path d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z"></path></svg>' : x, w = c.onClickScrollTo, y = void 0 === w ? 0 : w, k = c.scrollContainer, E = void 0 === k ? document.body : k, T = c.scrollDuration, C = void 0 === T ? 100 : T, M = c.showWhenScrollTopIs, z = void 0 === M ? 1 : M, L = c.size, B = void 0 === L ? p : L, H = c.textColor, I = void 0 === H ? "#fff" : H, N = c.zIndex, S = void 0 === N ? 1 : N, q = E === document.body, A = q && document.documentElement; n = Math.round(.35 * B), i = Math.round(.2 * B), d = "#" + f + "{background:" + s + ";-webkit-border-radius:50%;-moz-border-radius:50%;border-radius:50%;bottom:" + u + "px;-webkit-box-shadow:0 2px 5px 0 rgba(0,0,0,.26);-moz-box-shadow:0 2px 5px 0 rgba(0,0,0,.26);box-shadow:0 2px 5px 0 rgba(0,0,0,.26);color:" + I + ";cursor:pointer;display:block;height:" + B + "px;opacity:1;outline:0;position:fixed;right:" + u + "px;-webkit-tap-highlight-color:transparent;-webkit-touch-callout:none;-webkit-transition:bottom .2s,opacity .2s;-o-transition:bottom .2s,opacity .2s;-moz-transition:bottom .2s,opacity .2s;transition:bottom .2s,opacity .2s;-webkit-user-select:none;-moz-user-select:none;-ms-user-select:none;user-select:none;width:" + B + "px;z-index:" + S + "}#" + f + " svg{display:block;fill:currentColor;height:" + n + "px;margin:" + i + "px auto 0;width:" + n + "px}#" + f + ".hidden{bottom:-" + B + "px;opacity:0}", (r = document.createElement("style")).appendChild(document.createTextNode(d)), document.head.insertAdjacentElement("afterbegin", r); var D = function () { var o = document.createElement("div"); return o.id = f, o.className = "hidden", o.innerHTML = g, o.addEventListener("click", function (o) { o.preventDefault(), function () { var o = "function" == typeof y ? y() : y, n = window, i = n.performance, d = n.requestAnimationFrame; if (C <= 0 || void 0 === i || void 0 === d) return e(o); var r = i.now(), c = t(), a = c - o; d(function o(t) { var n = Math.min((t - r) / C, 1); e(c - Math.round(b(n) * a)), n < 1 && d(o) }) }() }), document.body.appendChild(o), o }(), R = !0; (q ? window : E).addEventListener("scroll", o), o() } window.addEventListener("load", function () { var o = document.getElementById("back-to-top"), t = document.querySelector(".sticky-bottom"), e = document.querySelector(".fixed-bottom"); o && window.addEventListener("scroll", function () { if (t) { var n = t.getBoundingClientRect(); window.scrollY + window.innerHeight > document.body.scrollHeight - n.height ? (o.style.position = "fixed", o.style.bottom = n.height + 15 + "px") : (o.style.position = "fixed", o.style.bottom = "15px") } if (e) { var i = e.getBoundingClientRect(); o.style.position = "fixed", o.style.bottom = i.height + 15 + "px" } }) });
+</script>
+<script>
+    addBackToTop();
+</script>
+
+
+
+
+
+  </body>
+</html>
