@@ -104,6 +104,37 @@ permalink: /portfolio/
 
 ## 🚀 주요 프로젝트
 
+<!-- ────────── 현재 진행 중 ────────── -->
+<div style="border:2px solid #f03e3e; border-radius:8px; padding:16px 20px; margin:24px 0; background:#fff5f5;">
+  <div style="display:flex; align-items:center; gap:8px; margin-bottom:12px;">
+    <span style="display:inline-block; width:10px; height:10px; border-radius:50%; background:#f03e3e; animation:pulse 1.5s infinite;"></span>
+    <span style="font-weight:bold; color:#f03e3e; font-size:15px;">현재 진행 중</span>
+  </div>
+  <style>@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }</style>
+  <h3 style="margin:0 0 4px; color:#c92a2a;">UA소재 생성 및 검수 자동화를 위한 멀티 에이전트 시스템 구축</h3>
+  <p style="margin:0 0 12px; color:#868e96; font-size:14px;">
+    2026.03 — 진행 중 · 분석가 · 넥슨코리아
+  </p>
+  <p style="margin:0 0 8px;">
+    <img src="https://img.shields.io/badge/LangGraph-1C3C3C?style=flat-square&logo=langchain&logoColor=white" alt="LangGraph" style="display:inline; margin:0 2px 4px 0; border-radius:3px;">
+    <img src="https://img.shields.io/badge/LangSmith-1C3C3C?style=flat-square&logo=langchain&logoColor=white" alt="LangSmith" style="display:inline; margin:0 2px 4px 0; border-radius:3px;">
+    <img src="https://img.shields.io/badge/Google%20ADK-4285F4?style=flat-square&logo=google&logoColor=white" alt="Google ADK" style="display:inline; margin:0 2px 4px 0; border-radius:3px;">
+  </p>
+  <h4 style="margin:12px 0 4px; font-size:15px;">문제 상황</h4>
+  <p style="margin:0; font-size:15px;">UA(User Acquisition) 소재 제작 및 검수에는 높은 비용과 시간이 소요되어, 빠른 캠페인 실험과 광고 최적화에 병목이 발생</p>
+  <h4 style="margin:12px 0 4px; font-size:15px;">접근 방법</h4>
+  <ul style="margin:0; font-size:15px;">
+    <li>Google ADK로 시스템 뼈대를 구성한 뒤, LangGraph 기반 멀티 에이전트 파이프라인으로 발전 — 시장 분석·기획·비주얼 정의 등 각 단계를 역할과 산출물이 명확한 에이전트로 분리</li>
+    <li>LangSmith를 연동하여 웹 기반 실험 환경을 구축, 코딩에 익숙하지 않은 사업 담당자도 에이전트 파이프라인을 직접 테스트하고 피드백을 반영할 수 있도록 접근성 확보</li>
+    <li>생성된 소재의 검수를 위해 LLM을 CTR 시뮬레이터로 활용하고, 해당 추론 결과를 경량 regressor로 distillation하는 방식으로 검수 시스템 설계</li>
+  </ul>
+  <h4 style="margin:12px 0 4px; font-size:15px;">결과 및 성과</h4>
+  <p style="margin:0; font-size:15px;">
+    <span style="background:#f03e3e; color:#fff; padding:2px 8px; border-radius:3px; font-size:13px;">진행 중</span>
+    &nbsp;현재 개발 진행 중으로 성과는 추후 업데이트 예정
+  </p>
+</div>
+
 <!-- ────────── Project 1 ────────── -->
 <div style="border-left:4px solid #1862ab; padding:16px 20px; margin:24px 0; background:#f8f9fa; border-radius:0 8px 8px 0;">
   <h3 style="margin:0 0 4px; color:#1862ab;">페르소나 기반 멀티 에이전트 시스템을 활용한 게임 IP평가</h3>
