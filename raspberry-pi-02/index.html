@@ -1,0 +1,688 @@
+<!DOCTYPE html>
+<html>
+  <head>
+  <title>[라즈베리 파이를 활용한 홈서버 구축] 02. 세팅 – YunsooLog – 행간을 읽는 기계학습 이야기</title>
+  <link rel="icon" href="/images/favicon.ico">
+      <meta name="google-site-verification" content="NA4jg1Iffw6aA9VWjj3kqoo2jfOkPRxINJtYphd7VeI" />
+    <meta charset="utf-8" />
+    <meta content='text/html; charset=utf-8' http-equiv='Content-Type'>
+    <meta http-equiv='X-UA-Compatible' content='IE=edge'>
+    <meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1.0'>
+    <meta http-equiv="Permissions-Policy" content="interest-cohort=()">
+    
+    
+    <meta name="description" content="준비물
+
+
+
+
+  Raspberry Pi 4B 8GB RAM (🥕)
+  5V 4A 라즈베리파이4 KC인증 C타입 아답터 (구매처)
+  샌디스크 32GB SD카드
+  하기비스 미니 모니터와 microHDMI-to-HDMI 케이블
+  냉각팬 케이스
+
+
+세팅
+
+
+  OS 설치
+  하드웨어 조립
+  전원, 모니터, 키보드 연결
+
+
+1. OS 설치
+
+어댑터를 활용해서 SD카드를 맥북에 연결한다.
+
+
+
+SD Memory Card Formatter를 사용해서 SD카드를 포맷한다.
+
+
+
+Raspberry Pi Imager 를 설치한다.
+
+
+
+OS는 Lite 버전으로 선택했다. GUI 환경이 없는 대신 메모리 사용량이 낮은 장점이 있다.
+또한 openclaw 설치를 염두에 두어 64비트로 진행했다.
+
+
+
+
+호스트명은 archie로 했다. 노래 Marry Me, Archie 에서 따왔고 Architecture 라는 의미도 담았다.
+
+
+  
+  
+
+
+2. 하드웨어 조립
+
+방열판 붙이기
+
+
+라즈베리 파이에 동봉되어 있던 알루미늄 방열판 (히트싱크) 을 부착해준다. 뒷판의 양면 테이프를 떼어 붙이면 된다.
+알리에서 주문한 케이스에도 방열판이 함께 왔기 때문에 사이즈가 더 잘 맞는 것으로 골라 붙여주었다.
+
+
+  
+  
+
+
+히트싱크는 전자장치의 열을 금속으로 전달하고 공기로 빠지도록 돕는 수동 방식의 열 교환기이다.
+라즈베리파이에 방열판을 붙이면, 메인보드 표면의 열이 금속에 흡수 되고 공기와 접촉된 방열판이 열을 식히는 역할을 하게 된다.
+(이 작은 금속판이 어떤 식으로 도움을 주는 건지 궁금해서 찾아봤다)
+
+케이스 조립
+
+
+
+알리에서 작은 냉각팬이 붙은 케이스를 주문하였다 - 52Pi 냉각팬 아크릴 케이스
+
+52pi 공식 위키페이지를 참고하여 조립했다.
+
+
+
+네 개의 고정핀을 풀면 얇은 판들이 분해된다.
+
+
+  
+  
+
+
+파란색 판, 초록색 판 위에 메인보드를 깔고 그 위로 노란색 판과 빨간색 판을 얹어준다.
+
+
+
+노란색 판이 라즈베리파이 구조에 딱 맞게 나왔기 때문에, 방열판과 PoE HAT header 사이로 케이스가 잘 들어맞지 않는 문제가 있었다 (방열판을 살짝 위로 붙인 게 문제)
+
+케이스를 끼운 상태로 방열판을 살짝 끌어내려 딱 맞게 조립할 수 있었다. 케이스를 끼웠는데 한 쪽이 뜬다든가 하면 꼭 살펴 볼 것.
+
+고정핀을 끼우기 전에, 맨 위 투명 판에 쿨링팬을 부착해야 한다.
+
+
+
+네 개의 볼트로 쿨링팬을 투명팬에 고정한다.
+
+
+  
+  
+
+
+다음 쿨링팬의 전선 연결. 빨간 선을 어디에 꽂는지에 따라 power mode / quiet mode 를 선택할 수 있다고 안내되어 있다.
+
+
+
+빨간색 선을 이미지의 3.3V 파워(1번)에 연결하면 저속회전 모드, 5V 파워(2번)에 연결하면 고속회전 모드가 된다. 파란선은 6번 ground 에 연결한다.
+(나는 quiet 모드를 선택했다)
+
+
+
+완성!
+
+3. 전원, 모니터, 키보드 연결
+
+
+  
+  
+
+
+SD 카드의 앞면이 바닥을 향하도록 메인보드에 장착해준다.
+
+
+  
+  
+
+
+이미지에 보이는 대로 전원, 모니터, 키보드를 연결하면 된다.
+
+
+
+제일 걱정했던 부분은 하기비스 미니 모니터와의 연결이었는데, 별도의 c타입 전원을 추가로 연결했더니 라즈베리파이의 모니터로 사용할 수 있었다.
+
+
+
+다음 글에서는 wifi 연결과 ssh 접속에 대해 다루어보겠다.
+" />
+    <meta property="og:description" content="준비물
+
+
+
+
+  Raspberry Pi 4B 8GB RAM (🥕)
+  5V 4A 라즈베리파이4 KC인증 C타입 아답터 (구매처)
+  샌디스크 32GB SD카드
+  하기비스 미니 모니터와 microHDMI-to-HDMI 케이블
+  냉각팬 케이스
+
+
+세팅
+
+
+  OS 설치
+  하드웨어 조립
+  전원, 모니터, 키보드 연결
+
+
+1. OS 설치
+
+어댑터를 활용해서 SD카드를 맥북에 연결한다.
+
+
+
+SD Memory Card Formatter를 사용해서 SD카드를 포맷한다.
+
+
+
+Raspberry Pi Imager 를 설치한다.
+
+
+
+OS는 Lite 버전으로 선택했다. GUI 환경이 없는 대신 메모리 사용량이 낮은 장점이 있다.
+또한 openclaw 설치를 염두에 두어 64비트로 진행했다.
+
+
+
+
+호스트명은 archie로 했다. 노래 Marry Me, Archie 에서 따왔고 Architecture 라는 의미도 담았다.
+
+
+  
+  
+
+
+2. 하드웨어 조립
+
+방열판 붙이기
+
+
+라즈베리 파이에 동봉되어 있던 알루미늄 방열판 (히트싱크) 을 부착해준다. 뒷판의 양면 테이프를 떼어 붙이면 된다.
+알리에서 주문한 케이스에도 방열판이 함께 왔기 때문에 사이즈가 더 잘 맞는 것으로 골라 붙여주었다.
+
+
+  
+  
+
+
+히트싱크는 전자장치의 열을 금속으로 전달하고 공기로 빠지도록 돕는 수동 방식의 열 교환기이다.
+라즈베리파이에 방열판을 붙이면, 메인보드 표면의 열이 금속에 흡수 되고 공기와 접촉된 방열판이 열을 식히는 역할을 하게 된다.
+(이 작은 금속판이 어떤 식으로 도움을 주는 건지 궁금해서 찾아봤다)
+
+케이스 조립
+
+
+
+알리에서 작은 냉각팬이 붙은 케이스를 주문하였다 - 52Pi 냉각팬 아크릴 케이스
+
+52pi 공식 위키페이지를 참고하여 조립했다.
+
+
+
+네 개의 고정핀을 풀면 얇은 판들이 분해된다.
+
+
+  
+  
+
+
+파란색 판, 초록색 판 위에 메인보드를 깔고 그 위로 노란색 판과 빨간색 판을 얹어준다.
+
+
+
+노란색 판이 라즈베리파이 구조에 딱 맞게 나왔기 때문에, 방열판과 PoE HAT header 사이로 케이스가 잘 들어맞지 않는 문제가 있었다 (방열판을 살짝 위로 붙인 게 문제)
+
+케이스를 끼운 상태로 방열판을 살짝 끌어내려 딱 맞게 조립할 수 있었다. 케이스를 끼웠는데 한 쪽이 뜬다든가 하면 꼭 살펴 볼 것.
+
+고정핀을 끼우기 전에, 맨 위 투명 판에 쿨링팬을 부착해야 한다.
+
+
+
+네 개의 볼트로 쿨링팬을 투명팬에 고정한다.
+
+
+  
+  
+
+
+다음 쿨링팬의 전선 연결. 빨간 선을 어디에 꽂는지에 따라 power mode / quiet mode 를 선택할 수 있다고 안내되어 있다.
+
+
+
+빨간색 선을 이미지의 3.3V 파워(1번)에 연결하면 저속회전 모드, 5V 파워(2번)에 연결하면 고속회전 모드가 된다. 파란선은 6번 ground 에 연결한다.
+(나는 quiet 모드를 선택했다)
+
+
+
+완성!
+
+3. 전원, 모니터, 키보드 연결
+
+
+  
+  
+
+
+SD 카드의 앞면이 바닥을 향하도록 메인보드에 장착해준다.
+
+
+  
+  
+
+
+이미지에 보이는 대로 전원, 모니터, 키보드를 연결하면 된다.
+
+
+
+제일 걱정했던 부분은 하기비스 미니 모니터와의 연결이었는데, 별도의 c타입 전원을 추가로 연결했더니 라즈베리파이의 모니터로 사용할 수 있었다.
+
+
+
+다음 글에서는 wifi 연결과 ssh 접속에 대해 다루어보겠다.
+" />
+    
+    <meta name="author" content="YunsooLog" />
+
+    
+    <meta property="og:title" content="[라즈베리 파이를 활용한 홈서버 구축] 02. 세팅" />
+    <meta property="twitter:title" content="[라즈베리 파이를 활용한 홈서버 구축] 02. 세팅" />
+    
+  <!-- Async font loading -->
+<script>
+  window.WebFontConfig = {
+      custom: {
+          families: ['Spoqa Han Sans:100,300,400,700'],
+          urls: ['https://spoqa.github.io/spoqa-han-sans/css/SpoqaHanSans-kr.css']
+      },
+      timeout: 60000
+  };
+  (function(d) {
+      var wf = d.createElement('script'), s = d.scripts[0];
+      wf.src = 'https://ajax.googleapis.com/ajax/libs/webfont/1.5.18/webfont.js';
+      s.parentNode.insertBefore(wf, s);
+  })(document);
+</script>
+
+  <!--[if lt IE 9]>
+    <script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+  <![endif]-->
+
+  <link rel="stylesheet" type="text/css" href="/style.css" />
+  <link rel="alternate" type="application/rss+xml" title="YunsooLog - 행간을 읽는 기계학습 이야기" href="/feed.xml" />
+  <script>
+    document.cookie = "promo_shown=1; SameSite=Lax; path=/";
+  </script>
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.13.11/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.13.11/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.13.11/dist/contrib/auto-render.min.js"
+          onload="renderMathInElement(document.body, {
+            delimiters: [
+              {left: '\\[', right: '\\]', display: true},
+              {left: '$$', right: '$$', display: true},
+              {left: '$', right: '$', display: false},
+            ]
+          });">
+  </script>
+
+  <!-- Created with Jekyll Now - http://github.com/barryclark/jekyll-now -->
+</head>
+  <body>
+    <div class="wrapper-masthead">
+  <div class="container">
+    <header class="masthead clearfix">
+      <a href="/" class="site-avatar"><img src="/images/avatar.png"/></a>
+      
+      <div class="site-info">
+        <h1 class="site-name"><a href="/">YunsooLog</a></h1>
+        <p class="site-description">행간을 읽는 기계학습 이야기</p>
+      </div>
+
+      <nav>
+        
+        
+        <a href="/about">About</a>
+        
+        
+        
+        <a href="/">Blog</a>
+        
+        
+        
+        <a href="/tags">Tags</a>
+        
+        
+        
+        <a href="/timeline">Timeline</a>
+        
+        
+        
+        <ul class="search-icon">
+          <a href="/search">
+          <svg 
+            width="24" 
+            height="24" 
+            viewBox="0 0 24 24" 
+            fill="none" 
+            xmlns="http://www.w3.org/2000/svg">
+            <path d="M10 2C5.58172 2 2 5.58172 2 10C2 14.4183 5.58172 18 10 18C11.8485 18 13.5451 17.3376 14.8458 16.2416L19.7071 21.1029C20.0976 21.4934 20.7308 21.4934 21.1213 21.1029C21.5118 20.7124 21.5118 20.0792 21.1213 19.6887L16.2416 14.809C17.3376 13.5083 18 11.8116 18 10C18 5.58172 14.4183 2 10 2ZM4 10C4 6.68629 6.68629 4 10 4C13.3137 4 16 6.68629 16 10C16 13.3137 13.3137 16 10 16C6.68629 16 4 13.3137 4 10Z" 
+            fill="currentColor"></path>
+          </svg>
+          </a>
+        </ul>
+
+      </nav>
+    </header>
+  </div>
+</div>
+
+    <div id="main" role="main" class="container">
+      <article class="post">
+  <div class="inner-wrap">
+    <h1>[라즈베리 파이를 활용한 홈서버 구축] 02. 세팅</h1>
+
+    <div>
+      <span class="date">
+        2026-02-22
+      </span>
+
+      <ul class="tag">
+        
+        <li>
+          <a href="https://woocosmos.github.io/tags#홈서버">
+            홈서버
+          </a>
+        </li>
+        
+      </ul>
+    </div>
+
+    <section class="entry">
+      
+      <aside>
+        <nav class="nav-toc">
+          <h3> 목차 </h3>
+          <ul id="toc" class="section-nav">
+<li class="toc-entry toc-h1"><a href="#준비물">준비물</a></li>
+<li class="toc-entry toc-h1"><a href="#세팅">세팅</a>
+<ul>
+<li class="toc-entry toc-h2"><a href="#1-os-설치">1. OS 설치</a></li>
+<li class="toc-entry toc-h2"><a href="#2-하드웨어-조립">2. 하드웨어 조립</a>
+<ul>
+<li class="toc-entry toc-h3"><a href="#방열판-붙이기">방열판 붙이기</a></li>
+<li class="toc-entry toc-h3"><a href="#케이스-조립">케이스 조립</a></li>
+</ul>
+</li>
+<li class="toc-entry toc-h2"><a href="#3-전원-모니터-키보드-연결">3. 전원, 모니터, 키보드 연결</a></li>
+</ul>
+</li>
+</ul>
+        </nav>
+      </aside>
+      <script src="/assets/scroll-spy.js" type="text/javascript"></script>
+      
+      <h1 id="준비물">준비물</h1>
+
+<p><img src="/images/raspberry-02/raspberry__.png" alt="image" /></p>
+
+<ol>
+  <li>Raspberry Pi 4B 8GB RAM (🥕)</li>
+  <li>5V 4A 라즈베리파이4 KC인증 C타입 아답터 (<a href="https://www.devicemart.co.kr/goods/view?no=12544959&amp;NaPm=ct%3Dmlxoh85a%7Cci%3Dcheckout%7Ctr%3Dppc%7Ctrx%3Dnull%7Chk%3D9c3aef4de945ae6dc213520b6dcbd13168c2d29c">구매처</a>)</li>
+  <li>샌디스크 32GB SD카드</li>
+  <li>하기비스 미니 모니터와 microHDMI-to-HDMI 케이블</li>
+  <li>냉각팬 케이스</li>
+</ol>
+
+<h1 id="세팅">세팅</h1>
+
+<ol>
+  <li>OS 설치</li>
+  <li>하드웨어 조립</li>
+  <li>전원, 모니터, 키보드 연결</li>
+</ol>
+
+<h2 id="1-os-설치">1. OS 설치</h2>
+
+<p>어댑터를 활용해서 SD카드를 맥북에 연결한다.</p>
+
+<p><img src="/images/raspberry-02/raspberry_01.jpg" alt="image" width="80%" /></p>
+
+<p><a href="https://www.sdcard.org/downloads/formatter/">SD Memory Card Formatter</a>를 사용해서 SD카드를 포맷한다.</p>
+
+<p><img src="/images/raspberry-02/raspberry_03.jpg" alt="image" width="80%" /></p>
+
+<p><a href="https://www.raspberrypi.com/software/">Raspberry Pi Imager</a> 를 설치한다.</p>
+
+<p><img src="/images/raspberry-02/raspberry_04.jpg" alt="image" width="80%" /></p>
+
+<p>OS는 Lite 버전으로 선택했다. GUI 환경이 없는 대신 메모리 사용량이 낮은 장점이 있다.<br />
+또한 openclaw 설치를 염두에 두어 64비트로 진행했다.</p>
+
+<iframe width="100%" height="400" src="https://www.youtube.com/embed/ZAn3JdtSrnY" frameborder="0" allowfullscreen="">
+</iframe>
+
+<p>호스트명은 <code class="language-plaintext highlighter-rouge">archie</code>로 했다. 노래 Marry Me, Archie 에서 따왔고 Architecture 라는 의미도 담았다.</p>
+
+<div style="display:flex; gap:10px;">
+  <img src="/images/raspberry-02/raspberry_05.jpg" style="width:50%;" />
+  <img src="/images/raspberry-02/raspberry_06.jpg" style="width:50%;" />
+</div>
+
+<h2 id="2-하드웨어-조립">2. 하드웨어 조립</h2>
+
+<h3 id="방열판-붙이기">방열판 붙이기</h3>
+<p><img src="/images/raspberry-02/raspberry_07.png" alt="image" /></p>
+
+<p>라즈베리 파이에 동봉되어 있던 알루미늄 방열판 (히트싱크) 을 부착해준다. 뒷판의 양면 테이프를 떼어 붙이면 된다.<br />
+알리에서 주문한 케이스에도 방열판이 함께 왔기 때문에 사이즈가 더 잘 맞는 것으로 골라 붙여주었다.</p>
+
+<div style="display:flex; gap:10px;">
+  <img src="/images/raspberry-02/raspberry_08.png" style="width:50%;" />
+  <img src="/images/raspberry-02/raspberry_09.png" style="width:50%;" />
+</div>
+
+<p>히트싱크는 전자장치의 열을 금속으로 전달하고 공기로 빠지도록 돕는 수동 방식의 열 교환기이다.<br />
+라즈베리파이에 방열판을 붙이면, 메인보드 표면의 열이 금속에 흡수 되고 공기와 접촉된 방열판이 열을 식히는 역할을 하게 된다.
+(이 작은 금속판이 어떤 식으로 도움을 주는 건지 궁금해서 찾아봤다)</p>
+
+<h3 id="케이스-조립">케이스 조립</h3>
+
+<p><img src="https://ae-pic-a1.aliexpress-media.com/kf/H1577057c98a144a1b594e5d433d31ec60.jpg_220x220q75.jpg" alt="제품 사진" /></p>
+
+<p>알리에서 작은 냉각팬이 붙은 케이스를 주문하였다 - <a href="https://ko.aliexpress.com/item/4000200441404.html?spm=a2g0o.order_list.order_list_main.11.1ab2140fVgPXiQ&amp;gatewayAdapt=glo2kor">52Pi 냉각팬 아크릴 케이스</a></p>
+
+<p><a href="https://wiki.52pi.com/index.php?title=5-layer_acrylic_case_for_RPi_4B_SKU:_ZP-0080">52pi 공식 위키페이지</a>를 참고하여 조립했다.</p>
+
+<p><img src="/images/raspberry-02/raspberry_11.png" alt="alt text" /></p>
+
+<p>네 개의 고정핀을 풀면 얇은 판들이 분해된다.</p>
+
+<div style="display:flex; gap:10px;">
+  <img src="/images/raspberry-02/raspberry_13.jpg" style="width:50%;" />
+  <img src="/images/raspberry-02/raspberry_12.jpg" style="width:50%;" />
+</div>
+
+<p>파란색 판, 초록색 판 위에 메인보드를 깔고 그 위로 노란색 판과 빨간색 판을 얹어준다.</p>
+
+<p><img src="/images/raspberry-02/raspberry_14.png" alt="alt text" /></p>
+
+<p>노란색 판이 라즈베리파이 구조에 딱 맞게 나왔기 때문에, 방열판과 PoE HAT header 사이로 케이스가 잘 들어맞지 않는 문제가 있었다 (방열판을 살짝 위로 붙인 게 문제)</p>
+
+<p>케이스를 끼운 상태로 방열판을 살짝 끌어내려 딱 맞게 조립할 수 있었다. 케이스를 끼웠는데 한 쪽이 뜬다든가 하면 꼭 살펴 볼 것.</p>
+
+<p>고정핀을 끼우기 전에, 맨 위 투명 판에 쿨링팬을 부착해야 한다.</p>
+
+<p><img src="/images/raspberry-02/raspberry_15.png" alt="alt text" /></p>
+
+<p>네 개의 볼트로 쿨링팬을 투명팬에 고정한다.</p>
+
+<div style="display:flex; gap:10px;">
+  <img src="/images/raspberry-02/raspberry_16.jpeg" style="width:50%;" />
+  <img src="/images/raspberry-02/raspberry_17.jpeg" style="width:50%;" />
+</div>
+
+<p>다음 쿨링팬의 전선 연결. 빨간 선을 어디에 꽂는지에 따라 power mode / quiet mode 를 선택할 수 있다고 안내되어 있다.</p>
+
+<p><img src="https://i.namu.wiki/i/4mcbAsTuqL0NPrt48jBB96ovp6I_9osurjH_xxLxVSAoLK0Le-3ow_z_o20jLj0SdqBlJbP1Ia5d8sqxctSPBb60fEwljgki_2nsPG0IOyqPxIlsPXQfLEmG8IrOtLYaTL66yTLJlLgHe_LH9El1Jw.webp" alt="image" /></p>
+
+<p>빨간색 선을 이미지의 3.3V 파워(1번)에 연결하면 저속회전 모드, 5V 파워(2번)에 연결하면 고속회전 모드가 된다. 파란선은 6번 ground 에 연결한다.<br />
+(나는 quiet 모드를 선택했다)</p>
+
+<p><img src="/images/raspberry-02/raspberry_18.jpeg" alt="alt text" /></p>
+
+<p>완성!</p>
+
+<h2 id="3-전원-모니터-키보드-연결">3. 전원, 모니터, 키보드 연결</h2>
+
+<div style="display:flex; gap:10px;">
+  <img src="/images/raspberry-02/raspberry_23.jpeg" style="width:30%;" />
+  <img src="https://manuals.plus/wp-content/uploads/2021/05/Installing-Raspberry-Pi-SD-Card-featured.png" style="width:70%;" />
+</div>
+
+<p>SD 카드의 앞면이 바닥을 향하도록 메인보드에 장착해준다.</p>
+
+<div style="display:flex; gap:10px;">
+  <img src="/images/raspberry-02/raspberry_19.png" style="width:40%;" />
+  <img src="/images/raspberry-02/raspberry_20.png" style="width:60%;" />
+</div>
+
+<p>이미지에 보이는 대로 전원, 모니터, 키보드를 연결하면 된다.</p>
+
+<p><img src="/images/raspberry-02/raspberry_21.png" alt="alt text" /></p>
+
+<p>제일 걱정했던 부분은 하기비스 미니 모니터와의 연결이었는데, 별도의 c타입 전원을 추가로 연결했더니 라즈베리파이의 모니터로 사용할 수 있었다.</p>
+
+<p><img src="/images/raspberry-02/raspberry_22.jpeg" alt="alt text" /></p>
+
+<p>다음 글에서는 wifi 연결과 ssh 접속에 대해 다루어보겠다.</p>
+
+    </section>
+  </div>
+
+  <div class="pagination">
+    
+      <span class="prev" >
+          <a href="https://woocosmos.github.io/obsidian-git-auth/">
+            &#xE000; Windows 옵시디언 앱에서 git username/password 를 계속 요구하는 문제
+          </a>
+      </span>
+    
+    
+      <span class="next" >
+          <a href="https://woocosmos.github.io/raspberry-pi-03/">
+            [라즈베리 파이를 활용한 홈서버 구축] 03. 접속 &#xE001;
+          </a>
+      </span>
+    
+  </div>
+
+  <div class="comments">
+	<div id="disqus_thread"></div>
+	<script type="text/javascript">
+
+	    var disqus_shortname = 'woocosmos';
+
+	    (function() {
+	        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+	        dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+			dsq.setAttribute('data-timestamp', +new Date()); //추가
+	        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+	    })();
+
+	</script>
+	<noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+</article>
+
+    </div>
+    
+    <div class="wrapper-footer">
+      <div class="container">
+        <footer class="footer">
+          <!-- Refer to https://codepen.io/ruandre/pen/howFi -->
+<ul class="svg-icon">
+
+  
+
+  
+
+  
+  <li><a href="mailto:woocosmos@gmail.com" class="icon-8 email" title="Email"><svg viewBox="0 0 512 512"><path d="M101.3 141.6v228.9h0.3 308.4 0.8V141.6H101.3zM375.7 167.8l-119.7 91.5 -119.6-91.5H375.7zM127.6 194.1l64.1 49.1 -64.1 64.1V194.1zM127.8 344.2l84.9-84.9 43.2 33.1 43-32.9 84.7 84.7L127.8 344.2 127.8 344.2zM384.4 307.8l-64.4-64.4 64.4-49.3V307.8z"/></svg><!--[if lt IE 9]><em>Email</em><![endif]--></a></li>
+  
+
+  
+
+  
+
+  
+  <li><a href="https://github.com/woocosmos" class="icon-13 github" title="GitHub"><svg viewBox="0 0 512 512"><path d="M256 70.7c-102.6 0-185.9 83.2-185.9 185.9 0 82.1 53.3 151.8 127.1 176.4 9.3 1.7 12.3-4 12.3-8.9V389.4c-51.7 11.3-62.5-21.9-62.5-21.9 -8.4-21.5-20.6-27.2-20.6-27.2 -16.9-11.5 1.3-11.3 1.3-11.3 18.7 1.3 28.5 19.2 28.5 19.2 16.6 28.4 43.5 20.2 54.1 15.4 1.7-12 6.5-20.2 11.8-24.9 -41.3-4.7-84.7-20.6-84.7-91.9 0-20.3 7.3-36.9 19.2-49.9 -1.9-4.7-8.3-23.6 1.8-49.2 0 0 15.6-5 51.1 19.1 14.8-4.1 30.7-6.2 46.5-6.3 15.8 0.1 31.7 2.1 46.6 6.3 35.5-24 51.1-19.1 51.1-19.1 10.1 25.6 3.8 44.5 1.8 49.2 11.9 13 19.1 29.6 19.1 49.9 0 71.4-43.5 87.1-84.9 91.7 6.7 5.8 12.8 17.1 12.8 34.4 0 24.9 0 44.9 0 51 0 4.9 3 10.7 12.4 8.9 73.8-24.6 127-94.3 127-176.4C441.9 153.9 358.6 70.7 256 70.7z"/></svg><!--[if lt IE 9]><em>GitHub</em><![endif]--></a></li>
+  
+
+  
+
+  
+
+  
+  <li><a href="https://www.linkedin.com/in/yunsoo-woo-245946213" class="icon-17 linkedin" title="LinkedIn"><svg viewBox="0 0 512 512"><path d="M186.4 142.4c0 19-15.3 34.5-34.2 34.5 -18.9 0-34.2-15.4-34.2-34.5 0-19 15.3-34.5 34.2-34.5C171.1 107.9 186.4 123.4 186.4 142.4zM181.4 201.3h-57.8V388.1h57.8V201.3zM273.8 201.3h-55.4V388.1h55.4c0 0 0-69.3 0-98 0-26.3 12.1-41.9 35.2-41.9 21.3 0 31.5 15 31.5 41.9 0 26.9 0 98 0 98h57.5c0 0 0-68.2 0-118.3 0-50-28.3-74.2-68-74.2 -39.6 0-56.3 30.9-56.3 30.9v-25.2H273.8z"/></svg><!--[if lt IE 9]><em>LinkedIn</em><![endif]--></a></li>
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</ul>
+
+
+<p>© 2026 Yunsoo Woo</p>
+
+        </footer>
+      </div>
+    </div>
+
+    <!--  -->
+
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-1YCJCQRD4F"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-1YCJCQRD4F');
+</script>
+    <script type="text/javascript">
+    "use strict"; 
+    function addBackToTop() 
+        { function o() 
+            { 
+                t() >= z ? R && (D.className = "", R = !1) : R || (D.className = "hidden", R = !0) 
+            } 
+          function t() 
+            { 
+                return E.scrollTop || A && document.documentElement.scrollTop || 0 
+            } 
+          function e(o) 
+            { 
+                E.scrollTop = o, A && (document.documentElement.scrollTop = o) 
+            } 
+    
+    var n, i, d, r, c = arguments.length > 0 && void 0 !== arguments[0] ? arguments[0] : {}, a = c.backgroundColor, s = void 0 === a ? "#000" : a, l = c.cornerOffset, u = void 0 === l ? 20 : l, m = c.diameter, p = void 0 === m ? 56 : m, h = c.ease, b = void 0 === h ? function (o) { return .5 * (1 - Math.cos(Math.PI * o)) } : h, v = c.id, f = void 0 === v ? "back-to-top" : v, x = c.innerHTML, g = void 0 === x ? '<svg viewBox="0 0 24 24"><path d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z"></path></svg>' : x, w = c.onClickScrollTo, y = void 0 === w ? 0 : w, k = c.scrollContainer, E = void 0 === k ? document.body : k, T = c.scrollDuration, C = void 0 === T ? 100 : T, M = c.showWhenScrollTopIs, z = void 0 === M ? 1 : M, L = c.size, B = void 0 === L ? p : L, H = c.textColor, I = void 0 === H ? "#fff" : H, N = c.zIndex, S = void 0 === N ? 1 : N, q = E === document.body, A = q && document.documentElement; n = Math.round(.35 * B), i = Math.round(.2 * B), d = "#" + f + "{background:" + s + ";-webkit-border-radius:50%;-moz-border-radius:50%;border-radius:50%;bottom:" + u + "px;-webkit-box-shadow:0 2px 5px 0 rgba(0,0,0,.26);-moz-box-shadow:0 2px 5px 0 rgba(0,0,0,.26);box-shadow:0 2px 5px 0 rgba(0,0,0,.26);color:" + I + ";cursor:pointer;display:block;height:" + B + "px;opacity:1;outline:0;position:fixed;right:" + u + "px;-webkit-tap-highlight-color:transparent;-webkit-touch-callout:none;-webkit-transition:bottom .2s,opacity .2s;-o-transition:bottom .2s,opacity .2s;-moz-transition:bottom .2s,opacity .2s;transition:bottom .2s,opacity .2s;-webkit-user-select:none;-moz-user-select:none;-ms-user-select:none;user-select:none;width:" + B + "px;z-index:" + S + "}#" + f + " svg{display:block;fill:currentColor;height:" + n + "px;margin:" + i + "px auto 0;width:" + n + "px}#" + f + ".hidden{bottom:-" + B + "px;opacity:0}", (r = document.createElement("style")).appendChild(document.createTextNode(d)), document.head.insertAdjacentElement("afterbegin", r); var D = function () { var o = document.createElement("div"); return o.id = f, o.className = "hidden", o.innerHTML = g, o.addEventListener("click", function (o) { o.preventDefault(), function () { var o = "function" == typeof y ? y() : y, n = window, i = n.performance, d = n.requestAnimationFrame; if (C <= 0 || void 0 === i || void 0 === d) return e(o); var r = i.now(), c = t(), a = c - o; d(function o(t) { var n = Math.min((t - r) / C, 1); e(c - Math.round(b(n) * a)), n < 1 && d(o) }) }() }), document.body.appendChild(o), o }(), R = !0; (q ? window : E).addEventListener("scroll", o), o() } window.addEventListener("load", function () { var o = document.getElementById("back-to-top"), t = document.querySelector(".sticky-bottom"), e = document.querySelector(".fixed-bottom"); o && window.addEventListener("scroll", function () { if (t) { var n = t.getBoundingClientRect(); window.scrollY + window.innerHeight > document.body.scrollHeight - n.height ? (o.style.position = "fixed", o.style.bottom = n.height + 15 + "px") : (o.style.position = "fixed", o.style.bottom = "15px") } if (e) { var i = e.getBoundingClientRect(); o.style.position = "fixed", o.style.bottom = i.height + 15 + "px" } }) });
+</script>
+<script>
+    addBackToTop();
+</script>
+
+
+
+
+
+  </body>
+</html>
